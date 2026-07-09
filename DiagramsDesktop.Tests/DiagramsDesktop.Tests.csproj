@@ -20,6 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DiagramsDesktop\DiagramsDesktop.csproj" />
+    <ProjectReference Include="..\DiagramsDesktop\DiagramsDesktop.csproj">
+      <ExcludeAssets>build;buildTransitive</ExcludeAssets>
+    </ProjectReference>
   </ItemGroup>
 </Project>
