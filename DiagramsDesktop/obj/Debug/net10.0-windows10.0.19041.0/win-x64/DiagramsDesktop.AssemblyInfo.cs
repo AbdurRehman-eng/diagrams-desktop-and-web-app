@@ -17,7 +17,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DiagramsDesktop")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+2c27e9577f52b5c3fd9a153a168ce0fc7e30b387")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+63becb70caf65a3d3e16227a202482ec3643519f")]
 [assembly: System.Reflection.AssemblyProductAttribute("DiagramsDesktop")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DiagramsDesktop")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -4230,11 +4230,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
+      "projectUniqueName": "d:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
       "projectName": "DiagramsDesktop",
-      "projectPath": "D:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
+      "projectPath": "d:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
       "packagesPath": "C:\\Users\\abdur\\.nuget\\packages\\",
-      "outputPath": "D:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\obj\\",
+      "outputPath": "d:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\obj\\",
       "projectStyle": "PackageReference",
       "crossTargeting": true,
       "configFilePaths": [

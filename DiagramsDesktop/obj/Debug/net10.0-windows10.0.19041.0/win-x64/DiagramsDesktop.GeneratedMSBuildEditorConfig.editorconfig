@@ -14,7 +14,7 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = DiagramsDesktop
-build_property.ProjectDir = D:\Projects\diagrams-gml-amr_abdulwahab\DiagramsDesktop\
+build_property.ProjectDir = d:\Projects\diagrams-gml-amr_abdulwahab\DiagramsDesktop\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.CsWinRTAotOptimizerEnabled = true
@@ -28,7 +28,7 @@ build_property.CsWinRTUseWindowsUIXamlProjections = false
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[D:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/App.xaml]
+[d:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/App.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = DiagramsDesktop.App.xaml
 build_metadata.AdditionalFiles.TargetPath = App.xaml
@@ -38,7 +38,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/AppShell.xaml]
+[d:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/AppShell.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = DiagramsDesktop.AppShell.xaml
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
@@ -48,7 +48,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/MainPage.xaml]
+[d:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/MainPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = DiagramsDesktop.MainPage.xaml
 build_metadata.AdditionalFiles.TargetPath = MainPage.xaml
@@ -58,7 +58,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/Resources/Styles/Colors.xaml]
+[d:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = DiagramsDesktop.Resources.Styles.Colors.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Colors.xaml
@@ -68,7 +68,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/Resources/Styles/Styles.xaml]
+[d:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/Resources/Styles/Styles.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = DiagramsDesktop.Resources.Styles.Styles.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
@@ -78,7 +78,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/Views/CanvasView.xaml]
+[d:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/Views/CanvasView.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = DiagramsDesktop.Views.CanvasView.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\CanvasView.xaml
@@ -88,7 +88,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/Views/ShapesPanel.xaml]
+[d:/Projects/diagrams-gml-amr_abdulwahab/DiagramsDesktop/Views/ShapesPanel.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = DiagramsDesktop.Views.ShapesPanel.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\ShapesPanel.xaml

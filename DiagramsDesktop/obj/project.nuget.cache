@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "RQJzCo3YaaE=",
+  "dgSpecHash": "5ZBwxLfWk/o=",
   "success": true,
-  "projectFilePath": "D:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
+  "projectFilePath": "d:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\abdur\\.nuget\\packages\\microsoft.data.sqlite.core\\9.0.0\\microsoft.data.sqlite.core.9.0.0.nupkg.sha512",
     "C:\\Users\\abdur\\.nuget\\packages\\microsoft.entityframeworkcore\\9.0.0\\microsoft.entityframeworkcore.9.0.0.nupkg.sha512",
@@ -51,9 +51,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'SQLitePCLRaw.lib.e_sqlite3' 2.1.10 has a known high severity vulnerability, https://github.com/advisories/GHSA-2m69-gcr7-jv3q",
-      "projectPath": "D:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
+      "projectPath": "d:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
       "warningLevel": 1,
-      "filePath": "D:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
+      "filePath": "d:\\Projects\\diagrams-gml-amr_abdulwahab\\DiagramsDesktop\\DiagramsDesktop.csproj",
       "libraryId": "SQLitePCLRaw.lib.e_sqlite3",
       "targetGraphs": [
         "net10.0-windows10.0.19041",
