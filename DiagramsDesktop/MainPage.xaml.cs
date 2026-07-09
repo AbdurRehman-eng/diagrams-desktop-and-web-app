@@ -72,4 +72,28 @@ public partial class MainPage : ContentPage
             MainCanvasView?.Invalidate();
         }
     }
+
+    private void OnFileButtonClicked(object? sender, EventArgs e)
+    {
+        FileDropdownOverlay.IsVisible = !FileDropdownOverlay.IsVisible;
+        EditDropdownOverlay.IsVisible = false;
+    }
+
+    private void OnEditButtonClicked(object? sender, EventArgs e)
+    {
+        EditDropdownOverlay.IsVisible = !EditDropdownOverlay.IsVisible;
+        FileDropdownOverlay.IsVisible = false;
+    }
+
+    private void OnCloseDropdowns(object? sender, TappedEventArgs e)
+    {
+        FileDropdownOverlay.IsVisible = false;
+        EditDropdownOverlay.IsVisible = false;
+    }
+
+    private void OnDropdownItemClicked(object? sender, EventArgs e)
+    {
+        FileDropdownOverlay.IsVisible = false;
+        EditDropdownOverlay.IsVisible = false;
+    }
 }
