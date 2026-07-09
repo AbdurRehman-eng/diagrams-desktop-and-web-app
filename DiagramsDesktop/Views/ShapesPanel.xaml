@@ -6,10 +6,15 @@
              xmlns:views="clr-namespace:DiagramsDesktop.Views"
              x:Class="DiagramsDesktop.Views.ShapesPanel"
              x:DataType="vm:ShapesPanelViewModel"
-             WidthRequest="{Binding PanelWidth}">
+             HorizontalOptions="Start"
+             VerticalOptions="Fill"
+             WidthRequest="{Binding PanelWidth, FallbackValue=248, TargetNullValue=248}">
 
     <!-- Outer: fixed-width panel + collapse toggle sits outside -->
-    <Grid ColumnDefinitions="Auto, Auto" BackgroundColor="#f8fafc">
+    <Grid ColumnDefinitions="Auto, Auto"
+          BackgroundColor="#f8fafc"
+          HorizontalOptions="Fill"
+          VerticalOptions="Fill">
 
         <!-- ── Panel body (collapses to zero width) ─────────────────────── -->
         <Border Grid.Column="0"
@@ -17,7 +22,7 @@
                 StrokeThickness="0,0,1,0"
                 Stroke="#e2e8f0"
                 BackgroundColor="#f8fafc"
-                IsVisible="{Binding IsExpanded}">
+                IsVisible="{Binding IsExpanded, FallbackValue=True, TargetNullValue=True}">
 
             <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
 

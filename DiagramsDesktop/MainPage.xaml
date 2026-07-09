@@ -180,11 +180,18 @@
         <!-- ═══════════════════════════════════════════════════════════════
              Row 1: Main Workspace
              ═══════════════════════════════════════════════════════════════ -->
-        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto">
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding Source={x:Reference ShapesSidebar}, Path=BindingContext.PanelWidth, FallbackValue=248, TargetNullValue=248}" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
             <!-- Column 0: Shapes Panel -->
             <views:ShapesPanel x:Name="ShapesSidebar"
                                Grid.Column="0"
+                               HorizontalOptions="Start"
+                               VerticalOptions="Fill"
                                BindingContext="{Binding ShapesPanelVM}" />
 
             <!-- Column 1: Canvas -->
