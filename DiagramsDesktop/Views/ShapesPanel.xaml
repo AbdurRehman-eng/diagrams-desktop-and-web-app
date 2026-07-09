@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:DiagramsDesktop.ViewModels"
+             xmlns:models="clr-namespace:DiagramsDesktop.Models"
+             xmlns:views="clr-namespace:DiagramsDesktop.Views"
+             x:Class="DiagramsDesktop.Views.ShapesPanel"
+             x:DataType="vm:ShapesPanelViewModel">
+
+    <Grid ColumnDefinitions="60, Auto" BackgroundColor="#f8fafc">
+        <!-- Column 0: Category Sidebar -->
+        <Border Grid.Column="0" 
+                StrokeThickness="0" 
+                BackgroundColor="#f1f5f9"
+                WidthRequest="60"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill">
+            <Grid RowDefinitions="Auto, *">
+                <!-- Collapse/Expand Hamburger or arrow -->
+                <Button Grid.Row="0"
+                        Command="{Binding ToggleCollapseCommand}"
+                        Text="☰"
+                        FontSize="18"
+                        TextColor="#475569"
+                        BackgroundColor="Transparent"
+                        BorderWidth="0"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        Margin="5"
+                        CornerRadius="4" />
+
+                <!-- Categories list -->
+                <CollectionView Grid.Row="1"
+                                ItemsSource="{Binding Categories}"
+                                SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+                                SelectionMode="Single"
+                                Margin="0,10,0,0">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ShapeCategory">
+                            <Grid HeightRequest="50" WidthRequest="60">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="Transparent" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="#e2e8f0" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                                <views:ShapeIconView ShapeType="{Binding IconType}"
+                                                     ColorHex="{Binding IconColor}"
+                                                     WidthRequest="36"
+                                                     HeightRequest="36"
+                                                     HorizontalOptions="Center"
+                                                     VerticalOptions="Center" />
+                                <ToolTipProperties.Text>
+                                    <MultiBinding StringFormat="{}{0}">
+                                        <Binding Path="Name" />
+                                    </MultiBinding>
+                                </ToolTipProperties.Text>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Border>
+
+        <!-- Column 1: Items List & Search -->
+        <Border Grid.Column="1" 
+                StrokeThickness="1,0,0,0" 
+                Stroke="#e2e8f0"
+                BackgroundColor="#ffffff"
+                WidthRequest="220"
+                IsVisible="{Binding IsExpanded}">
+            <Grid RowDefinitions="Auto, Auto, *">
+                <!-- Header with Selected Category Title -->
+                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="15,12">
+                    <Label Text="{Binding SelectedCategoryHeader}"
+                           FontAttributes="Bold"
+                           FontSize="15"
+                           TextColor="#1e293b"
+                           VerticalOptions="Center" />
+                    
+                    <Button Grid.Column="1"
+                            Command="{Binding ToggleCollapseCommand}"
+                            Text="◀"
+                            FontSize="10"
+                            TextColor="#64748b"
+                            BackgroundColor="Transparent"
+                            BorderWidth="0"
+                            Padding="5"
+                            HeightRequest="30"
+                            WidthRequest="30"
+                            CornerRadius="4" />
+                </Grid>
+
+                <!-- Search Input -->
+                <Border Grid.Row="1"
+                        StrokeShape="RoundRectangle 6"
+                        StrokeThickness="1"
+                        Stroke="#e2e8f0"
+                        Margin="10,0,10,10"
+                        Padding="5,2"
+                        BackgroundColor="#f8fafc">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <Label Grid.Column="0" 
+                               Text="🔍" 
+                               FontSize="12" 
+                               TextColor="#94a3b8" 
+                               VerticalOptions="Center"
+                               Margin="5,0,5,0" />
+                        <Entry Grid.Column="1"
+                               Text="{Binding SearchText}"
+                               Placeholder="Search shapes..."
+                               FontSize="13"
+                               TextColor="#1e293b"
+                               PlaceholderColor="#94a3b8"
+                               BackgroundColor="Transparent"
+                               Margin="0"
+                               HeightRequest="32"/>
+                    </Grid>
+                </Border>
+
+                <!-- Content Area: Item List or Placeholder Message -->
+                <Grid Grid.Row="2">
+                    <!-- Standard Item CollectionView -->
+                    <CollectionView ItemsSource="{Binding FilteredItems}"
+                                    SelectionMode="None"
+                                    IsVisible="{Binding IsStandardCategorySelected}"
+                                    Padding="10">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="10" VerticalItemSpacing="10" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ShapeLibraryItem">
+                                <Border StrokeThickness="1"
+                                        Stroke="#e2e8f0"
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="#ffffff"
+                                        Padding="5"
+                                        HeightRequest="90">
+                                    
+                                    <Border.GestureRecognizers>
+                                        <DragGestureRecognizer DragStarting="OnDragStarting" />
+                                    </Border.GestureRecognizers>
+
+                                    <Grid RowDefinitions="*, Auto" RowSpacing="5">
+                                        <views:ShapeIconView Grid.Row="0"
+                                                             ShapeType="{Binding Type}"
+                                                             ColorHex="{Binding FillColor}"
+                                                             WidthRequest="40"
+                                                             HeightRequest="40"
+                                                             HorizontalOptions="Center"
+                                                             VerticalOptions="Center" />
+                                        <Label Grid.Row="1"
+                                               Text="{Binding Label}"
+                                               FontSize="10"
+                                               TextColor="#475569"
+                                               HorizontalOptions="Center"
+                                               HorizontalTextAlignment="Center"
+                                               MaxLines="2"
+                                               LineBreakMode="TailTruncation" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Placeholder Coming Soon Message -->
+                    <VerticalStackLayout IsVisible="{Binding IsPlaceholderCategorySelected}"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Center"
+                                         Spacing="10"
+                                         Padding="20">
+                        <Label Text="🚧"
+                               FontSize="32"
+                               HorizontalOptions="Center" />
+                        <Label Text="{Binding PlaceholderMessage}"
+                               FontSize="13"
+                               TextColor="#64748b"
+                               HorizontalTextAlignment="Center"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

@@ -1,0 +1,41 @@
+/**
+ * circle-on-container.css
+ * =======================
+ * Milestone 8 — Visual styling for Circle On Container states.
+ */
+
+/* ── Base Group ─────────────────────────────────────────────────── */
+.circle-on-container {
+  cursor: move;
+}
+
+/* ── Hover glow: subtle cyan ring ───────────────────────────────── */
+.circle-on-container__hover-ring {
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+
+/* ── Selection ring: solid blue ─────────────────────────────────── */
+.circle-on-container__selection-ring {
+  pointer-events: none;
+}
+
+/* ── Invalid drop preview: red dashed ───────────────────────────── */
+.circle-on-container--invalid-preview circle {
+  stroke: #ef4444 !important;
+  stroke-dasharray: 5 3;
+  fill-opacity: 0.3;
+}
+
+/* ── Resize handle squares ──────────────────────────────────────── */
+.coc-resize-handle {
+  cursor: crosshair;
+}
+
+/* ── Delete button (midpoint X) ─────────────────────────────────── */
+.coc-delete-btn {
+  cursor: pointer;
+}
+.coc-delete-btn:hover circle {
+  fill: #dc2626;
+}

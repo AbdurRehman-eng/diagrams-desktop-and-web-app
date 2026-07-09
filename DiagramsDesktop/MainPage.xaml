@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:DiagramsDesktop.ViewModels"
+             xmlns:views="clr-namespace:DiagramsDesktop.Views"
+             x:Class="DiagramsDesktop.MainPage"
+             x:DataType="vm:MainPageViewModel"
+             Title="Diagramming Desktop">
+
+    <!-- Top Grid with Header/Toolbar and Main Canvas Area -->
+    <Grid RowDefinitions="60, *">
+        
+        <!-- Row 0: Professional Top Toolbar -->
+        <Border Grid.Row="0"
+                StrokeThickness="0,0,0,1"
+                Stroke="#cbd5e1"
+                BackgroundColor="#ffffff"
+                Padding="15,5">
+            <Grid ColumnDefinitions="Auto, *, Auto">
+                <!-- Title Entry -->
+                <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
+                    <Label Text="🏷️" FontSize="18" VerticalOptions="Center" />
+                    <Entry Text="{Binding DiagramTitle}"
+                           FontAttributes="Bold"
+                           FontSize="15"
+                           TextColor="#1e293b"
+                           WidthRequest="220"
+                           Placeholder="Diagram Title..."
+                           BackgroundColor="Transparent"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <!-- Navigation & File Options Toolbar -->
+                <HorizontalStackLayout Grid.Column="1" Spacing="8" HorizontalOptions="Center" VerticalOptions="Center">
+                    <!-- New, Open, Save -->
+                    <Button Text="➕ New" Command="{Binding NewDiagramCommand}" BackgroundColor="#f1f5f9" TextColor="#334155" BorderWidth="1" BorderColor="#cbd5e1" Padding="12,5" HeightRequest="36" CornerRadius="6" />
+                    <Button Text="📂 Open" Command="{Binding LoadDiagramCommand}" BackgroundColor="#f1f5f9" TextColor="#334155" BorderWidth="1" BorderColor="#cbd5e1" Padding="12,5" HeightRequest="36" CornerRadius="6" />
+                    <Button Text="💾 Save" Command="{Binding SaveDiagramCommand}" BackgroundColor="#2563eb" TextColor="#ffffff" Padding="15,5" HeightRequest="36" CornerRadius="6" />
+                    
+                    <BoxView WidthRequest="1" HeightRequest="24" Color="#e2e8f0" Margin="5,0" VerticalOptions="Center" />
+
+                    <!-- JSON Import/Export -->
+                    <Button Text="📥 Import JSON" Command="{Binding ImportJsonCommand}" BackgroundColor="#f1f5f9" TextColor="#334155" BorderWidth="1" BorderColor="#cbd5e1" Padding="12,5" HeightRequest="36" CornerRadius="6" />
+                    <Button Text="📤 Export JSON" Command="{Binding ExportJsonCommand}" BackgroundColor="#f1f5f9" TextColor="#334155" BorderWidth="1" BorderColor="#cbd5e1" Padding="12,5" HeightRequest="36" CornerRadius="6" />
+                </HorizontalStackLayout>
+
+                <!-- Zoom Controls -->
+                <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
+                    <Button Text="➖🔍" Command="{Binding ZoomOutCommand}" BackgroundColor="#f1f5f9" TextColor="#334155" BorderWidth="1" BorderColor="#cbd5e1" WidthRequest="36" HeightRequest="36" Padding="0" CornerRadius="6" />
+                    <Button Text="100%" Command="{Binding ZoomResetCommand}" BackgroundColor="#f1f5f9" TextColor="#334155" BorderWidth="1" BorderColor="#cbd5e1" Padding="10,5" HeightRequest="36" CornerRadius="6" />
+                    <Button Text="➕🔍" Command="{Binding ZoomInCommand}" BackgroundColor="#f1f5f9" TextColor="#334155" BorderWidth="1" BorderColor="#cbd5e1" WidthRequest="36" HeightRequest="36" Padding="0" CornerRadius="6" />
+                    <Button Text="⛶ Fit" Command="{Binding FitToScreenCommand}" BackgroundColor="#f1f5f9" TextColor="#334155" BorderWidth="1" BorderColor="#cbd5e1" Padding="10,5" HeightRequest="36" CornerRadius="6" />
+                </HorizontalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Row 1: Workspace Grid -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto">
+            
+            <!-- Column 0: Collapsible left panel -->
+            <views:ShapesPanel Grid.Column="0" 
+                                BindingContext="{Binding ShapesPanelVM}" />
+
+            <!-- Column 1: Interactive Canvas drawing surface -->
+            <views:CanvasView x:Name="MainCanvasView"
+                              Grid.Column="1"
+                              Diagram="{Binding ActiveDiagram}"
+                              SelectedShapeId="{Binding SelectedShapeId, Mode=TwoWay}"
+                              SizeChanged="OnCanvasViewSizeChanged" />
+
+            <!-- Column 2: Properties editor for the selected shape -->
+            <Border Grid.Column="2"
+                    WidthRequest="250"
+                    StrokeThickness="1,0,0,0"
+                    Stroke="#cbd5e1"
+                    BackgroundColor="#ffffff"
+                    IsVisible="{Binding HasSelectedShape}"
+                    Padding="15">
+                
+                <ScrollView>
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="✏️ Properties" 
+                               FontAttributes="Bold" 
+                               FontSize="16" 
+                               TextColor="#1e293b" 
+                               Margin="0,0,0,5" />
+                        
+                        <!-- Shape Type -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Type" FontSize="11" TextColor="#64748b" />
+                            <Label Text="{Binding SelectedShape.Type}" 
+                                   FontAttributes="Italic"
+                                   FontSize="13" 
+                                   TextColor="#334155" />
+                        </VerticalStackLayout>
+                        
+                        <!-- Label -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Label" FontSize="11" TextColor="#64748b" />
+                            <Entry Text="{Binding SelectedShape.Label}" 
+                                   FontSize="13" 
+                                   TextColor="#1e293b" 
+                                   BackgroundColor="#f8fafc"
+                                   TextChanged="OnPropertyModified"/>
+                        </VerticalStackLayout>
+
+                        <!-- World Coordinates X -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="World X" FontSize="11" TextColor="#64748b" />
+                            <Entry Text="{Binding SelectedShape.WorldX}" 
+                                   Keyboard="Numeric"
+                                   FontSize="13" 
+                                   TextColor="#1e293b" 
+                                   BackgroundColor="#f8fafc"
+                                   TextChanged="OnPropertyModified"/>
+                        </VerticalStackLayout>
+
+                        <!-- World Coordinates Y -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="World Y" FontSize="11" TextColor="#64748b" />
+                            <Entry Text="{Binding SelectedShape.WorldY}" 
+                                   Keyboard="Numeric"
+                                   FontSize="13" 
+                                   TextColor="#1e293b" 
+                                   BackgroundColor="#f8fafc"
+                                   TextChanged="OnPropertyModified"/>
+                        </VerticalStackLayout>
+
+                        <!-- Size Width -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Width" FontSize="11" TextColor="#64748b" />
+                            <Entry Text="{Binding SelectedShape.Width}" 
+                                   Keyboard="Numeric"
+                                   FontSize="13" 
+                                   TextColor="#1e293b" 
+                                   BackgroundColor="#f8fafc"
+                                   TextChanged="OnPropertyModified"/>
+                        </VerticalStackLayout>
+
+                        <!-- Size Height -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Height" FontSize="11" TextColor="#64748b" />
+                            <Entry Text="{Binding SelectedShape.Height}" 
+                                   Keyboard="Numeric"
+                                   FontSize="13" 
+                                   TextColor="#1e293b" 
+                                   BackgroundColor="#f8fafc"
+                                   TextChanged="OnPropertyModified"/>
+                        </VerticalStackLayout>
+
+                        <!-- Colors -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Fill Color" FontSize="11" TextColor="#64748b" />
+                            <Entry Text="{Binding SelectedShape.FillColor}" 
+                                   FontSize="13" 
+                                   TextColor="#1e293b" 
+                                   BackgroundColor="#f8fafc"
+                                   TextChanged="OnPropertyModified"/>
+                        </VerticalStackLayout>
+
+                        <!-- Delete Shape Button -->
+                        <Button Text="🗑️ Delete Shape"
+                                Clicked="OnDeleteShapeClicked"
+                                BackgroundColor="#ef4444"
+                                TextColor="#ffffff"
+                                Margin="0,15,0,0"
+                                HeightRequest="38"
+                                CornerRadius="6" />
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

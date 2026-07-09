@@ -1,0 +1,215 @@
+/**
+ * properties-modal.css
+ * ====================
+ */
+
+#properties-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.6);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#properties-modal-overlay.hidden {
+  display: none;
+}
+
+.prop-modal {
+  background: #0f121b;
+  border: 1px solid #2a3146;
+  border-radius: 8px;
+  width: 700px;
+  max-width: 90vw;
+  height: 500px;
+  display: flex;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+  overflow: hidden;
+  color: #e2e8f0;
+  font-family: inherit;
+}
+
+.prop-sidebar {
+  width: 180px;
+  background: #141824;
+  border-right: 1px solid #2a3146;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prop-sidebar-item {
+  padding: 10px 16px;
+  color: #94a3b8;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.prop-sidebar-item:hover {
+  background: #1e2433;
+  color: #f8fafc;
+}
+
+.prop-sidebar-item.active {
+  background: #2a2d46;
+  color: #f8fafc;
+  font-weight: 500;
+  border-left: 3px solid #6366f1;
+}
+
+.prop-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.prop-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #2a3146;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.prop-body {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.prop-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.prop-label {
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.prop-input {
+  background: #000;
+  border: 1px solid #334155;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  width: 160px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.prop-input[type="color"] {
+  padding: 0;
+  width: 40px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.prop-input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.prop-checkbox-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.prop-hint {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 16px;
+  line-height: 1.4;
+}
+
+.prop-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #2a3146;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.prop-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.prop-btn-cancel {
+  background: transparent;
+  color: #cbd5e1;
+  border-color: #334155;
+}
+
+.prop-btn-cancel:hover {
+  background: #1e2433;
+  color: #fff;
+}
+
+.prop-btn-apply {
+  background: #6366f1;
+  color: #fff;
+}
+
+.prop-btn-apply:hover {
+  background: #4f46e5;
+}
+
+/* Specific Forms */
+.prop-form { display: none; }
+.prop-form.active { display: flex; flex-direction: column; gap: 16px; }
+
+/* Swatches */
+.prop-swatch-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.prop-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  background-clip: content-box;
+}
+
+.prop-swatch:hover {
+  transform: scale(1.1);
+}
+
+.prop-swatch.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 1px #6366f1;
+}
+
+/* ── Section titles within a form (M3 — Rectangle / Circle tabs) ── */
+.prop-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6366f1;
+  border-bottom: 1px solid #2a3146;
+  padding-bottom: 6px;
+  margin-top: 4px;
+}
