@@ -13,6 +13,9 @@ public partial class CanvasView : ContentView
     private double _initialVCX;
     private double _initialVCY;
     private bool _isPanning;
+    // Track last pointer position for drop coordinate calculation
+    private double _lastPointerSX;
+    private double _lastPointerSY;
 
     public static readonly BindableProperty DiagramProperty =
         BindableProperty.Create(nameof(Diagram), typeof(DiagramModel), typeof(CanvasView), null,
@@ -104,6 +107,10 @@ public partial class CanvasView : ContentView
         double sx = movePos.Value.X;
         double sy = movePos.Value.Y;
 
+        // Save position for use in drop handler
+        _lastPointerSX = sx;
+        _lastPointerSY = sy;
+
         var (wx, wy) = ViewportMath.ScreenToWorld(
             sx, sy, 
             Diagram.Canvas, 
@@ -158,16 +165,13 @@ public partial class CanvasView : ContentView
     }
 
     // --- Shape Dropping (Instantiate shapes from drag payload) ---
-    private void OnShapeDropped(object? sender, DropEventArgs e)
+    private async void OnShapeDropped(object? sender, DropEventArgs e)
     {
         if (Diagram == null || Diagram.Canvas == null) return;
 
-        // Extract coordinates of the drop relative to the GraphicsView
-        var dropPos = e.GetPosition(CanvasGraphicsView);
-        if (!dropPos.HasValue) return;
-
-        double sx = dropPos.Value.X;
-        double sy = dropPos.Value.Y;
+        // Use last tracked pointer position — DropEventArgs has no GetPosition in MAUI
+        double sx = _lastPointerSX > 0 ? _lastPointerSX : CanvasGraphicsView.Width / 2.0;
+        double sy = _lastPointerSY > 0 ? _lastPointerSY : CanvasGraphicsView.Height / 2.0;
 
         // Convert screen coordinates to world space coordinates
         var (wx, wy) = ViewportMath.ScreenToWorld(
@@ -177,33 +181,30 @@ public partial class CanvasView : ContentView
             CanvasGraphicsView.Height
         );
 
-        // Retrieve properties from drag package
+        // Retrieve properties from drag data package
         var props = e.Data.Properties;
         if (!props.ContainsKey("ShapeType")) return;
 
         string shapeType = props["ShapeType"]?.ToString() ?? "rectangle";
-        string label = e.Data.Text ?? shapeType;
+        // Read label from properties (avoid DataPackageView.Text which is not available)
+        string label = props.ContainsKey("ShapeLabel") 
+            ? props["ShapeLabel"]?.ToString() ?? shapeType 
+            : shapeType;
         string color = props.ContainsKey("ShapeColor") ? props["ShapeColor"]?.ToString() ?? "#6366f1" : "#6366f1";
         
         double defaultW = 100;
         double defaultH = 100;
 
         if (props.ContainsKey("ShapeWidth") && double.TryParse(props["ShapeWidth"]?.ToString(), out double dw))
-        {
             defaultW = dw;
-        }
         if (props.ContainsKey("ShapeHeight") && double.TryParse(props["ShapeHeight"]?.ToString(), out double dh))
-        {
             defaultH = dh;
-        }
 
         bool isContainer = false;
         if (props.ContainsKey("IsContainer") && bool.TryParse(props["IsContainer"]?.ToString(), out bool ic))
-        {
             isContainer = ic;
-        }
 
-        // Instantiate new shape
+        // Instantiate new shape at drop world position
         string newShapeId = "shape-" + Guid.NewGuid().ToString().Substring(0, 8);
         var newShape = new ShapeModel
         {
@@ -222,14 +223,13 @@ public partial class CanvasView : ContentView
         };
 
         if (shapeType == "circle" || shapeType == "aws-igw" || shapeType == "aws-nat")
-        {
             newShape.Radius = defaultW / 2.0;
-        }
 
         Diagram.Shapes.Add(newShape);
         SelectedShapeId = newShapeId;
-        
         Invalidate();
+
+        await Task.CompletedTask; // keeps async void without compiler warning
     }
 
     // --- Helper Collision/Containment Tests ---

@@ -27,4 +27,7 @@ public class CanvasModel
     public bool PanEnabled { get; set; } = true;
     public bool ZoomEnabled { get; set; } = true;
     public string UpdatedAt { get; set; } = DateTime.UtcNow.ToString("o");
+
+    // EF Foreign Key back to DiagramModel
+    public string DiagramID { get; set; } = "";
 }

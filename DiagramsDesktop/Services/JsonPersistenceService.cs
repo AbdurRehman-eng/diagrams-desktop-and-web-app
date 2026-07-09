@@ -30,4 +30,17 @@ public class JsonPersistenceService
         string jsonText = File.ReadAllText(filePath);
         return JsonSerializer.Deserialize<DiagramModel>(jsonText, JsonOptions);
     }
+
+    public string SerializeDiagram(DiagramModel diagram)
+    {
+        if (diagram == null) throw new ArgumentNullException(nameof(diagram));
+        return JsonSerializer.Serialize(diagram, JsonOptions);
+    }
+
+    public DiagramModel? DeserializeDiagram(string jsonText)
+    {
+        if (string.IsNullOrWhiteSpace(jsonText)) return null;
+        return JsonSerializer.Deserialize<DiagramModel>(jsonText, JsonOptions);
+    }
 }
+

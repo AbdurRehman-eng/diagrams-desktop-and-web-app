@@ -136,7 +136,7 @@
                     <CollectionView ItemsSource="{Binding FilteredItems}"
                                     SelectionMode="None"
                                     IsVisible="{Binding IsStandardCategorySelected}"
-                                    Padding="10">
+                                    Margin="10">
                         <CollectionView.ItemsLayout>
                             <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="10" VerticalItemSpacing="10" />
                         </CollectionView.ItemsLayout>

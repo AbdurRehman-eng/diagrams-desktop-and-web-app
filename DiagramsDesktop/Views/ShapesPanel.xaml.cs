@@ -18,13 +18,11 @@ public partial class ShapesPanel : ContentView
             // Set the package payload values
             e.Data.Properties["ShapeId"] = item.Id;
             e.Data.Properties["ShapeType"] = item.Type;
+            e.Data.Properties["ShapeLabel"] = item.Label;  // Use Properties, not Text
             e.Data.Properties["ShapeColor"] = item.FillColor;
             e.Data.Properties["ShapeWidth"] = item.DefaultWidth;
             e.Data.Properties["ShapeHeight"] = item.DefaultHeight;
             e.Data.Properties["IsContainer"] = item.IsContainer;
-
-            // Optional visual representation text
-            e.Data.Text = item.Label;
         }
     }
 }

@@ -25,4 +25,9 @@ public class ShapeModel
     public string? ProtectionPaddingColor { get; set; }
     public string? ParentContainerID { get; set; }
     public string DiagramID { get; set; } = "";
+
+    // Rendering hints
+    public bool? TransparentFill { get; set; }
+    public string? GeometryType { get; set; }
 }
+

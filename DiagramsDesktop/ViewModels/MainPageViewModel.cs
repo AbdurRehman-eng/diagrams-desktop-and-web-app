@@ -142,9 +142,9 @@ public class MainPageViewModel : BaseViewModel
                 AxisOrientationX = "Right",
                 AxisOrientationY = "Down",
                 AxisOrientationZ = "In",
-                IsInfiniteX = 1,
-                IsInfiniteY = 1,
-                IsInfiniteZ = 1,
+                IsInfiniteX = true,
+                IsInfiniteY = true,
+                IsInfiniteZ = true,
                 ViewportCenterX = 0,
                 ViewportCenterY = 0,
                 ViewportWidth = 2000,
@@ -156,8 +156,8 @@ public class MainPageViewModel : BaseViewModel
                 GridSpacingY = 25,
                 ShowOriginMarker = true,
                 ShowAxes = true,
-                PanEnabled = 1,
-                ZoomEnabled = 1
+                PanEnabled = true,
+                ZoomEnabled = true
             }
         };
 
@@ -169,7 +169,7 @@ public class MainPageViewModel : BaseViewModel
     {
         try
         {
-            await _dbService.SaveDiagramAsync(ActiveDiagram);
+            await Task.Run(() => _dbService.SaveDiagram(ActiveDiagram));
             await Application.Current!.MainPage!.DisplayAlert("Success", "Diagram saved to SQLite database successfully.", "OK");
         }
         catch (Exception ex)
@@ -182,7 +182,7 @@ public class MainPageViewModel : BaseViewModel
     {
         try
         {
-            var diagrams = await _dbService.GetAllDiagramsAsync();
+            var diagrams = await Task.Run(() => _dbService.ListDiagrams());
             if (!diagrams.Any())
             {
                 await Application.Current!.MainPage!.DisplayAlert("Info", "No saved diagrams found in the database.", "OK");
@@ -197,7 +197,7 @@ public class MainPageViewModel : BaseViewModel
             int index = Array.IndexOf(titles, selected);
             if (index >= 0)
             {
-                var fullDiagram = await _dbService.GetDiagramByIdAsync(diagrams[index].DiagramID);
+                var fullDiagram = await Task.Run(() => _dbService.LoadDiagram(diagrams[index].DiagramID));
                 if (fullDiagram != null)
                 {
                     ActiveDiagram = fullDiagram;
