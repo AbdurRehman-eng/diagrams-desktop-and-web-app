@@ -9,6 +9,8 @@ public class CanvasDrawable : IDrawable
     public DiagramModel? Diagram { get; set; }
     public string? SelectedShapeId { get; set; }
     public string? HoveredShapeId { get; set; }
+    public string? SelectedCircleOnContainerId { get; set; }
+    public string? HoveredCircleOnContainerId { get; set; }
     
     // Width and height from the GraphicsView bounds
     public double ViewportWidth { get; set; } = 800;
@@ -78,6 +80,20 @@ public class CanvasDrawable : IDrawable
         foreach (var shape in components)
         {
             DrawShape(canvas, shape, canvasModel);
+        }
+
+        // Draw CircleOnContainers
+        if (Diagram.CircleOnContainers != null)
+        {
+            var cocs = Diagram.CircleOnContainers
+                .Where(c => c.IsDeleted == 0)
+                .OrderBy(c => c.ZOrder)
+                .ToList();
+
+            foreach (var coc in cocs)
+            {
+                DrawCircleOnContainer(canvas, coc, canvasModel);
+            }
         }
     }
 
@@ -397,6 +413,100 @@ public class CanvasDrawable : IDrawable
         canvas.FontColor = Color.FromArgb("#94a3b8");
         canvas.FontSize = 13;
         canvas.DrawString("Canvas ready for objects", cx, cy + 38, HorizontalAlignment.Center);
+    }
+
+    private void DrawCircleOnContainer(ICanvas canvas, CircleOnContainerModel coc, CanvasModel model)
+    {
+        double zoom = model.ZoomScale;
+        var (sx, sy) = ViewportMath.WorldToScreen(coc.CenterX, coc.CenterY, model, ViewportWidth, ViewportHeight);
+        float r = (float)(coc.Radius * zoom);
+
+        bool isSelected = coc.CircleOnContainerID == SelectedCircleOnContainerId;
+        bool isHovered = coc.CircleOnContainerID == HoveredCircleOnContainerId;
+
+        // 1. Draw Hover and Selection Outlines
+        if (isHovered)
+        {
+            canvas.StrokeColor = Color.FromArgb("#93c5fd");
+            canvas.StrokeSize = (float)(2.0 * zoom);
+            canvas.StrokeDashPattern = new float[] { 4, 3 };
+            canvas.DrawCircle((float)sx, (float)sy, r + (float)(5 * zoom));
+            canvas.StrokeDashPattern = null;
+        }
+
+        if (isSelected)
+        {
+            canvas.StrokeColor = Color.FromArgb("#3b82f6");
+            canvas.StrokeSize = (float)(2.5 * zoom);
+            canvas.StrokeDashPattern = new float[] { 5, 3 };
+            canvas.DrawCircle((float)sx, (float)sy, r + (float)(4 * zoom));
+            canvas.StrokeDashPattern = null;
+        }
+
+        // 2. Draw border occlusion logic (OpaqueFill blocks container border lines)
+        if (coc.BorderOcclusionPolicy == "OpaqueFill")
+        {
+            canvas.FillColor = Color.FromArgb(coc.FillColor ?? "#8b5cf6");
+            canvas.FillCircle((float)sx, (float)sy, r);
+        }
+        else if (coc.FillType == "NoFill")
+        {
+            canvas.FillColor = Colors.Transparent;
+        }
+        else
+        {
+            canvas.FillColor = Color.FromArgb(coc.FillColor ?? "#8b5cf6");
+            canvas.FillCircle((float)sx, (float)sy, r);
+        }
+
+        // 3. Draw circle border
+        if (coc.LineType != "NoLine")
+        {
+            canvas.StrokeColor = Color.FromArgb(coc.LineColor ?? "#7c3aed");
+            canvas.StrokeSize = (float)(coc.LineWidth * zoom);
+            canvas.DrawCircle((float)sx, (float)sy, r);
+        }
+
+        // 4. Draw Icon Inside
+        string deviceType = coc.DeviceOnContainerEdgeType.ToLowerInvariant();
+        if (deviceType == "internet gateway" || deviceType.Contains("gateway") || deviceType.Contains("igw"))
+        {
+            canvas.FillColor = Color.FromArgb("#9d5025");
+            canvas.FillCircle((float)sx, (float)sy, (float)(r * 0.7));
+            canvas.FontColor = Colors.White;
+            canvas.FontSize = (float)(8 * zoom);
+            canvas.DrawString("IGW", (float)sx, (float)(sy + 3 * zoom), HorizontalAlignment.Center);
+        }
+
+        // 5. Draw Label below shape
+        if (!string.IsNullOrEmpty(coc.Label))
+        {
+            canvas.FontColor = Color.FromArgb("#475569");
+            canvas.FontSize = (float)(11 * zoom);
+            canvas.DrawString(coc.Label, (float)sx, (float)(sy + r + 14 * zoom), HorizontalAlignment.Center);
+        }
+
+        // 6. Draw Resize Handles if Selected
+        if (isSelected && coc.RadiusResizeEnabled == 1)
+        {
+            float size = (float)(8 * zoom);
+            canvas.FillColor = Colors.White;
+            canvas.StrokeColor = Color.FromArgb("#94a3b8");
+            canvas.StrokeSize = 1;
+
+            // North
+            canvas.FillRoundedRectangle((float)(sx - size / 2), (float)(sy - r - size / 2), size, size, 2);
+            canvas.DrawRoundedRectangle((float)(sx - size / 2), (float)(sy - r - size / 2), size, size, 2);
+            // South
+            canvas.FillRoundedRectangle((float)(sx - size / 2), (float)(sy + r - size / 2), size, size, 2);
+            canvas.DrawRoundedRectangle((float)(sx - size / 2), (float)(sy + r - size / 2), size, size, 2);
+            // West
+            canvas.FillRoundedRectangle((float)(sx - r - size / 2), (float)(sy - size / 2), size, size, 2);
+            canvas.DrawRoundedRectangle((float)(sx - r - size / 2), (float)(sy - size / 2), size, size, 2);
+            // East
+            canvas.FillRoundedRectangle((float)(sx + r - size / 2), (float)(sy - size / 2), size, size, 2);
+            canvas.DrawRoundedRectangle((float)(sx + r - size / 2), (float)(sy - size / 2), size, size, 2);
+        }
     }
 }
 

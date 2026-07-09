@@ -13,6 +13,13 @@ public class ShapesPanelViewModel : BaseViewModel
     private ShapeCategory? _selectedCategory;
     private bool _isCollapsed;
     private ObservableCollection<ShapeLibraryItem> _filteredItems = new();
+    private double _categoryListHeight = 180;
+
+    public double CategoryListHeight
+    {
+        get => _categoryListHeight;
+        set => SetProperty(ref _categoryListHeight, value);
+    }
 
     public ShapesPanelViewModel()
     {

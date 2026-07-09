@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using Microsoft.Maui.Storage;
 using DiagramsDesktop.Models;
 using DiagramsDesktop.Math;
@@ -41,6 +42,26 @@ public class MainPageViewModel : BaseViewModel
         ConnectToolCommand   = new RelayCommand(() => SetTool("connect"));
         UndoCommand          = new RelayCommand(() => { /* Phase 2 */ });
         RedoCommand          = new RelayCommand(() => { /* Phase 2 */ });
+
+        TogglePropertiesModalCommand = new RelayCommand(() => IsPropertiesModalVisible = !IsPropertiesModalVisible);
+        SelectModalTabCommand = new RelayCommand<string>(tab => { if (tab != null) SelectedModalTab = tab; });
+        AddVariableCommand = new RelayCommand(() => {
+            if (!string.IsNullOrWhiteSpace(NewVariableKey))
+            {
+                if (!GlobalVariables.Any(v => v.Key.Equals(NewVariableKey, StringComparison.OrdinalIgnoreCase)))
+                {
+                    GlobalVariables.Add(new GlobalVariable { Key = NewVariableKey.Trim(), Value = NewVariableValue.Trim() });
+                    NewVariableKey = "";
+                    NewVariableValue = "";
+                }
+            }
+        });
+        DeleteVariableCommand = new RelayCommand<GlobalVariable>(v => {
+            if (v != null)
+            {
+                GlobalVariables.Remove(v);
+            }
+        });
 
         // Start with a new diagram
         NewDiagram();
@@ -90,6 +111,10 @@ public class MainPageViewModel : BaseViewModel
             if (SetProperty(ref _selectedShapeId, value))
             {
                 SelectedShape = ActiveDiagram?.Shapes?.FirstOrDefault(s => s.ShapeID == value);
+                if (value != null)
+                {
+                    SelectedCircleOnContainerId = null; // deselect COC
+                }
             }
         }
     }
@@ -107,6 +132,84 @@ public class MainPageViewModel : BaseViewModel
     }
 
     public bool HasSelectedShape => SelectedShape != null;
+
+    private string? _selectedCircleOnContainerId;
+    private CircleOnContainerModel? _selectedCircleOnContainer;
+    private bool _isPropertiesModalVisible;
+    private string _selectedModalTab = "canvas";
+
+    public string? SelectedCircleOnContainerId
+    {
+        get => _selectedCircleOnContainerId;
+        set
+        {
+            if (SetProperty(ref _selectedCircleOnContainerId, value))
+            {
+                SelectedCircleOnContainer = ActiveDiagram?.CircleOnContainers?.FirstOrDefault(c => c.CircleOnContainerID == value);
+                if (value != null)
+                {
+                    SelectedShapeId = null; // deselect shape
+                }
+            }
+        }
+    }
+
+    public CircleOnContainerModel? SelectedCircleOnContainer
+    {
+        get => _selectedCircleOnContainer;
+        set
+        {
+            if (SetProperty(ref _selectedCircleOnContainer, value))
+            {
+                OnPropertyChanged(nameof(HasSelectedCircleOnContainer));
+            }
+        }
+    }
+
+    public bool HasSelectedCircleOnContainer => SelectedCircleOnContainer != null;
+
+    public bool IsPropertiesModalVisible
+    {
+        get => _isPropertiesModalVisible;
+        set => SetProperty(ref _isPropertiesModalVisible, value);
+    }
+
+    public string SelectedModalTab
+    {
+        get => _selectedModalTab;
+        set
+        {
+            if (SetProperty(ref _selectedModalTab, value))
+            {
+                OnPropertyChanged(nameof(IsCanvasTabActive));
+                OnPropertyChanged(nameof(IsVariablesTabActive));
+            }
+        }
+    }
+
+    public bool IsCanvasTabActive => SelectedModalTab == "canvas";
+    public bool IsVariablesTabActive => SelectedModalTab == "variables";
+
+    public ObservableCollection<GlobalVariable> GlobalVariables { get; } = new()
+    {
+        new GlobalVariable { Key = "env", Value = "production" },
+        new GlobalVariable { Key = "region", Value = "us-east-1" },
+        new GlobalVariable { Key = "version", Value = "1.0.0" }
+    };
+
+    private string _newVariableKey = "";
+    public string NewVariableKey
+    {
+        get => _newVariableKey;
+        set => SetProperty(ref _newVariableKey, value);
+    }
+
+    private string _newVariableValue = "";
+    public string NewVariableValue
+    {
+        get => _newVariableValue;
+        set => SetProperty(ref _newVariableValue, value);
+    }
 
     // View bounds passed from UI for viewport math
     public double CanvasViewWidth { get; set; } = 800;
@@ -185,6 +288,10 @@ public class MainPageViewModel : BaseViewModel
     public ICommand ConnectToolCommand { get; }
     public ICommand UndoCommand        { get; }
     public ICommand RedoCommand        { get; }
+    public ICommand TogglePropertiesModalCommand { get; }
+    public ICommand SelectModalTabCommand { get; }
+    public ICommand AddVariableCommand { get; }
+    public ICommand DeleteVariableCommand { get; }
 
     private void NewDiagram()
     {

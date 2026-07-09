@@ -23,6 +23,28 @@ public partial class ShapesPanel : ContentView
             e.Data.Properties["ShapeWidth"] = item.DefaultWidth;
             e.Data.Properties["ShapeHeight"] = item.DefaultHeight;
             e.Data.Properties["IsContainer"] = item.IsContainer;
+            e.Data.Properties["EdgeAttachment"] = item.EdgeAttachment;
+            e.Data.Properties["EdgeContainerType"] = item.EdgeContainerType;
+            e.Data.Properties["BaseShapeType"] = item.BaseShapeType;
+        }
+    }
+
+    private double _initialCategoryListHeight;
+
+    private void OnSplitterPanUpdated(object? sender, PanUpdatedEventArgs e)
+    {
+        if (BindingContext is ShapesPanelViewModel vm)
+        {
+            switch (e.StatusType)
+            {
+                case GestureStatus.Started:
+                    _initialCategoryListHeight = vm.CategoryListHeight;
+                    break;
+                case GestureStatus.Running:
+                    double newHeight = _initialCategoryListHeight + e.TotalY;
+                    vm.CategoryListHeight = System.Math.Clamp(newHeight, 80.0, 400.0);
+                    break;
+            }
         }
     }
 }

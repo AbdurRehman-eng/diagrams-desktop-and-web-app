@@ -93,7 +93,7 @@
                 </Border>
 
                 <!-- Row 2: Categories label + list ───────────────────────── -->
-                <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
+                <Grid Grid.Row="2" RowDefinitions="Auto, *" HeightRequest="{Binding CategoryListHeight}">
                     <!-- "Categories" label -->
                     <Label Grid.Row="0"
                            Text="Categories"
@@ -163,11 +163,20 @@
                 </Grid>
 
                 <!-- Splitter / Divider ────────────────────────────────────── -->
-                <BoxView Grid.Row="3"
-                         HeightRequest="1"
-                         Color="#e2e8f0"
-                         VerticalOptions="Start"
-                         Margin="10,6" />
+                <Border Grid.Row="3"
+                        HeightRequest="10"
+                        BackgroundColor="Transparent"
+                        VerticalOptions="Center"
+                        StrokeThickness="0">
+                    <Border.GestureRecognizers>
+                        <PanGestureRecognizer PanUpdated="OnSplitterPanUpdated" />
+                    </Border.GestureRecognizers>
+                    <BoxView HeightRequest="1"
+                             Color="#e2e8f0"
+                             VerticalOptions="Center"
+                             HorizontalOptions="Fill"
+                             Margin="10,0" />
+                </Border>
 
                 <!-- Row 4 (*, bottom): Shape items area ──────────────────── -->
                 <Grid Grid.Row="4">

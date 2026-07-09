@@ -52,4 +52,24 @@ public partial class MainPage : ContentPage
             MainCanvasView?.Invalidate();
         }
     }
+
+    private void OnDeleteCocClicked(object? sender, EventArgs e)
+    {
+        if (_viewModel.SelectedCircleOnContainer != null)
+        {
+            _viewModel.SelectedCircleOnContainer.IsDeleted = 1;
+            _viewModel.SelectedCircleOnContainerId = null;
+            MainCanvasView?.Invalidate();
+        }
+    }
+
+    private void OnCocFillColorTapped(object? sender, TappedEventArgs e)
+    {
+        if (_viewModel.SelectedCircleOnContainer != null && e.Parameter is string colorHex)
+        {
+            _viewModel.SelectedCircleOnContainer.FillColor = colorHex;
+            _viewModel.SelectedCircleOnContainer.LineColor = colorHex;
+            MainCanvasView?.Invalidate();
+        }
+    }
 }
