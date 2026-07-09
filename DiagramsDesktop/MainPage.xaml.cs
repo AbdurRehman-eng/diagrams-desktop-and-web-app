@@ -14,6 +14,8 @@ public partial class MainPage : ContentPage
         _viewModel = new MainPageViewModel();
         BindingContext = _viewModel;
 
+        ShapesSidebar.BindingContext = _viewModel.ShapesPanelVM;
+
         // Repaint request hook
         _viewModel.RequestCanvasRepaint = () => MainCanvasView.Invalidate();
     }

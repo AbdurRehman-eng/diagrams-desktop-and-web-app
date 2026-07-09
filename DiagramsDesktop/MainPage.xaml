@@ -183,7 +183,8 @@
         <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto">
 
             <!-- Column 0: Shapes Panel -->
-            <views:ShapesPanel Grid.Column="0"
+            <views:ShapesPanel x:Name="ShapesSidebar"
+                               Grid.Column="0"
                                BindingContext="{Binding ShapesPanelVM}" />
 
             <!-- Column 1: Canvas -->

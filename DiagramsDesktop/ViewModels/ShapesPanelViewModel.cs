@@ -74,12 +74,15 @@ public class ShapesPanelViewModel : BaseViewModel
             if (SetProperty(ref _isCollapsed, value))
             {
                 OnPropertyChanged(nameof(IsExpanded));
+                OnPropertyChanged(nameof(PanelWidth));
                 OnPropertyChanged(nameof(ToggleButtonText));
             }
         }
     }
 
     public bool IsExpanded => !_isCollapsed;
+
+    public double PanelWidth => IsExpanded ? 248 : 18;
 
     /// <summary>Chevron text that rotates when collapsed.</summary>
     public string ToggleButtonText => IsCollapsed ? "›" : "‹";

@@ -5,7 +5,8 @@
              xmlns:models="clr-namespace:DiagramsDesktop.Models"
              xmlns:views="clr-namespace:DiagramsDesktop.Views"
              x:Class="DiagramsDesktop.Views.ShapesPanel"
-             x:DataType="vm:ShapesPanelViewModel">
+             x:DataType="vm:ShapesPanelViewModel"
+             WidthRequest="{Binding PanelWidth}">
 
     <!-- Outer: fixed-width panel + collapse toggle sits outside -->
     <Grid ColumnDefinitions="Auto, Auto" BackgroundColor="#f8fafc">
@@ -18,7 +19,7 @@
                 BackgroundColor="#f8fafc"
                 IsVisible="{Binding IsExpanded}">
 
-            <Grid RowDefinitions="Auto, Auto, Auto, *, Auto">
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
 
                 <!-- Row 0: Header ────────────────────────────────────────── -->
                 <Grid Grid.Row="0"
@@ -164,7 +165,7 @@
                          Margin="10,6" />
 
                 <!-- Row 4 (*, bottom): Shape items area ──────────────────── -->
-                <Grid Grid.Row="3">
+                <Grid Grid.Row="4">
                     <!-- Standard items grid -->
                     <CollectionView ItemsSource="{Binding FilteredItems}"
                                     SelectionMode="None"
