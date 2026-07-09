@@ -22,5 +22,57 @@
             </GraphicsView.GestureRecognizers>
             
         </GraphicsView>
+
+        <!-- Floating Zoom Controls overlay -->
+        <Border HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="16"
+                StrokeThickness="1"
+                Stroke="#e2e8f0"
+                BackgroundColor="#ffffff"
+                Padding="6,4"
+                StrokeShape="RoundRectangle 8">
+            <Border.Shadow>
+                <Shadow Brush="#000000" Offset="0,2" Radius="6" Opacity="0.08" />
+            </Border.Shadow>
+            <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                <Button Command="{Binding ZoomInCommand}"
+                        Text="+"
+                        FontSize="14"
+                        TextColor="#64748b"
+                        BackgroundColor="Transparent"
+                        BorderWidth="0"
+                        WidthRequest="28" HeightRequest="28"
+                        Padding="0" CornerRadius="4" />
+                
+                <Label Text="{Binding ZoomPercent}"
+                       FontSize="11"
+                       TextColor="#334155"
+                       WidthRequest="38"
+                       HorizontalTextAlignment="Center"
+                       VerticalOptions="Center" />
+
+                <Button Command="{Binding ZoomOutCommand}"
+                        Text="−"
+                        FontSize="14"
+                        TextColor="#64748b"
+                        BackgroundColor="Transparent"
+                        BorderWidth="0"
+                        WidthRequest="28" HeightRequest="28"
+                        Padding="0" CornerRadius="4" />
+
+                <BoxView WidthRequest="1" HeightRequest="16" Color="#e2e8f0"
+                         VerticalOptions="Center" Margin="2,0" />
+
+                <Button Command="{Binding FitToScreenCommand}"
+                        Text="⛶"
+                        FontSize="12"
+                        TextColor="#64748b"
+                        BackgroundColor="Transparent"
+                        BorderWidth="0"
+                        WidthRequest="28" HeightRequest="28"
+                        Padding="0" CornerRadius="4" />
+            </HorizontalStackLayout>
+        </Border>
     </Grid>
 </ContentView>

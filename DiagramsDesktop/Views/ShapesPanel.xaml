@@ -7,158 +7,193 @@
              x:Class="DiagramsDesktop.Views.ShapesPanel"
              x:DataType="vm:ShapesPanelViewModel">
 
-    <Grid ColumnDefinitions="60, Auto" BackgroundColor="#f8fafc">
-        <!-- Column 0: Category Sidebar -->
-        <Border Grid.Column="0" 
-                StrokeThickness="0" 
-                BackgroundColor="#f1f5f9"
-                WidthRequest="60"
-                HorizontalOptions="Fill"
-                VerticalOptions="Fill">
-            <Grid RowDefinitions="Auto, *">
-                <!-- Collapse/Expand Hamburger or arrow -->
-                <Button Grid.Row="0"
-                        Command="{Binding ToggleCollapseCommand}"
-                        Text="☰"
-                        FontSize="18"
-                        TextColor="#475569"
-                        BackgroundColor="Transparent"
-                        BorderWidth="0"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        Margin="5"
-                        CornerRadius="4" />
+    <!-- Outer: fixed-width panel + collapse toggle sits outside -->
+    <Grid ColumnDefinitions="Auto, Auto" BackgroundColor="#f8fafc">
 
-                <!-- Categories list -->
-                <CollectionView Grid.Row="1"
-                                ItemsSource="{Binding Categories}"
-                                SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
-                                SelectionMode="Single"
-                                Margin="0,10,0,0">
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:ShapeCategory">
-                            <Grid HeightRequest="50" WidthRequest="60">
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup Name="CommonStates">
-                                        <VisualState Name="Normal">
-                                            <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="Transparent" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState Name="Selected">
-                                            <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="#e2e8f0" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-
-                                <views:ShapeIconView ShapeType="{Binding IconType}"
-                                                     ColorHex="{Binding IconColor}"
-                                                     WidthRequest="36"
-                                                     HeightRequest="36"
-                                                     HorizontalOptions="Center"
-                                                     VerticalOptions="Center" />
-                                <ToolTipProperties.Text>
-                                    <MultiBinding StringFormat="{}{0}">
-                                        <Binding Path="Name" />
-                                    </MultiBinding>
-                                </ToolTipProperties.Text>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Grid>
-        </Border>
-
-        <!-- Column 1: Items List & Search -->
-        <Border Grid.Column="1" 
-                StrokeThickness="1,0,0,0" 
+        <!-- ── Panel body (collapses to zero width) ─────────────────────── -->
+        <Border Grid.Column="0"
+                WidthRequest="230"
+                StrokeThickness="0,0,1,0"
                 Stroke="#e2e8f0"
-                BackgroundColor="#ffffff"
-                WidthRequest="220"
+                BackgroundColor="#f8fafc"
                 IsVisible="{Binding IsExpanded}">
-            <Grid RowDefinitions="Auto, Auto, *">
-                <!-- Header with Selected Category Title -->
-                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="15,12">
-                    <Label Text="{Binding SelectedCategoryHeader}"
+
+            <Grid RowDefinitions="Auto, Auto, Auto, *, Auto">
+
+                <!-- Row 0: Header ────────────────────────────────────────── -->
+                <Grid Grid.Row="0"
+                      ColumnDefinitions="*, Auto"
+                      BackgroundColor="#f1f5f9"
+                      Padding="14,10">
+                    <Label Text="SHAPES"
+                           FontSize="11"
                            FontAttributes="Bold"
-                           FontSize="15"
-                           TextColor="#1e293b"
+                           CharacterSpacing="1.5"
+                           TextColor="#475569"
                            VerticalOptions="Center" />
-                    
                     <Button Grid.Column="1"
                             Command="{Binding ToggleCollapseCommand}"
-                            Text="◀"
-                            FontSize="10"
+                            Text="‹"
+                            FontSize="16"
                             TextColor="#64748b"
                             BackgroundColor="Transparent"
                             BorderWidth="0"
-                            Padding="5"
-                            HeightRequest="30"
-                            WidthRequest="30"
+                            WidthRequest="28"
+                            HeightRequest="28"
+                            Padding="0"
                             CornerRadius="4" />
                 </Grid>
 
-                <!-- Search Input -->
+                <!-- Row 1: Search ────────────────────────────────────────── -->
                 <Border Grid.Row="1"
                         StrokeShape="RoundRectangle 6"
                         StrokeThickness="1"
                         Stroke="#e2e8f0"
-                        Margin="10,0,10,10"
-                        Padding="5,2"
-                        BackgroundColor="#f8fafc">
-                    <Grid ColumnDefinitions="Auto, *">
-                        <Label Grid.Column="0" 
-                               Text="🔍" 
-                               FontSize="12" 
-                               TextColor="#94a3b8" 
+                        Margin="10,8,10,4"
+                        Padding="6,0"
+                        BackgroundColor="#ffffff">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <!-- Search icon -->
+                        <Label Grid.Column="0"
+                               Text="🔍"
+                               FontSize="11"
+                               TextColor="#94a3b8"
                                VerticalOptions="Center"
-                               Margin="5,0,5,0" />
+                               Margin="0,0,4,0" />
+                        <!-- Input -->
                         <Entry Grid.Column="1"
                                Text="{Binding SearchText}"
-                               Placeholder="Search shapes..."
-                               FontSize="13"
+                               Placeholder="Search shapes…"
+                               FontSize="12"
                                TextColor="#1e293b"
                                PlaceholderColor="#94a3b8"
                                BackgroundColor="Transparent"
-                               Margin="0"
-                               HeightRequest="32"/>
+                               HeightRequest="32" />
+                        <!-- Clear (✕) button — only visible when text present -->
+                        <Button Grid.Column="2"
+                                Command="{Binding ClearSearchCommand}"
+                                IsVisible="{Binding SearchHasText}"
+                                Text="✕"
+                                FontSize="10"
+                                TextColor="#94a3b8"
+                                BackgroundColor="Transparent"
+                                BorderWidth="0"
+                                WidthRequest="24"
+                                HeightRequest="24"
+                                Padding="0"
+                                CornerRadius="12"
+                                VerticalOptions="Center" />
                     </Grid>
                 </Border>
 
-                <!-- Content Area: Item List or Placeholder Message -->
-                <Grid Grid.Row="2">
-                    <!-- Standard Item CollectionView -->
+                <!-- Row 2: Categories label + list ───────────────────────── -->
+                <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
+                    <!-- "Categories" label -->
+                    <Label Grid.Row="0"
+                           Text="Categories"
+                           FontSize="10"
+                           CharacterSpacing="0.8"
+                           TextColor="#94a3b8"
+                           Margin="14,6,14,4" />
+
+                    <!-- Category rows -->
+                    <CollectionView Grid.Row="1"
+                                    ItemsSource="{Binding Categories}"
+                                    SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+                                    SelectionMode="Single">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="2" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ShapeCategory">
+                                <Grid ColumnDefinitions="Auto, *, Auto"
+                                      Padding="12,7"
+                                      MinimumHeightRequest="36">
+
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup Name="CommonStates">
+                                            <VisualState Name="Normal">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="#e0e7ff" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+
+                                    <!-- Category icon -->
+                                    <views:ShapeIconView Grid.Column="0"
+                                                         ShapeType="{Binding IconType}"
+                                                         ColorHex="{Binding IconColor}"
+                                                         WidthRequest="20"
+                                                         HeightRequest="20"
+                                                         VerticalOptions="Center"
+                                                         Margin="0,0,8,0" />
+                                    <!-- Category name -->
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Name}"
+                                           FontSize="13"
+                                           TextColor="#334155"
+                                           VerticalOptions="Center" />
+                                    <!-- Count badge / "Soon" badge -->
+                                    <Border Grid.Column="2"
+                                            StrokeShape="RoundRectangle 10"
+                                            StrokeThickness="0"
+                                            BackgroundColor="{Binding BadgeColor}"
+                                            Padding="6,2"
+                                            VerticalOptions="Center">
+                                        <Label Text="{Binding BadgeText}"
+                                               FontSize="10"
+                                               TextColor="{Binding BadgeTextColor}" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+
+                <!-- Splitter / Divider ────────────────────────────────────── -->
+                <BoxView Grid.Row="3"
+                         HeightRequest="1"
+                         Color="#e2e8f0"
+                         VerticalOptions="Start"
+                         Margin="10,6" />
+
+                <!-- Row 4 (*, bottom): Shape items area ──────────────────── -->
+                <Grid Grid.Row="3">
+                    <!-- Standard items grid -->
                     <CollectionView ItemsSource="{Binding FilteredItems}"
                                     SelectionMode="None"
                                     IsVisible="{Binding IsStandardCategorySelected}"
-                                    Margin="10">
+                                    Margin="8,16,8,8">
                         <CollectionView.ItemsLayout>
-                            <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="10" VerticalItemSpacing="10" />
+                            <GridItemsLayout Orientation="Vertical" Span="2"
+                                             HorizontalItemSpacing="8"
+                                             VerticalItemSpacing="8" />
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:ShapeLibraryItem">
                                 <Border StrokeThickness="1"
                                         Stroke="#e2e8f0"
-                                        StrokeShape="RoundRectangle 6"
+                                        StrokeShape="RoundRectangle 8"
                                         BackgroundColor="#ffffff"
-                                        Padding="5"
-                                        HeightRequest="90">
-                                    
+                                        Padding="6"
+                                        HeightRequest="82">
+
                                     <Border.GestureRecognizers>
                                         <DragGestureRecognizer DragStarting="OnDragStarting" />
                                     </Border.GestureRecognizers>
 
-                                    <Grid RowDefinitions="*, Auto" RowSpacing="5">
+                                    <Grid RowDefinitions="*, Auto" RowSpacing="4">
                                         <views:ShapeIconView Grid.Row="0"
                                                              ShapeType="{Binding Type}"
                                                              ColorHex="{Binding FillColor}"
-                                                             WidthRequest="40"
-                                                             HeightRequest="40"
+                                                             WidthRequest="36"
+                                                             HeightRequest="36"
                                                              HorizontalOptions="Center"
                                                              VerticalOptions="Center" />
                                         <Label Grid.Row="1"
@@ -175,15 +210,14 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <!-- Placeholder Coming Soon Message -->
+                    <!-- Coming Soon placeholder -->
                     <VerticalStackLayout IsVisible="{Binding IsPlaceholderCategorySelected}"
                                          VerticalOptions="Center"
                                          HorizontalOptions="Center"
                                          Spacing="10"
-                                         Padding="20">
-                        <Label Text="🚧"
-                               FontSize="32"
-                               HorizontalOptions="Center" />
+                                         Padding="20"
+                                         Margin="0,40,0,0">
+                        <Label Text="🚧" FontSize="32" HorizontalOptions="Center" />
                         <Label Text="{Binding PlaceholderMessage}"
                                FontSize="13"
                                TextColor="#64748b"
@@ -193,5 +227,25 @@
                 </Grid>
             </Grid>
         </Border>
+
+        <!-- ── Collapse/Expand toggle tab (always visible) ──────────────── -->
+        <Border Grid.Column="1"
+                WidthRequest="18"
+                StrokeThickness="0,0,1,0"
+                Stroke="#e2e8f0"
+                BackgroundColor="#f1f5f9"
+                VerticalOptions="Fill">
+            <Button Command="{Binding ToggleCollapseCommand}"
+                    Text="{Binding ToggleButtonText}"
+                    FontSize="14"
+                    TextColor="#64748b"
+                    BackgroundColor="Transparent"
+                    BorderWidth="0"
+                    Padding="0"
+                    CornerRadius="0"
+                    VerticalOptions="Start"
+                    Margin="0,60,0,0" />
+        </Border>
+
     </Grid>
 </ContentView>

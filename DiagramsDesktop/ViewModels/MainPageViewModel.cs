@@ -17,6 +17,7 @@ public class MainPageViewModel : BaseViewModel
     private ShapeModel? _selectedShape;
     private string? _selectedShapeId;
     private string _diagramTitle = "Untitled Diagram";
+    private string _currentTool = "select";   // "select" | "connect"
     private readonly DatabasePersistenceService _dbService;
     private readonly JsonPersistenceService _jsonService;
 
@@ -27,16 +28,19 @@ public class MainPageViewModel : BaseViewModel
         _shapesPanelVM = new ShapesPanelViewModel();
 
         // Commands
-        NewDiagramCommand = new RelayCommand(NewDiagram);
-        SaveDiagramCommand = new RelayCommand(async () => await SaveDiagramAsync());
-        LoadDiagramCommand = new RelayCommand(async () => await LoadDiagramAsync());
-        ImportJsonCommand = new RelayCommand(async () => await ImportJsonAsync());
-        ExportJsonCommand = new RelayCommand(async () => await ExportJsonAsync());
-        
-        ZoomInCommand = new RelayCommand(ZoomIn);
-        ZoomOutCommand = new RelayCommand(ZoomOut);
-        ZoomResetCommand = new RelayCommand(ZoomReset);
-        FitToScreenCommand = new RelayCommand(FitToScreen);
+        NewDiagramCommand    = new RelayCommand(NewDiagram);
+        SaveDiagramCommand   = new RelayCommand(async () => await SaveDiagramAsync());
+        LoadDiagramCommand   = new RelayCommand(async () => await LoadDiagramAsync());
+        ImportJsonCommand    = new RelayCommand(async () => await ImportJsonAsync());
+        ExportJsonCommand    = new RelayCommand(async () => await ExportJsonAsync());
+        ZoomInCommand        = new RelayCommand(ZoomIn);
+        ZoomOutCommand       = new RelayCommand(ZoomOut);
+        ZoomResetCommand     = new RelayCommand(ZoomReset);
+        FitToScreenCommand   = new RelayCommand(FitToScreen);
+        SelectToolCommand    = new RelayCommand(() => SetTool("select"));
+        ConnectToolCommand   = new RelayCommand(() => SetTool("connect"));
+        UndoCommand          = new RelayCommand(() => { /* Phase 2 */ });
+        RedoCommand          = new RelayCommand(() => { /* Phase 2 */ });
 
         // Start with a new diagram
         NewDiagram();
@@ -111,16 +115,76 @@ public class MainPageViewModel : BaseViewModel
     // Action hook to trigger canvas repaint from ViewModel
     public Action? RequestCanvasRepaint { get; set; }
 
+    // ── Tool mode ─────────────────────────────────────────────────────────
+    public string CurrentTool
+    {
+        get => _currentTool;
+        private set
+        {
+            if (SetProperty(ref _currentTool, value))
+            {
+                OnPropertyChanged(nameof(IsSelectToolActive));
+                OnPropertyChanged(nameof(IsConnectToolActive));
+            }
+        }
+    }
+    public bool IsSelectToolActive  => CurrentTool == "select";
+    public bool IsConnectToolActive => CurrentTool == "connect";
+
+    private void SetTool(string tool) => CurrentTool = tool;
+
+    // ── Status bar ────────────────────────────────────────────────────────
+    public string ZoomPercent
+    {
+        get
+        {
+            if (Canvas == null) return "100%";
+            return $"{(int)(Canvas.ZoomScale * 100)}%";
+        }
+    }
+
+    public string ShapeCount
+    {
+        get
+        {
+            var count = ActiveDiagram?.Shapes?.Count(s => s.IsDeleted == 0) ?? 0;
+            return $"{count} shape{(count == 1 ? "" : "s")}";
+        }
+    }
+
+    public string WorldCoords
+    {
+        get
+        {
+            if (Canvas == null) return "[0, 0]";
+            return $"[{(int)Canvas.ViewportCenterX}, {(int)Canvas.ViewportCenterY}]";
+        }
+    }
+
+    public string ActiveCategoryName => ShapesPanelVM?.SelectedCategory?.Name ?? "—";
+
+    /// <summary>Refreshes all status-bar bindings. Call after any canvas state change.</summary>
+    private void NotifyStatusBar()
+    {
+        OnPropertyChanged(nameof(ZoomPercent));
+        OnPropertyChanged(nameof(ShapeCount));
+        OnPropertyChanged(nameof(WorldCoords));
+    }
+
     // Commands
-    public ICommand NewDiagramCommand { get; }
+    public ICommand NewDiagramCommand  { get; }
     public ICommand SaveDiagramCommand { get; }
     public ICommand LoadDiagramCommand { get; }
-    public ICommand ImportJsonCommand { get; }
-    public ICommand ExportJsonCommand { get; }
-    public ICommand ZoomInCommand { get; }
-    public ICommand ZoomOutCommand { get; }
-    public ICommand ZoomResetCommand { get; }
+    public ICommand ImportJsonCommand  { get; }
+    public ICommand ExportJsonCommand  { get; }
+    public ICommand ZoomInCommand      { get; }
+    public ICommand ZoomOutCommand     { get; }
+    public ICommand ZoomResetCommand   { get; }
     public ICommand FitToScreenCommand { get; }
+    public ICommand SelectToolCommand  { get; }
+    public ICommand ConnectToolCommand { get; }
+    public ICommand UndoCommand        { get; }
+    public ICommand RedoCommand        { get; }
 
     private void NewDiagram()
     {
@@ -162,6 +226,7 @@ public class MainPageViewModel : BaseViewModel
         };
 
         SelectedShapeId = null;
+        NotifyStatusBar();
         RequestCanvasRepaint?.Invoke();
     }
 
@@ -287,6 +352,7 @@ public class MainPageViewModel : BaseViewModel
         Canvas.ZoomScale = newZoom;
         if (newVCX.HasValue) Canvas.ViewportCenterX = newVCX.Value;
         if (newVCY.HasValue) Canvas.ViewportCenterY = newVCY.Value;
+        NotifyStatusBar();
         RequestCanvasRepaint?.Invoke();
     }
 
@@ -305,6 +371,7 @@ public class MainPageViewModel : BaseViewModel
         Canvas.ZoomScale = newZoom;
         if (newVCX.HasValue) Canvas.ViewportCenterX = newVCX.Value;
         if (newVCY.HasValue) Canvas.ViewportCenterY = newVCY.Value;
+        NotifyStatusBar();
         RequestCanvasRepaint?.Invoke();
     }
 
@@ -314,6 +381,7 @@ public class MainPageViewModel : BaseViewModel
         Canvas.ZoomScale = 1.0;
         Canvas.ViewportCenterX = 0;
         Canvas.ViewportCenterY = 0;
+        NotifyStatusBar();
         RequestCanvasRepaint?.Invoke();
     }
 

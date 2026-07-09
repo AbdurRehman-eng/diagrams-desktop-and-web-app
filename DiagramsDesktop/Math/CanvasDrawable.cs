@@ -26,6 +26,7 @@ public class CanvasDrawable : IDrawable
             // Draw empty canvas background
             canvas.FillColor = Color.FromArgb("#f1f5f9");
             canvas.FillRectangle(dirtyRect);
+            DrawEmptyState(canvas, dirtyRect);
             return;
         }
 
@@ -58,6 +59,12 @@ public class CanvasDrawable : IDrawable
             .Where(s => s.IsDeleted == 0)
             .OrderBy(s => s.ZOrder)
             .ToList();
+
+        if (shapes.Count == 0)
+        {
+            DrawEmptyState(canvas, dirtyRect);
+            return;
+        }
 
         // Draw containers first so they sit in the background
         var containers = shapes.Where(s => IsContainerShape(s.Type)).ToList();
@@ -354,4 +361,42 @@ public class CanvasDrawable : IDrawable
 
         canvas.DrawString(shape.Label, labelX, labelY, alignment);
     }
+
+    private void DrawEmptyState(ICanvas canvas, RectF dirtyRect)
+    {
+        float cx = dirtyRect.Width / 2f;
+        float cy = dirtyRect.Height / 2f;
+
+        float boxWidth = 72;
+        float boxHeight = 72;
+        float boxX = cx - (boxWidth / 2f);
+        float boxY = cy - 80f; // offset vertically upward to make room for text below
+
+        // 1. Draw Dotted Rounded Rect
+        canvas.StrokeColor = Color.FromArgb("#cbd5e1");
+        canvas.StrokeSize = 2;
+        canvas.StrokeDashPattern = new float[] { 7, 5 };
+        canvas.DrawRoundedRectangle(boxX, boxY, boxWidth, boxHeight, 10);
+        canvas.StrokeDashPattern = null; // reset
+
+        // 2. Draw Plus sign inside the box
+        canvas.StrokeColor = Color.FromArgb("#cbd5e1");
+        canvas.StrokeSize = 2;
+        canvas.StrokeLineCap = LineCap.Round;
+        // Vert line:
+        canvas.DrawLine(boxX + 36, boxY + 24, boxX + 36, boxY + 48);
+        // Horiz line:
+        canvas.DrawLine(boxX + 24, boxY + 36, boxX + 48, boxY + 36);
+
+        // 3. Draw Text below the box
+        canvas.FontColor = Color.FromArgb("#64748b");
+        canvas.FontSize = 16;
+        // Draw bold-like title (using string representation, MAUI drawing doesn't support easy font weight styling, but size does the job)
+        canvas.DrawString("Diagram Workspace", cx, cy + 16, HorizontalAlignment.Center);
+
+        canvas.FontColor = Color.FromArgb("#94a3b8");
+        canvas.FontSize = 13;
+        canvas.DrawString("Canvas ready for objects", cx, cy + 38, HorizontalAlignment.Center);
+    }
 }
+

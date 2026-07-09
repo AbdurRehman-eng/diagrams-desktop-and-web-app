@@ -12,7 +12,6 @@ public class ShapesPanelViewModel : BaseViewModel
     private string _searchText = "";
     private ShapeCategory? _selectedCategory;
     private bool _isCollapsed;
-    private double _panelWidth = 260;
     private ObservableCollection<ShapeLibraryItem> _filteredItems = new();
 
     public ShapesPanelViewModel()
@@ -20,13 +19,15 @@ public class ShapesPanelViewModel : BaseViewModel
         Categories = ShapeCategories.LoadShapeCategories();
         SelectCategoryCommand = new RelayCommand<ShapeCategory>(SelectCategory);
         ToggleCollapseCommand = new RelayCommand(ToggleCollapse);
+        ClearSearchCommand    = new RelayCommand(ClearSearch);
 
-        // Default to the first non-placeholder category if available
+        // Default to the first non-placeholder category
         SelectedCategory = Categories.FirstOrDefault(c => !c.IsPlaceholder) ?? Categories.FirstOrDefault();
     }
 
     public List<ShapeCategory> Categories { get; }
 
+    // ── Search ────────────────────────────────────────────────────────────────
     public string SearchText
     {
         get => _searchText;
@@ -34,11 +35,21 @@ public class ShapesPanelViewModel : BaseViewModel
         {
             if (SetProperty(ref _searchText, value))
             {
+                OnPropertyChanged(nameof(SearchHasText));
                 RefreshFilteredItems();
             }
         }
     }
 
+    /// <summary>True when search box has text → shows the ✕ clear button.</summary>
+    public bool SearchHasText => !string.IsNullOrEmpty(_searchText);
+
+    private void ClearSearch()
+    {
+        SearchText = "";
+    }
+
+    // ── Category ──────────────────────────────────────────────────────────────
     public ShapeCategory? SelectedCategory
     {
         get => _selectedCategory;
@@ -63,21 +74,15 @@ public class ShapesPanelViewModel : BaseViewModel
             if (SetProperty(ref _isCollapsed, value))
             {
                 OnPropertyChanged(nameof(IsExpanded));
+                OnPropertyChanged(nameof(ToggleButtonText));
             }
         }
     }
 
-    public bool IsExpanded
-    {
-        get => !_isCollapsed;
-        set => IsCollapsed = !value;
-    }
+    public bool IsExpanded => !_isCollapsed;
 
-    public double PanelWidth
-    {
-        get => _panelWidth;
-        set => SetProperty(ref _panelWidth, value);
-    }
+    /// <summary>Chevron text that rotates when collapsed.</summary>
+    public string ToggleButtonText => IsCollapsed ? "›" : "‹";
 
     public ObservableCollection<ShapeLibraryItem> FilteredItems
     {
@@ -88,26 +93,22 @@ public class ShapesPanelViewModel : BaseViewModel
     public string SelectedCategoryHeader => SelectedCategory?.Name ?? "Shapes";
 
     public bool IsPlaceholderCategorySelected => SelectedCategory?.IsPlaceholder ?? false;
-
-    public bool IsStandardCategorySelected => !IsPlaceholderCategorySelected;
+    public bool IsStandardCategorySelected    => !IsPlaceholderCategorySelected;
 
     public string PlaceholderMessage => SelectedCategory?.PlaceholderMessage ?? "";
 
+    // ── Commands ──────────────────────────────────────────────────────────────
     public ICommand SelectCategoryCommand { get; }
     public ICommand ToggleCollapseCommand { get; }
+    public ICommand ClearSearchCommand    { get; }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
     private void SelectCategory(ShapeCategory category)
     {
-        if (category != null)
-        {
-            SelectedCategory = category;
-        }
+        if (category != null) SelectedCategory = category;
     }
 
-    private void ToggleCollapse()
-    {
-        IsCollapsed = !IsCollapsed;
-    }
+    private void ToggleCollapse() => IsCollapsed = !IsCollapsed;
 
     private void RefreshFilteredItems()
     {
@@ -119,21 +120,17 @@ public class ShapesPanelViewModel : BaseViewModel
 
         var items = ShapeCategories.GetCategoryItems(SelectedCategory.Id);
 
-        // Apply search query filter if search text is provided
         if (!string.IsNullOrWhiteSpace(SearchText))
         {
             string query = SearchText.Trim().ToLowerInvariant();
-            items = items.Where(i => 
+            items = items.Where(i =>
                 (i.Label != null && i.Label.ToLowerInvariant().Contains(query)) ||
-                (i.Type != null && i.Type.ToLowerInvariant().Contains(query))
+                (i.Type  != null && i.Type.ToLowerInvariant().Contains(query))
             ).ToList();
         }
 
-        // Update the ObservableCollection
         FilteredItems.Clear();
         foreach (var item in items)
-        {
             FilteredItems.Add(item);
-        }
     }
 }

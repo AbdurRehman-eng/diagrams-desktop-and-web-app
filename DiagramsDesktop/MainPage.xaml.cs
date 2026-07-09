@@ -41,4 +41,13 @@ public partial class MainPage : ContentPage
             MainCanvasView?.Invalidate();
         }
     }
+
+    private void OnFillColorTapped(object? sender, TappedEventArgs e)
+    {
+        if (_viewModel.SelectedShape != null && e.Parameter is string colorHex)
+        {
+            _viewModel.SelectedShape.FillColor = colorHex;
+            MainCanvasView?.Invalidate();
+        }
+    }
 }
