@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="DiagramsDesktop.Core/DiagramsDesktop.Core.csproj" />
+  <Project Path="DiagramsDesktop.Tests/DiagramsDesktop.Tests.csproj" />
+  <Project Path="DiagramsDesktop/DiagramsDesktop.csproj" />
+</Solution>

@@ -1,0 +1,23 @@
+# .NET build directories
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+
+# Mono/Android/iOS/Mac temp files
+*.apk
+*.aab
+*.ipa
+*.app
+
+# IDEs
+.vs/
+.vscode/
+.idea/
+
+# SQLite databases
+diagrams.db
+diagrams-test.db
