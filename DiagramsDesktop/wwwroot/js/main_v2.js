@@ -82,8 +82,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── 8.5. History ────────────────────────────────────────────────
   // if (typeof HistoryManager !== 'undefined') HistoryManager.init();
 
-  // ── 8.6. UI Enhancements (M5+ — commented out for M1/M2 baseline) ──────────
-  // if (typeof DropdownController    !== 'undefined') DropdownController.init();
+  // ── 8.6. M1/M2 UI Infrastructure ────────────────────────────────
+  // DropdownController is M1/M2 — it drives the File menu open/close toggle.
+  if (typeof DropdownController !== 'undefined') DropdownController.init();
+
+  // ── 8.7. M5+ UI Enhancements (commented out for M1/M2 baseline) ─
   // if (typeof PropertiesModal       !== 'undefined') PropertiesModal.init();
   // if (typeof ContextMenuController !== 'undefined') ContextMenuController.init();
   // if (typeof ConnectionOptionsMenu !== 'undefined') ConnectionOptionsMenu.init();

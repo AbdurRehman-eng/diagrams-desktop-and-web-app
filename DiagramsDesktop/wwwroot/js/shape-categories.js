@@ -11,11 +11,20 @@
  * Each item carries:
  *   id, type (must match ShapeHierarchyModel.ShapeType), label,
  *   categoryId, svgIcon, parentType (null = canvas root)
+ *
+ * Milestone gating:
+ *   Set ACTIVE_MILESTONE to control which shape categories are visible.
+ *   M1/M2 baseline = 2 (only Basic Shapes)
+ *   M4 cloud work  = 4 (enables AWS, Azure, GCP)
  */
 
 'use strict';
 
 const ShapeCategories = (() => {
+
+  // ── Milestone gate ─────────────────────────────────────────────────────────
+  // Increase this value when unlocking higher-milestone categories.
+  const ACTIVE_MILESTONE = 2; // M1/M2 baseline: only Basic Shapes visible
 
   // ── SVG helpers ────────────────────────────────────────────────────────────
 
@@ -128,6 +137,7 @@ const ShapeCategories = (() => {
       name:         'Basic Shapes',
       icon:         _svgRectangle('#6366f1'),
       displayOrder: 0,
+      milestone:    1,    // M1/M2 core geometry
       isPlaceholder: false,
     },
     {
@@ -135,6 +145,7 @@ const ShapeCategories = (() => {
       name:         'AWS',
       icon:         _svgAwsRegion('#f59e0b'),
       displayOrder: 1,
+      milestone:    4,    // M4: Cloud Shape Library
       isPlaceholder: false,
     },
     {
@@ -142,6 +153,7 @@ const ShapeCategories = (() => {
       name:         'Azure',
       icon:         _placeholderRect('#0ea5e9'),
       displayOrder: 2,
+      milestone:    4,    // M4: Cloud Shape Library (placeholder)
       isPlaceholder: true,
       placeholderMessage: 'Azure shapes — Coming Soon',
     },
@@ -150,6 +162,7 @@ const ShapeCategories = (() => {
       name:         'GCP',
       icon:         _placeholderRect('#10b981'),
       displayOrder: 3,
+      milestone:    4,    // M4: Cloud Shape Library (placeholder)
       isPlaceholder: true,
       placeholderMessage: 'GCP shapes — Coming Soon',
     },
@@ -357,8 +370,16 @@ const ShapeCategories = (() => {
 
   // ── Public API ────────────────────────────────────────────────────────────
 
+  /**
+   * loadShapeCategories
+   * ────────────────────
+   * Returns only the categories whose milestone <= ACTIVE_MILESTONE.
+   * Increase ACTIVE_MILESTONE at the top of this file to unlock cloud categories.
+   */
   function loadShapeCategories() {
-    return [..._categories].sort((a, b) => a.displayOrder - b.displayOrder);
+    return [..._categories]
+      .filter(c => (c.milestone || 1) <= ACTIVE_MILESTONE)
+      .sort((a, b) => a.displayOrder - b.displayOrder);
   }
 
   function getCategoryItems(categoryId) {
