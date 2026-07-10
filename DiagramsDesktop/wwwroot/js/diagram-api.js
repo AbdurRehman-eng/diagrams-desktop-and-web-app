@@ -19,7 +19,15 @@ const DiagramApi = (() => {
         body: JSON.stringify(dto)
       });
 
-      if (!response.ok) throw new Error('Failed to save diagram to DB.');
+      if (!response.ok) {
+        // Try to extract the server's error message from JSON body
+        let serverMsg = `HTTP ${response.status}`;
+        try {
+          const errBody = await response.json();
+          serverMsg = errBody.Message || errBody.message || serverMsg;
+        } catch (_) { /* non-JSON body — keep HTTP status */ }
+        throw new Error(`Save failed: ${serverMsg}`);
+      }
       
       const result = await response.json();
       console.log('[DiagramApi] Save successful:', result);
@@ -27,7 +35,8 @@ const DiagramApi = (() => {
 
     } catch (err) {
       console.error('[DiagramApi] Save error:', err);
-      return null;
+      // Re-throw so callers (promptAndSaveToDb, saveActiveToDb) can surface it
+      throw err;
     }
   }
 
@@ -55,8 +64,8 @@ const DiagramApi = (() => {
       : null;
     if (!payload) { alert('Could not build diagram payload.'); return; }
 
-    const result = await saveDiagram(payload);
-    if (result) {
+    try {
+      const result = await saveDiagram(payload);
       // Sync server-assigned ID/version back into state
       if (result.DiagramID) CanvasState.updateDiagramMeta({ DiagramID: result.DiagramID });
       if (result.Version)   CanvasState.updateDiagramMeta({ DiagramVersion: result.Version });
@@ -64,9 +73,9 @@ const DiagramApi = (() => {
       // Mark diagram as clean after successful save
       if (typeof DirtyTracker !== 'undefined') DirtyTracker.markClean();
 
-      alert(`Diagram "${finalName}" saved successfully.`);
-    } else {
-      alert('Save failed. Please try again.');
+      alert(`Diagram "${finalName}" saved successfully (v${result.Version ?? '?'}).`);
+    } catch (err) {
+      alert(`Save failed: ${err.message}`);
     }
   }
 

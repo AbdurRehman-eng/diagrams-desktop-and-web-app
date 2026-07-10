@@ -31,8 +31,10 @@ const MultiDiagramLoader = (() => {
 
   // ── Init ───────────────────────────────────────────────────────
   function init() {
-    const btnSaveDb = document.getElementById('btn-save-db');
-    if (btnSaveDb) btnSaveDb.addEventListener('click', saveActiveToDb);
+    // NOTE: #btn-save-db is wired in main_v2.js via DiagramApi.promptAndSaveToDb().
+    // DO NOT re-register it here to avoid duplicate concurrent save calls.
+    // const btnSaveDb = document.getElementById('btn-save-db');
+    // if (btnSaveDb) btnSaveDb.addEventListener('click', saveActiveToDb);
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -52,16 +54,16 @@ const MultiDiagramLoader = (() => {
     const payload = (typeof BuildDiagramJson !== 'undefined') ? BuildDiagramJson.buildFlatDto() : null;
     if (!payload) { alert('Could not build diagram payload.'); return; }
 
-    const result = await DiagramApi.saveDiagram(payload);
-    if (result) {
-      alert(`Diagram "${diagram.DiagramName}" saved to database (v${result.DiagramVersion}).`);
+    try {
+      const result = await DiagramApi.saveDiagram(payload);
+      alert(`Diagram "${diagram.DiagramName}" saved to database (v${result.Version ?? result.DiagramVersion ?? '?'}).`);
       // BUG-10 fix: use updateDiagramMeta, NOT updateCanvas, for root-level fields
       CanvasState.updateDiagramMeta({
         DiagramID:      result.DiagramID,
-        DiagramVersion: result.DiagramVersion
+        DiagramVersion: result.Version ?? result.DiagramVersion
       });
-    } else {
-      alert('Failed to save to database. Check the browser console for details.');
+    } catch (err) {
+      alert(`Failed to save to database: ${err.message}`);
     }
   }
 

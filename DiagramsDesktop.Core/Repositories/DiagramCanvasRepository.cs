@@ -102,12 +102,17 @@ namespace DiagramsDesktop.Core.Repositories
                 dto.UpdatedAt = nowStr;
 
                 // 1. Save or Update Diagrams
-                var diagramExists = await connection.ExecuteScalarAsync<int>(
-                    "SELECT COUNT(1) FROM Diagrams WHERE DiagramID = @DiagramID",
-                    new { dto.DiagramID }, transaction) > 0;
+                var currentVersion = await connection.ExecuteScalarAsync<int?>(
+                    "SELECT DiagramVersion FROM Diagrams WHERE DiagramID = @DiagramID",
+                    new { dto.DiagramID }, transaction);
+
+                bool diagramExists = currentVersion.HasValue;
 
                 if (diagramExists)
                 {
+                    // Server owns the version — always auto-increment so clients cannot spoof it
+                    dto.DiagramVersion = currentVersion!.Value + 1;
+
                     var updateDiagramSql = @"
                         UPDATE Diagrams 
                         SET DiagramName = @DiagramName, DiagramVersion = @DiagramVersion, CanvasID = @CanvasID, UpdatedAt = @UpdatedAt 
@@ -117,6 +122,7 @@ namespace DiagramsDesktop.Core.Repositories
                 else
                 {
                     dto.CreatedAt = nowStr;
+                    dto.DiagramVersion = 1; // Server owns the initial version
                     var insertDiagramSql = @"
                         INSERT INTO Diagrams (DiagramID, DiagramName, DiagramVersion, CanvasID, CreatedAt, UpdatedAt, IsDeleted)
                         VALUES (@DiagramID, @DiagramName, @DiagramVersion, @CanvasID, @CreatedAt, @UpdatedAt, 0)";

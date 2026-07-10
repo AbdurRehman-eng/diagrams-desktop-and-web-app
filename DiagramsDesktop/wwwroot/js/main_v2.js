@@ -17,7 +17,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-  console.log('[Main] APPLICATION BOOTSTRAP - Version M2.1');
+  console.log('[Main] APPLICATION BOOTSTRAP - M1/M2 Baseline');
 
   // ── 1. State ────────────────────────────────────────────────────
   if (typeof CanvasState === 'undefined') {
@@ -34,22 +34,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   RenderCanvas.init();
 
   // ── 2.5. Load Hierarchy Constraints & M7 Lookups ────────────────
-  if (typeof HierarchyLoader !== 'undefined') {
-    await HierarchyLoader.load();
-  }
-  // M8: Load device-on-container-edge rules
-  if (typeof EdgeAttachmentRulesLoader !== 'undefined') {
-    await EdgeAttachmentRulesLoader.load();
-  }
-  if (typeof ConnectionTypeLookupCsv !== 'undefined') {
-    await ConnectionTypeLookupCsv.load();
-  }
-  if (typeof ConnectionTypeLookupDb !== 'undefined') {
-    await ConnectionTypeLookupDb.load();
-  }
-  if (typeof GlobalConnectionDefaults !== 'undefined') {
-    await GlobalConnectionDefaults.load();
-  }
+  // if (typeof HierarchyLoader !== 'undefined') {
+  //   await HierarchyLoader.load();
+  // }
+  // // M8: Load device-on-container-edge rules
+  // if (typeof EdgeAttachmentRulesLoader !== 'undefined') {
+  //   await EdgeAttachmentRulesLoader.load();
+  // }
+  // if (typeof ConnectionTypeLookupCsv !== 'undefined') {
+  //   await ConnectionTypeLookupCsv.load();
+  // }
+  // if (typeof ConnectionTypeLookupDb !== 'undefined') {
+  //   await ConnectionTypeLookupDb.load();
+  // }
+  // if (typeof GlobalConnectionDefaults !== 'undefined') {
+  //   await GlobalConnectionDefaults.load();
+  // }
 
   // ── 3. Shapes Panel (BUG-02 fix — was never called from here) ───
   if (typeof RenderShapesPanel !== 'undefined') {
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof InputController !== 'undefined') InputController.init();
 
   // ── 4.5. Hover detection (M5) ───────────────────────────────────
-  if (typeof HoverManager !== 'undefined') HoverManager.init();
+  // if (typeof HoverManager !== 'undefined') HoverManager.init();
 
   // ── 5. Drop handler ─────────────────────────────────────────────
   if (typeof DropHandler !== 'undefined') DropHandler.init();
@@ -73,31 +73,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof MultiDiagramLoader !== 'undefined') MultiDiagramLoader.init();
 
   // ── 7. Diagnostics ──────────────────────────────────────────────
-  const debugPanel = document.getElementById('debug-panel');
-  if (debugPanel) debugPanel.classList.remove('hidden');
+  // const debugPanel = document.getElementById('debug-panel');
+  // if (debugPanel) debugPanel.classList.remove('hidden');
 
   // ── 8. Resize ───────────────────────────────────────────────────
   window.addEventListener('resize', () => RenderCanvas.render());
 
   // ── 8.5. History ────────────────────────────────────────────────
-  if (typeof HistoryManager !== 'undefined') HistoryManager.init();
+  // if (typeof HistoryManager !== 'undefined') HistoryManager.init();
 
-  // ── 8.6. UI Enhancements ────────────────────────────────────────
-  if (typeof DropdownController    !== 'undefined') DropdownController.init();
-  if (typeof PropertiesModal       !== 'undefined') PropertiesModal.init();
-  if (typeof ContextMenuController !== 'undefined') ContextMenuController.init();
-  if (typeof ConnectionOptionsMenu !== 'undefined') ConnectionOptionsMenu.init();
-  if (typeof DirtyTracker          !== 'undefined') DirtyTracker.init();
+  // ── 8.6. UI Enhancements (M5+ — commented out for M1/M2 baseline) ──────────
+  // if (typeof DropdownController    !== 'undefined') DropdownController.init();
+  // if (typeof PropertiesModal       !== 'undefined') PropertiesModal.init();
+  // if (typeof ContextMenuController !== 'undefined') ContextMenuController.init();
+  // if (typeof ConnectionOptionsMenu !== 'undefined') ConnectionOptionsMenu.init();
+  // if (typeof DirtyTracker          !== 'undefined') DirtyTracker.init();
 
   // ── 9. Toolbar ──────────────────────────────────────────────────
   _setupToolbarV2();
 
-  // \u2500\u2500 M9: Auto-build demo diagram if canvas is empty \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-  if (typeof DemoDiagramBuilder !== 'undefined') {
-    DemoDiagramBuilder.build();
-  }
+  // ── M9: Auto-build demo diagram (commented out for M1/M2 baseline) ──────────
+  // if (typeof DemoDiagramBuilder !== 'undefined') { DemoDiagramBuilder.build(); }
 
-  console.log('[Main] Application Ready - M9.1');
+  console.log('[Main] Application Ready - M1/M2 Baseline');
 });
 
 function _setupToolbarV2() {
@@ -105,14 +103,13 @@ function _setupToolbarV2() {
   const btnsZoomIn  = [document.getElementById('ctrl-zoom-in'),  document.getElementById('btn-zoom-in')];
   const btnsZoomOut = [document.getElementById('ctrl-zoom-out'), document.getElementById('btn-zoom-out')];
 
-  btnsZoomIn.forEach(btn => { if(btn) btn.onclick = () => ZoomHandler.zoomByDelta(1); });
+  btnsZoomIn.forEach(btn  => { if(btn) btn.onclick = () => ZoomHandler.zoomByDelta(1); });
   btnsZoomOut.forEach(btn => { if(btn) btn.onclick = () => ZoomHandler.zoomByDelta(-1); });
 
   // 2. View/File Commands
-  const btnFitView      = document.getElementById('ctrl-fit-view');
-  const btnNew          = document.getElementById('btn-new');
-  const btnOpenMulti    = document.getElementById('btn-open-multi-json');
-  const btnListDb       = document.getElementById('btn-list-db');
+  const btnFitView   = document.getElementById('ctrl-fit-view');
+  const btnNew       = document.getElementById('btn-new');
+  const btnListDb    = document.getElementById('btn-list-db');
 
   if (btnFitView) {
     btnFitView.onclick = () => {
@@ -130,52 +127,39 @@ function _setupToolbarV2() {
       if (confirm('Clear the current diagram? Unsaved changes will be lost.')) {
         CanvasState.clearShapes();
         CanvasState.updateCanvas({ ViewportCenterX: 0, ViewportCenterY: 0, ZoomScale: 1.0 });
-        if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
-        if (typeof DirtyTracker   !== 'undefined') DirtyTracker.markDirty();
+        // if (typeof HistoryManager !== 'undefined') HistoryManager.recordState(); // M3+
         RenderCanvas.render();
       }
     };
   }
 
-  // 3. Tool Selection (Select vs Connect)
-  const btnSelect  = document.getElementById('btn-select');
-  const btnConnect = document.getElementById('btn-connect');
-
-  const updateToolUI = (activeTool) => {
-    if (btnSelect)  btnSelect.classList.toggle('toolbar-btn--active', activeTool === 'select');
-    if (btnConnect) btnConnect.classList.toggle('toolbar-btn--active', activeTool === 'connect');
-  };
+  // 3. Tool Selection (Select only — Connect is M7+)
+  const btnSelect = document.getElementById('btn-select');
+  // const btnConnect = document.getElementById('btn-connect'); // M7+
 
   if (btnSelect) {
     btnSelect.onclick = () => {
       InputController.setTool('select');
-      updateToolUI('select');
+      if (btnSelect) btnSelect.classList.add('toolbar-btn--active');
     };
+    btnSelect.classList.add('toolbar-btn--active'); // default active state
   }
 
-  if (btnConnect) {
-    btnConnect.onclick = () => {
-      InputController.setTool('connect');
-      updateToolUI('connect');
-    };
-  }
+  // 4. Undo/Redo (M3+ — commented out for M1/M2 baseline)
+  // const btnUndo = document.getElementById('btn-undo');
+  // const btnRedo = document.getElementById('btn-redo');
+  // if (btnUndo) btnUndo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.undo(); };
+  // if (btnRedo) btnRedo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.redo(); };
 
-  // 4. Undo/Redo (Milestone Placeholders Removed, History Engine Bound)
-  const btnUndo = document.getElementById('btn-undo');
-  const btnRedo = document.getElementById('btn-redo');
-  
-  if (btnUndo) btnUndo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.undo(); };
-  if (btnRedo) btnRedo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.redo(); };
-
-  // 5. Save to DB — prompt for name before saving (Fix 3)
+  // 5. Save to DB — prompt for name before saving
   const btnSaveDb = document.getElementById('btn-save-db');
   if (btnSaveDb && typeof DiagramApi !== 'undefined') {
     btnSaveDb.onclick = () => DiagramApi.promptAndSaveToDb();
   }
 
-  // 6. Properties Modal
-  const btnGlobalVars = document.getElementById('btn-global-vars');
-  if (btnGlobalVars && typeof PropertiesModal !== 'undefined') {
-    btnGlobalVars.onclick = () => PropertiesModal.openForCanvas();
-  }
+  // 6. Properties Modal (M5+ — commented out for M1/M2 baseline)
+  // const btnGlobalVars = document.getElementById('btn-global-vars');
+  // if (btnGlobalVars && typeof PropertiesModal !== 'undefined') {
+  //   btnGlobalVars.onclick = () => PropertiesModal.openForCanvas();
+  // }
 }

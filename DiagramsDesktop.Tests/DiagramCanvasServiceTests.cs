@@ -150,7 +150,8 @@ namespace DiagramsDesktop.Tests
             Assert.NotNull(loaded);
             Assert.Equal(diagramId, loaded.DiagramID);
             Assert.Equal("Integration Test Diagram", loaded.DiagramName);
-            Assert.Equal(2, loaded.DiagramVersion);
+            // Server owns DiagramVersion: first save is always v1, regardless of client-supplied value
+            Assert.Equal(1, loaded.DiagramVersion);
             Assert.Equal(canvasId, loaded.CanvasID);
             Assert.Equal("Test Canvas", loaded.CanvasName);
             Assert.Equal("#121212", loaded.BackgroundColor);
