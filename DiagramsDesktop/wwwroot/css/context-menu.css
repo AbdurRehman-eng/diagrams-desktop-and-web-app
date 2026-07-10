@@ -1,0 +1,55 @@
+/**
+ * context-menu.css
+ * ================
+ */
+
+#app-context-menu {
+  position: absolute;
+  z-index: 10000;
+  background-color: #121827;
+  border: 1px solid #2a3146;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  min-width: 180px;
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#app-context-menu.hidden {
+  display: none;
+}
+
+.context-menu-item {
+  padding: 8px 16px;
+  color: #cbd5e1;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.context-menu-item:hover {
+  background-color: #1e2433;
+  color: #f8fafc;
+}
+
+.context-menu-item svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* Danger variant — used for Delete Shape */
+.context-menu-item--danger {
+  color: #f87171;
+}
+
+.context-menu-item--danger:hover {
+  background-color: #3b1f1f;
+  color: #fca5a5;
+}

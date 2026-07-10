@@ -1,0 +1,9 @@
+﻿Child,Parent
+AWS Region,Null
+AWS VPC,AWS Region
+AWS Availability Zone,AWS VPC
+AWS Route table,AWS Availability Zone OR AWS VPC
+AWS EC2,AWS Subnet
+AWS Subnet,AWS Availability Zone
+AWS NAT Gateway,AWS Availability Zone OR AWS VPC
+AWS Lambda,AWS Subnet

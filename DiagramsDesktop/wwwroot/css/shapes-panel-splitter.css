@@ -1,0 +1,64 @@
+/* =========================================================
+   shapes-panel-splitter.css
+   Responsibility: ShapesPanelSplitter visual states —
+   default, hover, active drag, and disabled.
+   The splitter is the draggable divider between the
+   ShapeCategoryList and ShapeLibraryItemsContainer.
+   Phase Coverage: 1.3
+   ========================================================= */
+
+#ShapesPanelSplitter {
+  height: var(--splitter-height);
+  background: var(--color-border);
+  cursor: row-resize;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--t-fast);
+  user-select: none;
+  z-index: 10;
+}
+
+/* ── Grip Handle ─────────────────────────────────────────── */
+#ShapesPanelSplitter::after {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 2px;
+  background: var(--color-border-light);
+  border-radius: 2px;
+  transition:
+    background   var(--t-fast),
+    width        var(--t-fast),
+    box-shadow   var(--t-fast);
+}
+
+/* ── Hover State ─────────────────────────────────────────── */
+#ShapesPanelSplitter:hover {
+  background: var(--color-border-light);
+}
+
+#ShapesPanelSplitter:hover::after {
+  background: var(--color-accent-light);
+  width: 36px;
+}
+
+/* ── Active Drag State ───────────────────────────────────── */
+#ShapesPanelSplitter.dragging {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+#ShapesPanelSplitter.dragging::after {
+  background: var(--color-accent);
+  width: 44px;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+/* ── Disabled State ──────────────────────────────────────── */
+#ShapesPanelSplitter.disabled {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.3;
+}

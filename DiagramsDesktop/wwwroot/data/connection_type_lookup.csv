@@ -1,0 +1,7 @@
+SourceDeviceType,DestinationDeviceType,PossibleConnections,Maximum number of connections
+Rectangle,Rectangle,One line OR Two lines OR Three lines OR Four lines,1
+Rectangle,Circle,One line OR Two lines OR Three lines OR Four lines,1
+AWS VPC,AWS VPC,IPsec tunnel OR VPC Peer link,1
+AWS Subnet,AWS Route table,No choices. Solid black line,1
+AWS Route table,AWS Internet Gateway,No choices. Solid black line,1
+AWS Route table,AWS NAT gateway,No choices. Solid black line,1

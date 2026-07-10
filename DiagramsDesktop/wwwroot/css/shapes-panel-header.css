@@ -1,0 +1,81 @@
+/* =========================================================
+   shapes-panel-header.css
+   Responsibility: ShapesPanelHeader layout — title text
+   and the open/close toggle button visual states.
+   Phase Coverage: 1.1
+   ========================================================= */
+
+#ShapesPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 14px;
+  height: var(--panel-header-height);
+  background: linear-gradient(180deg, #1a1f2e 0%, #13161f 100%);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-inset);
+}
+
+/* ── Panel Title ─────────────────────────────────────────── */
+#ShapesPanelTitle {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity var(--t-normal);
+  user-select: none;
+}
+
+/* Title hides when panel collapses */
+#ShapesPanel.collapsed #ShapesPanelTitle {
+  opacity: 0;
+  width: 0;
+}
+
+/* ── Toggle Button ───────────────────────────────────────── */
+#ShapesPanelToggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast), box-shadow var(--t-fast);
+  outline: none;
+}
+
+#ShapesPanelToggleButton:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-light);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+#ShapesPanelToggleButton:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-glow-md);
+}
+
+/* Arrow icon rotates when collapsed */
+.toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--t-slow);
+  will-change: transform;
+}
+
+/* When collapsed, point arrow to the right (→) */
+#ShapesPanel.collapsed .toggle-icon {
+  transform: rotate(180deg);
+}

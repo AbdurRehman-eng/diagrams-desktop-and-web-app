@@ -1,0 +1,93 @@
+/**
+ * dropdowns.css
+ * =============
+ * Styles for the File / Edit menus in the top toolbar.
+ */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.dropdown-btn {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.dropdown-btn:hover, .dropdown.open .dropdown-btn {
+  background: #1e2433;
+  color: #f8fafc;
+}
+
+.dropdown-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: transform 0.2s;
+}
+
+.dropdown.open .dropdown-btn svg {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background-color: #121827;
+  min-width: 200px;
+  border: 1px solid #2a3146;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  padding: 8px 0;
+}
+
+.dropdown.open .dropdown-menu {
+  display: block;
+  animation: fadeInDown 0.15s ease-out forwards;
+}
+
+.dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  color: #cbd5e1;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dropdown-item:hover {
+  background-color: #1e2433;
+  color: #f8fafc;
+}
+
+.dropdown-item .shortcut {
+  font-size: 11px;
+  background: #1e2433;
+  padding: 2px 6px;
+  border-radius: 12px;
+  color: #64748b;
+  border: 1px solid #2a3146;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

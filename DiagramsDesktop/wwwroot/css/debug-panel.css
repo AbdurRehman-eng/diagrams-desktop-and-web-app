@@ -1,0 +1,48 @@
+/**
+ * debug-panel.css
+ * ===============
+ * Styling for the overlay diagnostic panel.
+ */
+
+#debug-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(15, 23, 42, 0.85); /* Dark blue slate */
+  backdrop-filter: blur(4px);
+  color: #f1f5f9;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 11px;
+  pointer-events: none;
+  z-index: 100;
+  width: 220px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debug-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.debug-label {
+  color: #94a3b8;
+  margin-right: 8px;
+}
+
+.debug-value {
+  font-weight: bold;
+  color: #38bdf8; /* Cyan */
+}
+
+.debug-title {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 4px;
+  color: #ffffff;
+}

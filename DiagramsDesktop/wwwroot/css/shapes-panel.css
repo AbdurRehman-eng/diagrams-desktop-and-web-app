@@ -1,0 +1,419 @@
+/* =========================================================
+   shapes-panel.css
+   Responsibility: Design system tokens, app-level layout,
+   ShapesPanel shell dimensions and positioning, DiagramCanvas,
+   toolbar, status bar, and shared utility classes.
+   Phase Coverage: 1.1
+   ========================================================= */
+
+/* ── Design Tokens ──────────────────────────────────────── */
+:root {
+  /* Background palette */
+  --color-bg-app:         #0c0e14;
+  --color-bg-panel:       #13161f;
+  --color-bg-panel-alt:   #181c28;
+  --color-bg-canvas:      #0d1017;
+
+  /* Surface layers */
+  --color-surface:        #1a1f2e;
+  --color-surface-hover:  #1f2538;
+  --color-surface-active: #252d45;
+
+  /* Borders */
+  --color-border:         #242a3e;
+  --color-border-light:   #2e3650;
+  --color-border-focus:   #4f5a80;
+
+  /* Accent — indigo/violet */
+  --color-accent:         #6366f1;
+  --color-accent-light:   #818cf8;
+  --color-accent-dim:     #4f52c5;
+  --color-accent-glow:    rgba(99, 102, 241, 0.12);
+  --color-accent-glow-md: rgba(99, 102, 241, 0.22);
+
+  /* Text */
+  --color-text-primary:   #e2e8f0;
+  --color-text-secondary: #8b96b0;
+  --color-text-muted:     #4e5872;
+  --color-text-accent:    #a5b4fc;
+
+  /* Semantic */
+  --color-success:        #10b981;
+  --color-warning:        #f59e0b;
+  --color-danger:         #ef4444;
+  --color-info:           #06b6d4;
+
+  /* Shape category icon colors */
+  --color-cat-servers:    #6366f1;
+  --color-cat-blocks:     #f59e0b;
+  --color-cat-computers:  #06b6d4;
+  --color-cat-connectors: #10b981;
+  --color-cat-network:    #a78bfa;
+  --color-cat-security:   #ef4444;
+
+  /* Dimensions */
+  --panel-width:              264px;
+  --panel-collapsed-width:    38px;
+  --toolbar-height:           46px;
+  --statusbar-height:         26px;
+  --panel-header-height:      42px;
+  --search-wrapper-height:    46px;
+  --splitter-height:          6px;
+
+  /* Radii */
+  --radius-xs:  3px;
+  --radius-sm:  5px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+
+  /* Transitions */
+  --t-fast:   120ms ease;
+  --t-normal: 220ms ease;
+  --t-slow:   340ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Shadows — Disabled for Flat/Frameless look */
+  --shadow-sm:     none;
+  --shadow-md:     none;
+  --shadow-lg:     none;
+  --shadow-accent: none;
+  --shadow-inset:  none;
+}
+
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── App Root ───────────────────────────────────────────── */
+#app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* app-toolbar moved to base.css for M2 */
+
+.toolbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 170px;
+}
+
+.brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.4px;
+}
+
+.brand-badge {
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--color-accent-glow-md);
+  color: var(--color-accent-light);
+  border: 1px solid rgba(99,102,241,0.3);
+  padding: 1px 6px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.toolbar-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border);
+  margin: 0 4px;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 5px;
+  min-width: 170px;
+  justify-content: flex-end;
+}
+
+.toolbar-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 5px 13px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.toolbar-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-light);
+}
+
+.toolbar-btn:active {
+  background: var(--color-surface-active);
+}
+
+.toolbar-btn--active {
+  background: var(--color-accent-glow-md);
+  color: var(--color-accent-light);
+  border-color: rgba(99,102,241,0.35);
+}
+
+.toolbar-btn--primary {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dim) 100%);
+  border-color: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+}
+
+.toolbar-btn--primary:hover {
+  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%);
+  border-color: var(--color-accent-light);
+  box-shadow: 0 2px 12px rgba(99,102,241,0.5);
+}
+
+/* ── Main Workspace ─────────────────────────────────────── */
+#app-workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+
+/* ── Panel Mount ────────────────────────────────────────── */
+#shapes-panel-mount {
+  flex-shrink: 0;
+  display: flex;
+  height: 100%;
+  position: relative;
+}
+
+/* ── ShapesPanel Core ───────────────────────────────────── */
+#ShapesPanel {
+  width: var(--panel-width);
+  height: 100%;
+  background: var(--color-bg-panel);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width var(--t-slow);
+  position: relative;
+  flex-shrink: 0;
+  user-select: none;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.25);
+}
+
+#ShapesPanel.collapsed {
+  width: var(--panel-collapsed-width);
+}
+
+#ShapesPanel.collapsed .panel-body {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* ── Panel Body ─────────────────────────────────────────── */
+.panel-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  transition: opacity var(--t-fast), visibility var(--t-fast);
+}
+
+/* ── DiagramCanvas ──────────────────────────────────────── */
+#MainCanvasViewport {
+  flex: 1;
+  background-color: var(--color-bg-canvas);
+  background-image:
+    radial-gradient(circle at 1px 1px, #1c2133 1px, transparent 0);
+  background-size: 24px 24px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#canvas-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  pointer-events: none;
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#canvas-empty-state h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.3px;
+}
+
+#canvas-empty-state p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  max-width: 260px;
+  line-height: 1.6;
+}
+
+.canvas-hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  background: var(--color-surface);
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  letter-spacing: 0.3px;
+}
+
+/* ── Canvas Drop Indicator (shown during drag) ──────────── */
+#canvas-drop-indicator {
+  position: absolute;
+  inset: 16px;
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-glow);
+  pointer-events: none;
+  animation: dropPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes dropPulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1;   }
+}
+
+/* ── Drag Ghost ─────────────────────────────────────────── */
+#drag-preview-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+}
+
+/* ── Status Bar ─────────────────────────────────────────── */
+#app-status-bar {
+  height: var(--statusbar-height);
+  background: var(--color-bg-panel);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+#status-active-category {
+  color: var(--color-accent-light);
+  font-weight: 500;
+}
+
+#status-canvas-info {
+  margin-left: auto;
+  font-size: 10px;
+}
+
+/* ── Utilities ──────────────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* Placed canvas items */
+.placed-canvas-item {
+  transition: transform 0.1s ease;
+}
+
+.placed-canvas-item:hover {
+  /* Flat/Frameless: No shadow */
+}
+
+/* ── Sharp Corner Lockdown ──────────────────────────────── */
+rect {
+  rx: 0 !important;
+  ry: 0 !important;
+}
+
+/* ── M4: Coming Soon placeholder category style ─────────── */
+.ShapeCategoryItem--placeholder {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.ShapeCategoryItem--placeholder .category-name {
+  font-style: italic;
+}
+
+.category-soon-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: #1e2433;
+  color: #64748b;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: auto;
+}
+
+/* ── M4: Drop error toast ───────────────────────────────── */
+.drop-error-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e1322;
+  border: 1px solid #f43f5e;
+  color: #fda4af;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  z-index: 99999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+  max-width: 480px;
+  text-align: center;
+  animation: toast-in 0.2s ease;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
