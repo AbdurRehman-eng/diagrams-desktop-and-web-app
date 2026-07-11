@@ -13,7 +13,12 @@
  * No DOM access — pure logic module.
  *
  * API:
- *   validate(itemDef, worldX, worldY) → { ok: bool, reason: string|null }
+ *   validate(itemDef, worldX, worldY, excludeShapeId?, childDims?) → { ok: bool, reason: string|null }
+ *
+ *   childDims (optional): { childWidth, childHeight }
+ *     When supplied, the check upgrades from a center-point test to a full
+ *     bounding-box containment test — the child's entire rectangle must fit
+ *     inside the parent. Used by the move validator in drag-handler_v2.js.
  */
 
 'use strict';
@@ -23,12 +28,14 @@ const ParentDropValidator = (() => {
   /**
    * validate
    * ─────────
-   * @param {object} itemDef   - Shape item definition from ShapeCategories
-   * @param {number} worldX    - Drop X in World Space
-   * @param {number} worldY    - Drop Y in World Space
+   * @param {object}  itemDef      - Shape item definition from ShapeCategories
+   * @param {number}  worldX       - Center X in World Space
+   * @param {number}  worldY       - Center Y in World Space
+   * @param {string}  [excludeShapeId] - ShapeID to ignore (self-exclusion during moves)
+   * @param {object}  [childDims]  - { childWidth, childHeight } for bounding-box check
    * @returns {{ ok: boolean, reason: string|null }}
    */
-  function validate(itemDef, worldX, worldY, excludeShapeId = null) {
+  function validate(itemDef, worldX, worldY, excludeShapeId = null, childDims = null) {
     if (!itemDef) return { ok: false, reason: 'Unknown shape type.' };
 
     // Placeholder shapes cannot be dropped
@@ -56,10 +63,16 @@ const ParentDropValidator = (() => {
     }
     const requiredTypes = Array.isArray(parentType) ? parentType : [parentType];
 
-    // Find ALL shapes containing the drop point, sorted by area (smallest first)
-    // Smallest area = innermost shape
+    // Find ALL shapes containing the drop point/box, sorted by area (smallest first)
+    // Smallest area = innermost shape.
+    // When childDims are supplied use the strict bounding-box test so that a
+    // shape whose CENTER is inside but whose EDGES bleed outside is rejected.
+    const _containsChild = childDims
+      ? (s) => _boxFullyInsideShape(worldX, worldY, childDims.childWidth / 2, childDims.childHeight / 2, s)
+      : (s) => _pointInsideShape(worldX, worldY, s);
+
     const overlapping = shapes
-      .filter(s => _pointInsideShape(worldX, worldY, s))
+      .filter(_containsChild)
       .sort((a, b) => (a.Width * a.Height) - (b.Width * b.Height));
 
     if (overlapping.length === 0) {
@@ -107,8 +120,9 @@ const ParentDropValidator = (() => {
   }
 
   /**
-   * Axis-aligned bounding-box containment test (World Space).
-   * Works for both rectangles and circle/ellipse shapes via bounding box.
+   * _pointInsideShape
+   * Center-point containment test (World Space, AABB).
+   * Used for initial drop placement where only a point is known.
    */
   function _pointInsideShape(wx, wy, shape) {
     const hw = shape.Width  / 2;
@@ -116,6 +130,29 @@ const ParentDropValidator = (() => {
     return (
       wx >= shape.WorldX - hw && wx <= shape.WorldX + hw &&
       wy >= shape.WorldY - hh && wy <= shape.WorldY + hh
+    );
+  }
+
+  /**
+   * _boxFullyInsideShape
+   * Strict bounding-box containment test (World Space, AABB).
+   * ALL four edges of the child must lie within the parent's bounding box.
+   * Used for move/resize validation where we know the child's dimensions.
+   *
+   * @param {number} cx     - Child center X
+   * @param {number} cy     - Child center Y
+   * @param {number} chw    - Child half-width
+   * @param {number} chh    - Child half-height
+   * @param {object} parent - Parent shape (WorldX, WorldY, Width, Height)
+   */
+  function _boxFullyInsideShape(cx, cy, chw, chh, parent) {
+    const phw = parent.Width  / 2;
+    const phh = parent.Height / 2;
+    return (
+      cx - chw >= parent.WorldX - phw &&
+      cx + chw <= parent.WorldX + phw &&
+      cy - chh >= parent.WorldY - phh &&
+      cy + chh <= parent.WorldY + phh
     );
   }
 

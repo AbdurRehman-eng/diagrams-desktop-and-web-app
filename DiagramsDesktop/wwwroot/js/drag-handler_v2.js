@@ -99,9 +99,14 @@ const DragHandler = (() => {
       let newY = _shapeSnapshot.WorldY + dy;
 
       // ── M9: Live containment clamp for children ─────────────────────────
-      if (_shapeSnapshot.ParentContainerID && typeof ContainmentEngine !== 'undefined') {
-        const allShapes   = CanvasState.getShapes();
-        const parentShape = ContainmentEngine.getParentShape(_shapeSnapshot, allShapes);
+      // Use live-state parent lookup (not snapshot) so shapes re-linked on a
+      // previous drop are clamped correctly from the very first move tick.
+      if (typeof ContainmentEngine !== 'undefined') {
+        const allShapesNow = CanvasState.getShapes();
+        const liveShape    = allShapesNow.find(s => s.ShapeID === _draggedShapeId);
+        const parentShape  = liveShape?.ParentContainerID
+          ? allShapesNow.find(s => s.ShapeID === liveShape.ParentContainerID)
+          : null;
         if (parentShape) {
           const geom     = (_shapeSnapshot.GeometryType || _shapeSnapshot.Type || '').toLowerCase();
           const isCircle = geom === 'circle' || geom === 'ellipse';
@@ -201,11 +206,16 @@ const DragHandler = (() => {
         // ── M9: Live clamp child resize to parent inner boundaries ──────────
         // If this shape is a child (has a parent), prevent it from growing
         // outside the parent's inner boundaries during resize.
-        if (_shapeSnapshot.ParentContainerID && typeof DeriveParentInnerBoundaries !== 'undefined') {
-          const allShapes   = CanvasState.getShapes();
-          const parentShape = allShapes.find(s => s.ShapeID === _shapeSnapshot.ParentContainerID);
-          if (parentShape) {
-            const bounds  = DeriveParentInnerBoundaries.fromShape(parentShape);
+        // Use live-state parent lookup so newly-linked shapes are clamped
+        // correctly without requiring a full drag-start cycle.
+        if (typeof DeriveParentInnerBoundaries !== 'undefined') {
+          const allShapesNow2 = CanvasState.getShapes();
+          const liveShape2    = allShapesNow2.find(s => s.ShapeID === _draggedShapeId);
+          const parentShape2  = liveShape2?.ParentContainerID
+            ? allShapesNow2.find(s => s.ShapeID === liveShape2.ParentContainerID)
+            : null;
+          if (parentShape2) {
+            const bounds  = DeriveParentInnerBoundaries.fromShape(parentShape2);
             const EPSILON = 1;
 
             const pLeft   = bounds.ParentInnerLeftX   + EPSILON;
@@ -214,10 +224,10 @@ const DragHandler = (() => {
             const pBottom = bounds.ParentInnerBottomY + EPSILON;
 
             // Clamp only the edges that are actively being dragged
-            if (_activeHandle.includes('w') && left < pLeft)     left   = pLeft;
-            if (_activeHandle.includes('e') && right > pRight)   right  = pRight;
+            if (_activeHandle.includes('w') && left   < pLeft)   left   = pLeft;
+            if (_activeHandle.includes('e') && right  > pRight)  right  = pRight;
             if (_activeHandle.includes('s') && bottom < pBottom) bottom = pBottom;
-            if (_activeHandle.includes('n') && top > pTop)       top    = pTop;
+            if (_activeHandle.includes('n') && top    > pTop)    top    = pTop;
 
             // Re-apply minimum size in case clamping crushed the shape
             if (right - left < 10) {
@@ -316,7 +326,15 @@ const DragHandler = (() => {
         if (_activeHandle === 'move' && typeof ParentDropValidator !== 'undefined' && typeof ShapeCategories !== 'undefined') {
           const itemDef = ShapeCategories.getItemByType(finalShape.Type);
           if (itemDef) {
-            const result = ParentDropValidator.validate(itemDef, finalShape.WorldX, finalShape.WorldY, finalShape.ShapeID);
+            // Pass child dimensions for strict bounding-box containment check.
+            // This rejects shapes whose CENTER is inside the parent but whose
+            // EDGES bleed outside (e.g. a large VPC partially outside a Region).
+            const result = ParentDropValidator.validate(
+              itemDef,
+              finalShape.WorldX, finalShape.WorldY,
+              finalShape.ShapeID,
+              { childWidth: finalShape.Width, childHeight: finalShape.Height }
+            );
             if (!result.ok) {
               console.warn('[DragHandler] M4 Parent hierarchy violated — snapping back:', result.reason);
               if (typeof DropHandler !== 'undefined' && DropHandler.showError) {
