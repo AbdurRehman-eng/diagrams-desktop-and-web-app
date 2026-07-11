@@ -86,6 +86,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // DropdownController is M1/M2 — it drives the File menu open/close toggle.
   if (typeof DropdownController !== 'undefined') DropdownController.init();
 
+  // Initialize theme controller
+  if (typeof ThemeController !== 'undefined') ThemeController.init();
+
   // ── 8.7. M5+ UI Enhancements (commented out for M1/M2 baseline) ─
   // if (typeof PropertiesModal       !== 'undefined') PropertiesModal.init();
   // if (typeof ContextMenuController !== 'undefined') ContextMenuController.init();
@@ -158,6 +161,12 @@ function _setupToolbarV2() {
   const btnSaveDb = document.getElementById('btn-save-db');
   if (btnSaveDb && typeof DiagramApi !== 'undefined') {
     btnSaveDb.onclick = () => DiagramApi.promptAndSaveToDb();
+  }
+
+  // Theme Toggle Button
+  const btnThemeToggle = document.getElementById('btn-theme-toggle');
+  if (btnThemeToggle && typeof ThemeController !== 'undefined') {
+    btnThemeToggle.onclick = () => ThemeController.toggle();
   }
 
   // 6. Properties Modal (M5+ — commented out for M1/M2 baseline)
