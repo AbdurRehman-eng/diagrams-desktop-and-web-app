@@ -286,10 +286,10 @@ rect {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: #1e2433;
-  color: #64748b;
-  border: 1px solid #334155;
-  border-radius: 4px;
+  background: var(--color-bg-panel-alt);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
   padding: 1px 5px;
   margin-left: auto;
 }

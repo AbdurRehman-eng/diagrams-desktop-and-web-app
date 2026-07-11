@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   RenderCanvas.init();
 
   // ── 2.5. Load Hierarchy Constraints & M7 Lookups ────────────────
-  // if (typeof HierarchyLoader !== 'undefined') {
-  //   await HierarchyLoader.load();
-  // }
+  if (typeof HierarchyLoader !== 'undefined') {
+    await HierarchyLoader.load();
+  }
   // // M8: Load device-on-container-edge rules
   // if (typeof EdgeAttachmentRulesLoader !== 'undefined') {
   //   await EdgeAttachmentRulesLoader.load();
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('resize', () => RenderCanvas.render());
 
   // ── 8.5. History ────────────────────────────────────────────────
-  // if (typeof HistoryManager !== 'undefined') HistoryManager.init();
+  if (typeof HistoryManager !== 'undefined') HistoryManager.init();
 
   // ── 8.6. M1/M2 UI Infrastructure ────────────────────────────────
   // DropdownController is M1/M2 — it drives the File menu open/close toggle.
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof ThemeController !== 'undefined') ThemeController.init();
 
   // ── 8.7. M5+ UI Enhancements (commented out for M1/M2 baseline) ─
-  // if (typeof PropertiesModal       !== 'undefined') PropertiesModal.init();
+  if (typeof PropertiesModal       !== 'undefined') PropertiesModal.init();
   // if (typeof ContextMenuController !== 'undefined') ContextMenuController.init();
   // if (typeof ConnectionOptionsMenu !== 'undefined') ConnectionOptionsMenu.init();
   // if (typeof DirtyTracker          !== 'undefined') DirtyTracker.init();
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── M9: Auto-build demo diagram (commented out for M1/M2 baseline) ──────────
   // if (typeof DemoDiagramBuilder !== 'undefined') { DemoDiagramBuilder.build(); }
 
-  console.log('[Main] Application Ready - M1/M2 Baseline');
+  console.log('[Main] Application Ready - Milestones 3 & 4 Active');
 });
 
 function _setupToolbarV2() {
@@ -133,7 +133,7 @@ function _setupToolbarV2() {
       if (confirm('Clear the current diagram? Unsaved changes will be lost.')) {
         CanvasState.clearShapes();
         CanvasState.updateCanvas({ ViewportCenterX: 0, ViewportCenterY: 0, ZoomScale: 1.0 });
-        // if (typeof HistoryManager !== 'undefined') HistoryManager.recordState(); // M3+
+        if (typeof HistoryManager !== 'undefined') HistoryManager.recordState(); // M3+
         RenderCanvas.render();
       }
     };
@@ -151,11 +151,11 @@ function _setupToolbarV2() {
     btnSelect.classList.add('toolbar-btn--active'); // default active state
   }
 
-  // 4. Undo/Redo (M3+ — commented out for M1/M2 baseline)
-  // const btnUndo = document.getElementById('btn-undo');
-  // const btnRedo = document.getElementById('btn-redo');
-  // if (btnUndo) btnUndo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.undo(); };
-  // if (btnRedo) btnRedo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.redo(); };
+  // 4. Undo/Redo (M3+)
+  const btnUndo = document.getElementById('btn-undo');
+  const btnRedo = document.getElementById('btn-redo');
+  if (btnUndo) btnUndo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.undo(); };
+  if (btnRedo) btnRedo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.redo(); };
 
   // 5. Save to DB — prompt for name before saving
   const btnSaveDb = document.getElementById('btn-save-db');
@@ -169,9 +169,9 @@ function _setupToolbarV2() {
     btnThemeToggle.onclick = () => ThemeController.toggle();
   }
 
-  // 6. Properties Modal (M5+ — commented out for M1/M2 baseline)
-  // const btnGlobalVars = document.getElementById('btn-global-vars');
-  // if (btnGlobalVars && typeof PropertiesModal !== 'undefined') {
-  //   btnGlobalVars.onclick = () => PropertiesModal.openForCanvas();
-  // }
+  // 6. Properties Modal (M5+)
+  const btnGlobalVars = document.getElementById('btn-global-vars');
+  if (btnGlobalVars && typeof PropertiesModal !== 'undefined') {
+    btnGlobalVars.onclick = () => PropertiesModal.openForCanvas();
+  }
 }

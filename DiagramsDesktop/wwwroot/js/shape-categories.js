@@ -24,7 +24,7 @@ const ShapeCategories = (() => {
 
   // ── Milestone gate ─────────────────────────────────────────────────────────
   // Increase this value when unlocking higher-milestone categories.
-  const ACTIVE_MILESTONE = 2; // M1/M2 baseline: only Basic Shapes visible
+  const ACTIVE_MILESTONE = 4; // M1/M2 baseline: only Basic Shapes visible
 
   // ── SVG helpers ────────────────────────────────────────────────────────────
 
