@@ -28,7 +28,7 @@ const ParentDropValidator = (() => {
    * @param {number} worldY    - Drop Y in World Space
    * @returns {{ ok: boolean, reason: string|null }}
    */
-  function validate(itemDef, worldX, worldY) {
+  function validate(itemDef, worldX, worldY, excludeShapeId = null) {
     if (!itemDef) return { ok: false, reason: 'Unknown shape type.' };
 
     // Placeholder shapes cannot be dropped
@@ -41,7 +41,7 @@ const ParentDropValidator = (() => {
     // ── Root-level shape: no parent required ──────────────────────
     if (parentType === null || parentType === undefined) {
       // Optionally check it's not dropped on top of another shape of the same type
-      const overlapping = _shapesAt(worldX, worldY);
+      const overlapping = _shapesAt(worldX, worldY, excludeShapeId);
       const conflict = overlapping.find(s => s.Type === itemDef.type);
       if (conflict) {
         return { ok: false, reason: `Cannot overlap two "${itemDef.label}" shapes.` };
@@ -50,7 +50,10 @@ const ParentDropValidator = (() => {
     }
 
     // ── Child shape: must be dropped inside its required parent ───
-    const shapes = CanvasState.getShapes();
+    let shapes = CanvasState.getShapes();
+    if (excludeShapeId) {
+      shapes = shapes.filter(s => s.ShapeID !== excludeShapeId);
+    }
     const requiredTypes = Array.isArray(parentType) ? parentType : [parentType];
 
     // Find ALL shapes containing the drop point, sorted by area (smallest first)
@@ -95,8 +98,12 @@ const ParentDropValidator = (() => {
   /**
    * Returns all shapes whose bounding box contains the given world point.
    */
-  function _shapesAt(wx, wy) {
-    return CanvasState.getShapes().filter(s => _pointInsideShape(wx, wy, s));
+  function _shapesAt(wx, wy, excludeShapeId = null) {
+    let shapes = CanvasState.getShapes();
+    if (excludeShapeId) {
+      shapes = shapes.filter(s => s.ShapeID !== excludeShapeId);
+    }
+    return shapes.filter(s => _pointInsideShape(wx, wy, s));
   }
 
   /**

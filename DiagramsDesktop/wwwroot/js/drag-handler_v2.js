@@ -312,6 +312,45 @@ const DragHandler = (() => {
         RenderCanvas.render();
       } else if (_hasMoved) {
 
+        // ── Milestone 4: parent-hierarchy validation on move ──────────────────
+        if (_activeHandle === 'move' && typeof ParentDropValidator !== 'undefined' && typeof ShapeCategories !== 'undefined') {
+          const itemDef = ShapeCategories.getItemByType(finalShape.Type);
+          if (itemDef) {
+            const result = ParentDropValidator.validate(itemDef, finalShape.WorldX, finalShape.WorldY, finalShape.ShapeID);
+            if (!result.ok) {
+              console.warn('[DragHandler] M4 Parent hierarchy violated — snapping back:', result.reason);
+              if (typeof DropHandler !== 'undefined' && DropHandler.showError) {
+                DropHandler.showError(result.reason);
+              }
+              _snapBack();
+              RenderCanvas.render();
+              _reset();
+              return;
+            }
+
+            // Valid! Update the parent reference
+            const existingShapes = CanvasState.getShapes();
+            const requiredTypes = Array.isArray(itemDef.parentType) ? itemDef.parentType : [itemDef.parentType];
+            const parentShape = existingShapes.find(s => {
+              if (s.ShapeID === finalShape.ShapeID) return false;
+              if (!requiredTypes.includes(s.Type)) return false;
+              if (s.Type === finalShape.Type) return false;
+              const hw = s.Width / 2;
+              const hh = s.Height / 2;
+              return (
+                finalShape.WorldX >= s.WorldX - hw && finalShape.WorldX <= s.WorldX + hw &&
+                finalShape.WorldY >= s.WorldY - hh && finalShape.WorldY <= s.WorldY + hh
+              );
+            });
+            if (parentShape) {
+              CanvasState.updateShape(finalShape.ShapeID, { ParentContainerID: parentShape.ShapeID });
+              console.log(`[DragHandler] Re-linked ${finalShape.Label} (${finalShape.ShapeID}) -> parent ${parentShape.Label} (${parentShape.ShapeID})`);
+            } else {
+              CanvasState.updateShape(finalShape.ShapeID, { ParentContainerID: null });
+            }
+          }
+        }
+
         if (_activeHandle === 'move' && typeof ContainmentEngine !== 'undefined') {
           const movedShape  = CanvasState.getShapes().find(s => s.ShapeID === _draggedShapeId);
           const parentShape = movedShape ? ContainmentEngine.getParentShape(movedShape, allShapes) : null;

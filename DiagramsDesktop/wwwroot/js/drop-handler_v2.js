@@ -371,6 +371,6 @@ const DropHandler = (() => {
              width: s.Width, height: s.Height };
   }
 
-  return { init };
+  return { init, showError: _showDropError };
 
 })();
