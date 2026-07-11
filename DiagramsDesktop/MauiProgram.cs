@@ -76,7 +76,11 @@ public static class MauiProgram
                 builder.Services.AddSingleton<IDiagramCanvasRepository>(new DiagramCanvasRepository(connectionString));
                 builder.Services.AddSingleton<IDiagramCanvasService, DiagramCanvasService>();
 
-                builder.Services.AddControllers();
+                builder.Services.AddControllers()
+                    .AddJsonOptions(options =>
+                    {
+                        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+                    });
 
                 builder.Services.AddCors(options =>
                 {
