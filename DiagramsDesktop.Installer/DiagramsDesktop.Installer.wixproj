@@ -1,0 +1,36 @@
+<Project Sdk="WixToolset.Sdk/4.0.5">
+
+  <PropertyGroup>
+    <OutputName>DiagramsDesktop-1.0.0-Setup</OutputName>
+    <OutputType>Package</OutputType>
+    <!-- Tell WiX linker where SourceDir maps to (the publish folder) -->
+    <BindInputPaths>$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop</BindInputPaths>
+    <!-- Target x64 architecture -->
+    <InstallerPlatform>x64</InstallerPlatform>
+    <!-- ICE03/ICE80: Suppress resource language and 32/64 bit component mismatch warnings/errors -->
+    <SuppressIces>ICE03;ICE80</SuppressIces>
+  </PropertyGroup>
+
+  <!-- WiX UI and Util extensions -->
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="4.0.5" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.5" />
+    <PackageReference Include="WixToolset.Heat" Version="4.0.5" />
+  </ItemGroup>
+
+  <!-- Harvest the entire publish output folder automatically -->
+  <ItemGroup>
+    <HarvestDirectory Include="..\publish\DiagramsDesktop">
+      <DirectoryRefId>INSTALLFOLDER</DirectoryRefId>
+      <ComponentGroupName>PublishFilesGroup</ComponentGroupName>
+      <SuppressRootDirectory>true</SuppressRootDirectory>
+    </HarvestDirectory>
+  </ItemGroup>
+
+  <!-- Automatically publish the MAUI app as self-contained win-x64 before building the installer -->
+  <Target Name="PublishApp" BeforeTargets="BeforeBuild">
+    <RemoveDir Directories="$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop" />
+    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\DiagramsDesktop\DiagramsDesktop.csproj&quot; -c $(Configuration) -f net10.0-windows10.0.19041.0 -o &quot;$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop&quot; -r win-x64 --self-contained true -p:PublishSingleFile=false" />
+  </Target>
+
+</Project>

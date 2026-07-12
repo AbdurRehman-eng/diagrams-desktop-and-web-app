@@ -38,6 +38,7 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -74,7 +75,21 @@
 	<ItemGroup>
 		<Content Include="wwwroot\**\*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
 	</ItemGroup>
+ 
+	<Target Name="CopyCustomContentToPublish" AfterTargets="Publish">
+		<ItemGroup>
+			<MyContentFiles Include="wwwroot\**\*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(MyContentFiles)" 
+		      DestinationFolder="$(PublishDir)\wwwroot\%(RecursiveDir)" 
+		      SkipUnchangedFiles="true" />
+	</Target>
+
+	<Target Name="CleanSatelliteResources" AfterTargets="CopyCustomContentToPublish">
+		<Exec Command="powershell -Command &quot;Get-ChildItem '$(PublishDir)' -Directory | Where-Object { $_.Name -notin 'wwwroot', 'Microsoft.UI.Xaml', 'NpuDetect' } | Remove-Item -Recurse -Force&quot;" />
+	</Target>
 
 </Project>

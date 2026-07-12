@@ -1,0 +1,119 @@
+/**
+ * diagram-list.css
+ * =================
+ * Styles for the floating multi-diagram list panel.
+ * Used by multi-diagram-loader.js when rendering diagram summaries
+ * from JSON files or the database.
+ *
+ * BUG-05 fix: This file was referenced in index.html but did not exist,
+ * causing a 404 on every page load.
+ */
+
+/* ── Panel container ─────────────────────────────────────────────── */
+.diagram-list-panel {
+  position: fixed;
+  top: calc(var(--toolbar-height, 56px) + 12px);
+  right: 16px;
+  width: 300px;
+  max-height: 420px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(99, 102, 241, 0.12);
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  animation: dlFadeIn 0.18s ease;
+  overflow: hidden;
+}
+
+@keyframes dlFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.diagram-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #334155;
+  flex-shrink: 0;
+}
+
+.diagram-list-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.diagram-list-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+.diagram-list-close:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Body (scrollable) ─────────────────────────────────────────── */
+.diagram-list-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 6px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+.diagram-list-body::-webkit-scrollbar       { width: 4px; }
+.diagram-list-body::-webkit-scrollbar-track { background: transparent; }
+.diagram-list-body::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+/* ── Row ─────────────────────────────────────────────────────────── */
+.diagram-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 0.12s;
+  gap: 8px;
+}
+.diagram-list-row:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+.diagram-list-row.active {
+  background: rgba(99, 102, 241, 0.18);
+  border-left: 3px solid #6366f1;
+  padding-left: 11px;
+}
+
+.diagram-list-name {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e2e8f0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.diagram-list-id {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}

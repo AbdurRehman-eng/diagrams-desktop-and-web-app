@@ -1,0 +1,159 @@
+/* =========================================================
+   shape-category-list.css
+   Responsibility: ShapeCategoryList container, ShapeCategoryItem
+   layout, hover effects, ActiveShapeCategoryItem highlight,
+   and empty state display.
+   Phase Coverage: 1.2
+   ========================================================= */
+
+/* ── Category List Container ─────────────────────────────── */
+#ShapeCategoryList {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 5px;
+  gap: 2px;
+  flex-shrink: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+  /* Height is controlled dynamically via JS / splitter */
+}
+
+#ShapeCategoryList::-webkit-scrollbar {
+  width: 3px;
+}
+
+#ShapeCategoryList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#ShapeCategoryList::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+/* ── Category Item ───────────────────────────────────────── */
+.ShapeCategoryItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px 7px 11px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+  position: relative;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  user-select: none;
+  outline: none;
+  overflow: hidden;
+}
+
+.ShapeCategoryItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22%;
+  height: 56%;
+  width: 3px;
+  background: transparent;
+  border-radius: 0 2px 2px 0;
+  transition: background var(--t-fast);
+}
+
+.ShapeCategoryItem:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.ShapeCategoryItem:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-glow);
+}
+
+/* ── Active (Selected) Category ─────────────────────────── */
+.ShapeCategoryItem.ActiveShapeCategoryItem {
+  background: var(--color-accent-glow);
+  color: var(--color-text-accent);
+  border-color: rgba(99, 102, 241, 0.25);
+  font-weight: 600;
+}
+
+.ShapeCategoryItem.ActiveShapeCategoryItem::before {
+  background: var(--color-accent);
+}
+
+/* ── Category Icon ───────────────────────────────────────── */
+.category-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.75;
+  transition: opacity var(--t-fast);
+}
+
+.category-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ShapeCategoryItem:hover .category-icon,
+.ShapeCategoryItem.ActiveShapeCategoryItem .category-icon {
+  opacity: 1;
+}
+
+/* ── Category Name ───────────────────────────────────────── */
+.category-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* ── Item Count Badge ────────────────────────────────────── */
+.category-count {
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  min-width: 22px;
+  text-align: center;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+}
+
+.ShapeCategoryItem.ActiveShapeCategoryItem .category-count {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: var(--color-accent-light);
+}
+
+/* ── Empty State ─────────────────────────────────────────── */
+.category-list-empty {
+  padding: 20px 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* ── Category List Label (section header) ────────────────── */
+.category-list-label {
+  padding: 8px 12px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}

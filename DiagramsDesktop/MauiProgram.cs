@@ -15,10 +15,33 @@ namespace DiagramsDesktop;
 
 public static class MauiProgram
 {
-    public static string LocalServerUrl { get; private set; } = "http://localhost:5000";
+    public static string LocalServerUrl { get; private set; } = "http://127.0.0.1:5000";
+
+    public static void LogToFile(string message)
+    {
+        try
+        {
+            var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DiagramsDesktop");
+            Directory.CreateDirectory(appDataFolder);
+            var logPath = Path.Combine(appDataFolder, "startup.log");
+            File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}{Environment.NewLine}");
+        }
+        catch
+        {
+            // Ignore logging failures
+        }
+    }
 
     public static MauiApp CreateMauiApp()
     {
+        LogToFile("=========================================");
+        LogToFile("Application Starting...");
+        LogToFile($"AppContext.BaseDirectory: {AppContext.BaseDirectory}");
+        LogToFile($"Current Directory: {Environment.CurrentDirectory}");
+        
+        var webRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        LogToFile($"webRootPath: {webRootPath} (Exists: {Directory.Exists(webRootPath)})");
+
         // 1. Determine local database path and initialize database schema
         var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DiagramsDesktop");
         var dbPath = Path.Combine(appDataFolder, "diagrams.db");
@@ -28,10 +51,12 @@ public static class MauiProgram
         {
             var dbInitializer = new DiagramDbInitializer(connectionString);
             dbInitializer.InitializeDatabase();
+            LogToFile($"[Database] Successfully initialized at: {dbPath}");
             System.Diagnostics.Debug.WriteLine($"[Database] Successfully initialized at: {dbPath}");
         }
         catch (Exception ex)
         {
+            LogToFile($"[Database] Initialization failed: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"[Database] Initialization failed: {ex.Message}");
         }
 
@@ -57,19 +82,25 @@ public static class MauiProgram
     private static void StartLocalServer(string connectionString)
     {
         int port = GetFreeTcpPort();
-        LocalServerUrl = $"http://localhost:{port}";
+        LocalServerUrl = $"http://127.0.0.1:{port}";
+        LogToFile($"[LocalServer] Allocating port {port}. Base URL: {LocalServerUrl}");
         System.Diagnostics.Debug.WriteLine($"[LocalServer] Allocating port {port}. Base URL: {LocalServerUrl}");
 
         Task.Run(() =>
         {
             try
             {
-                var builder = WebApplication.CreateBuilder();
+                LogToFile("[LocalServer] Background thread starting Kestrel...");
+                var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+                {
+                    ContentRootPath = AppContext.BaseDirectory,
+                    Args = Array.Empty<string>()
+                });
 
-                // Listen only on loopback address for security
+                // Listen only on loopback address (supporting IPv4 and IPv6) for security
                 builder.WebHost.ConfigureKestrel(options =>
                 {
-                    options.Listen(IPAddress.Loopback, port);
+                    options.ListenLocalhost(port);
                 });
 
                 // Configure Services and Inject dependencies
@@ -112,15 +143,19 @@ public static class MauiProgram
                 }
                 else
                 {
+                    LogToFile($"[LocalServer] Warning: wwwroot path does not exist at {webRootPath}");
                     System.Diagnostics.Debug.WriteLine($"[LocalServer] Warning: wwwroot path does not exist at {webRootPath}");
                 }
 
                 app.MapControllers();
 
+                LogToFile($"[LocalServer] Running WebApplication on port {port}...");
                 app.Run();
+                LogToFile("[LocalServer] WebApplication has shut down.");
             }
             catch (Exception ex)
             {
+                LogToFile($"[LocalServer] Failed to start: {ex.GetType().Name} - {ex.Message}{Environment.NewLine}{ex.StackTrace}");
                 System.Diagnostics.Debug.WriteLine($"[LocalServer] Failed to start: {ex.Message}");
             }
         });
@@ -136,8 +171,9 @@ public static class MauiProgram
             listener.Stop();
             return port;
         }
-        catch
+        catch (Exception ex)
         {
+            LogToFile($"[GetFreeTcpPort] Error: {ex.Message}. Falling back to 5000.");
             // fallback
             return 5000;
         }

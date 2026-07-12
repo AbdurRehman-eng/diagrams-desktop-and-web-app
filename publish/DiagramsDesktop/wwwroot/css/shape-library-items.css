@@ -1,0 +1,201 @@
+/* =========================================================
+   shape-library-items.css
+   Responsibility: ShapeLibraryItemsContainer grid layout,
+   DraggableShapeLibraryItem visual states (default, hover,
+   dragging), drag ghost preview card, and items empty state.
+   Phase Coverage: 1.2, 1.3
+   ========================================================= */
+
+/* ── Items Container ─────────────────────────────────────── */
+#ShapeLibraryItemsContainer {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+#ShapeLibraryItemsContainer::-webkit-scrollbar {
+  width: 3px;
+}
+
+#ShapeLibraryItemsContainer::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+/* ── Items Grid ──────────────────────────────────────────── */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  animation: fadeItemsIn 0.2s ease;
+}
+
+@keyframes fadeItemsIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Draggable Shape Item ────────────────────────────────── */
+.DraggableShapeLibraryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 5px 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  transition:
+    background  var(--t-fast),
+    border-color var(--t-fast),
+    transform   var(--t-fast),
+    box-shadow  var(--t-fast);
+  position: relative;
+  user-select: none;
+  gap: 5px;
+  min-height: 70px;
+  outline: none;
+  overflow: hidden;
+}
+
+/* Subtle top shine */
+.DraggableShapeLibraryItem::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.DraggableShapeLibraryItem:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.DraggableShapeLibraryItem:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-glow);
+}
+
+/* Active drag source — visual feedback SOURCE stays in place */
+.DraggableShapeLibraryItem.dragging {
+  cursor: grabbing;
+  border-color: var(--color-accent);
+  background: var(--color-accent-glow);
+  transform: scale(0.95);
+  opacity: 0.5;
+  box-shadow: var(--shadow-accent);
+}
+
+/* ── Shape Icon ──────────────────────────────────────────── */
+.shape-item-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.shape-item-icon svg {
+  width: 34px;
+  height: 34px;
+  transition: transform var(--t-fast);
+}
+
+.DraggableShapeLibraryItem:hover .shape-item-icon svg {
+  transform: scale(1.08);
+}
+
+/* ── Shape Label ─────────────────────────────────────────── */
+.shape-item-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.25;
+  pointer-events: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 2px;
+  transition: color var(--t-fast);
+}
+
+.DraggableShapeLibraryItem:hover .shape-item-label {
+  color: var(--color-text-secondary);
+}
+
+/* ── Items Empty State ───────────────────────────────────── */
+.items-empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 14px;
+  gap: 10px;
+  color: var(--color-text-muted);
+  text-align: center;
+  animation: fadeIn 0.25s ease;
+}
+
+.items-empty-state svg {
+  opacity: 0.25;
+  flex-shrink: 0;
+}
+
+.items-empty-state p {
+  font-size: 12px;
+  line-height: 1.55;
+  max-width: 160px;
+  color: var(--color-text-muted);
+}
+
+/* ── Drag Ghost Card ─────────────────────────────────────── */
+.drag-ghost-card {
+  background: var(--color-surface-active);
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 8px 14px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 70px;
+  box-shadow: var(--shadow-accent), var(--shadow-lg);
+  animation: ghostAppear 0.1s ease;
+  pointer-events: none;
+}
+
+@keyframes ghostAppear {
+  from { opacity: 0; transform: scale(0.9) translate(-50%, -50%); }
+  to   { opacity: 0.9; transform: scale(1) translate(-50%, -50%); }
+}
+
+.drag-ghost-icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drag-ghost-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-accent);
+  white-space: nowrap;
+}

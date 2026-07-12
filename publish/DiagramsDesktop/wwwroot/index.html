@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DiagramEngine — a modular, professional diagram creation tool with drag-and-drop shape library" />
+  <title>DiagramEngine — Diagram Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- CSS modules — load in dependency order -->
+  <link rel="stylesheet" href="css/shapes-panel.css?v=2.0" />
+  <link rel="stylesheet" href="css/shapes-panel-header.css?v=2.0" />
+  <link rel="stylesheet" href="css/shape-category-list.css" />
+  <link rel="stylesheet" href="css/shape-library-items.css" />
+  <link rel="stylesheet" href="css/shapes-panel-splitter.css" />
+  <link rel="stylesheet" href="css/shapes-search.css" />
+
+  <!-- Milestone 2 CSS -->
+  <link rel="stylesheet" href="css/base.css?v=2.0" />
+  <link rel="stylesheet" href="css/canvas.css" />
+  <link rel="stylesheet" href="css/controls.css" />
+  <link rel="stylesheet" href="css/debug-panel.css" />
+  <link rel="stylesheet" href="css/diagram-list.css" />
+  <link rel="stylesheet" href="css/dropdowns.css" />
+  <link rel="stylesheet" href="css/properties-modal.css" />
+  <link rel="stylesheet" href="css/context-menu.css" />
+
+  <!-- M8+: Circle-on-container CSS — commented out for M1/M2 baseline -->
+  <!-- <link rel="stylesheet" href="css/circle-on-container.css" /> -->
+</head>
+<body>
+  <div id="app-root">
+
+    <!-- ── Top Toolbar ─────────────────────────────────── -->
+    <header id="app-toolbar">
+      <div class="toolbar-row" style="justify-content: flex-start;">
+        <div class="toolbar-brand">
+          <svg class="brand-icon" width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+            <rect x="2"  y="2"  width="10" height="10" rx="2.5" fill="#6366f1"/>
+            <rect x="14" y="2"  width="10" height="10" rx="2.5" fill="#8b5cf6"/>
+            <rect x="2"  y="14" width="10" height="10" rx="2.5" fill="#a78bfa"/>
+            <rect x="14" y="14" width="10" height="10" rx="2.5" fill="#c4b5fd" opacity="0.7"/>
+          </svg>
+          <span class="brand-name">DiagramEngine</span>
+          <span class="brand-badge">M4</span>
+        </div>
+
+        <nav class="toolbar-center" style="margin-left: auto;">
+          <!-- M3+: Undo/Redo -->
+          <button class="toolbar-btn" id="btn-undo" title="Undo">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 5l3-3-3-3M2 5h5a5 5 0 010 10H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="toolbar-btn" id="btn-redo" title="Redo">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 5l-3-3 3-3M12 5H7a5 5 0 000 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="toolbar-sep"></div>
+          <button class="toolbar-btn" id="btn-zoom-out" title="Zoom out">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 6h4M9.5 9.5L12 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </button>
+          <button class="toolbar-btn" id="btn-zoom-in" title="Zoom in">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M6 4v4M4 6h4M9.5 9.5L12 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </button>
+          <div class="toolbar-sep"></div>
+          <button class="toolbar-btn toolbar-btn--active" id="btn-select" title="Select tool">Select</button>
+          <!-- M7+: Connect button commented out for M1/M2 baseline -->
+          <!-- <button class="toolbar-btn" id="btn-connect" title="Connector tool">Connect</button> -->
+          <div class="toolbar-sep"></div>
+          <button class="toolbar-btn" id="btn-theme-toggle" title="Toggle theme">
+            <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </button>
+        </nav>
+      </div>
+
+      <div class="toolbar-row" style="margin-top: 4px; padding-left: 4px; justify-content: flex-start;">
+        <!-- Dropdown Menus (File / Edit) - Now aligned to the left under the brand -->
+        <div class="dropdown">
+          <button class="dropdown-btn">
+            File
+            <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none"/></svg>
+          </button>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" id="btn-new"><span>New</span></div>
+            <div class="dropdown-item" id="btn-open-json"><span>Open JSON</span></div>
+            <div class="dropdown-item" id="btn-list-db"><span>List DB</span></div>
+            <div class="dropdown-item" id="btn-save-db"><span>Save to DB</span></div>
+            <div class="dropdown-item" id="btn-save-json"><span>Export JSON</span></div>
+          </div>
+        </div>
+
+        <!-- M5+: Edit dropdown (Global Variables) -->
+        <div class="dropdown" style="margin-left: 12px;">
+          <button class="dropdown-btn">
+            Edit
+            <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none"/></svg>
+          </button>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" id="btn-global-vars"><span>Global Variables</span></div>
+          </div>
+        </div>
+      </div>
+
+
+    </header>
+
+    <!-- ── Main Workspace ──────────────────────────────── -->
+    <main id="app-workspace">
+
+      <!-- Shapes Panel will be rendered here by JS -->
+      <div id="shapes-panel-mount" aria-label="Shapes panel region" role="region"></div>
+
+      <!-- Diagram Canvas -->
+      <div id="MainCanvasViewport" aria-label="Diagram canvas" role="main">
+        <div id="canvas-empty-state">
+          <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+            <rect x="6" y="6" width="60" height="60" rx="10" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="7 5"/>
+            <path d="M36 24v24M24 36h24" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <h2 style="color:var(--color-text-secondary); margin-top:16px;">Diagram Workspace</h2>
+          <p style="color:var(--color-text-secondary); font-size:14px;">Canvas ready for objects</p>
+        </div>
+
+        <!-- Debug Diagnostic Panel -->
+        <div id="debug-panel" class="hidden"></div>
+
+        <!-- Canvas Floating Controls -->
+        <div class="canvas-controls">
+          <button class="control-btn" id="ctrl-zoom-in" title="Zoom In">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+          </button>
+          <span class="zoom-indicator" id="zoom-value">100%</span>
+          <button class="control-btn" id="ctrl-zoom-out" title="Zoom Out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+          </button>
+          <button class="control-btn" id="ctrl-fit-view" title="Fit View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── Drag Ghost Preview ───────────────────────────── -->
+    <div id="drag-preview-ghost" class="hidden" aria-hidden="true"></div>
+
+    <!-- ── Status Bar ──────────────────────────────────── -->
+    <footer id="app-status-bar">
+      <span id="status-message">Ready</span>
+      <span id="status-active-category" aria-live="polite"></span>
+      <span id="status-canvas-info">World Space · [0, 0]</span>
+    </footer>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       JavaScript modules — Milestone 1 (UI)
+       ═══════════════════════════════════════════════════ -->
+  <!-- Milestone 1 Scripts -->
+  <script src="js/shapes-panel-state.js?v=4.6"></script>
+  <script src="js/shape-categories.js?v=6.4"></script>
+  <script src="js/hierarchy-loader.js?v=6.1"></script>
+  <script src="js/shape-library-drag-payload_v2.js?v=4.6"></script>
+  <script src="js/load-shape-library-items.js?v=4.6"></script>
+  <script src="js/drag-shape-library-item_v2.js?v=4.6"></script>
+  <script src="js/render-shape-library-items.js?v=4.6"></script>
+  <script src="js/select-shape-category.js?v=4.6"></script>
+  <script src="js/shapes-search.js?v=4.6"></script>
+  <script src="js/shapes-panel-splitter.js?v=4.6"></script>
+  <script src="js/toggle-shapes-panel.js?v=4.6"></script>
+  <script src="js/render-shapes-panel.js?v=5.0"></script>
+
+  <!-- Milestone 2 Scripts -->
+  <script src="js/canvasconfig.js?v=4.6"></script>
+  <script src="js/canvas-state_v2.js?v=5.0"></script>
+  <script src="js/history-manager.js?v=8.1"></script>
+  <script src="js/world-toscreen.js?v=4.6"></script>
+  <script src="js/screen-toworld.js?v=4.6"></script>
+  <script src="js/viewport-math.js?v=4.6"></script>
+  <script src="js/collision_v2.js?v=4.6"></script>
+  <script src="js/child-rectangle-container-clamp.js?v=4.6"></script>
+
+  <!-- M6+: Circle Interaction — commented out for M1/M2 baseline -->
+  <!--
+  <script src="js/circle-interaction-state.js?v=6.0"></script>
+  <script src="js/circle-events.js?v=6.0"></script>
+  <script src="js/circle-derived-geometry.js?v=6.0"></script>
+  <script src="js/circle-hover-selection.js?v=6.0"></script>
+  <script src="js/circle-resize.js?v=6.0"></script>
+  <script src="js/circle-move.js?v=6.0"></script>
+  -->
+
+  <!-- M7+: Connections — commented out for M1/M2 baseline -->
+  <!--
+  <script src="js/connection-type-lookup-csv.js?v=7.0"></script>
+  <script src="js/connection-type-lookup-db.js?v=7.0"></script>
+  <script src="js/connection-mode-state.js?v=7.0"></script>
+  <script src="js/connect-to-mode.js?v=7.1"></script>
+  <script src="js/connection-options-menu.js?v=9.4"></script>
+  <script src="js/global-connection-defaults.js?v=7.0"></script>
+  <script src="js/connection-junction-math.js?v=7.1"></script>
+  <script src="js/connection-shortest-path.js?v=7.1"></script>
+  <script src="js/connection-builder.js?v=7.0"></script>
+  <script src="js/render-connections.js?v=7.1"></script>
+  -->
+
+  <!-- M8+: Circle On Container — commented out for M1/M2 baseline -->
+  <!--
+  <script src="js/edge-attachment-rules-loader.js?v=8.0"></script>
+  <script src="js/calculate-edge-circle-center.js?v=8.0"></script>
+  <script src="js/project-pointer-to-container-edge.js?v=8.0"></script>
+  <script src="js/validate-edge-circle-placement.js?v=8.1"></script>
+  <script src="js/recalculate-edge-circles-on-parent-change.js?v=8.0"></script>
+  <script src="js/circle-on-container-model.js?v=8.0"></script>
+  <script src="js/circle-on-container-state.js?v=8.0"></script>
+  <script src="js/move-circle-on-container.js?v=8.3"></script>
+  <script src="js/render-circle-on-container.js?v=8.3"></script>
+  -->
+
+  <!-- M9+: Protection Padding Math — commented out for M1/M2 baseline -->
+  <!--
+  <script src="js/child-rectangle-protection-padding.js?v=9.1"></script>
+  <script src="js/child-rectangle-container-clamp.js?v=9.1"></script>
+  <script src="js/child-circle-protection-padding.js?v=9.1"></script>
+  <script src="js/child-circle-container-clamp.js?v=9.1"></script>
+  <script src="js/derive-parent-inner-boundaries.js?v=9.1"></script>
+
+  <script src="js/child-rectangle-resize-validation.js?v=9.1"></script>
+  <script src="js/child-rectangle-resize.js?v=9.1"></script>
+  <script src="js/child-circle-resize-validation.js?v=9.1"></script>
+  <script src="js/child-circle-resize.js?v=9.1"></script>
+  <script src="js/parent-rectangle-resize-validation.js?v=9.1"></script>
+
+  <script src="js/parent-child-reference-center.js?v=9.2"></script>
+  <script src="js/recalculate-container-derived-geometry-on-resize.js?v=9.1"></script>
+  <script src="js/containment-engine.js?v=9.1"></script>
+
+  <script src="js/containment-protection-padding-recalculation.js?v=9.1"></script>
+  <script src="js/containment-save-validation.js?v=9.1"></script>
+  <script src="js/circle-on-container-protection-padding-validation.js?v=9.1"></script>
+  <script src="js/circle-on-container-radius-range-validation.js?v=9.1"></script>
+  -->
+
+  <script src="js/render-background.js?v=4.6"></script>
+  <script src="js/render-grid.js?v=4.6"></script>
+  <script src="js/render-axes.js?v=4.6"></script>
+  <script src="js/render-origin.js?v=4.6"></script>
+  <script src="js/render-shapes.js?v=9.1"></script>
+  <script src="js/debug-panel.js?v=4.6"></script>
+  <script src="js/render-canvas_v2.js?v=4.6"></script>
+
+  <script src="js/pan.js?v=4.6"></script>
+  <script src="js/zoom.js?v=4.6"></script>
+  <script src="js/drag-handler_v2.js?v=9.8"></script>
+  <script src="js/hover-manager.js?v=5.0"></script>
+  <script src="js/delete-guard.js?v=1.0"></script>
+  <script src="js/input-controller.js?v=4.8"></script>
+  <script src="js/parent-drop-validator.js?v=5.1"></script>
+  <script src="js/drop-handler_v2.js?v=5.6"></script>
+
+  <script src="js/build-diagram-json.js?v=4.6"></script>
+  <script src="js/save-diagram-json.js?v=4.6"></script>
+  <script src="js/open-diagram-json.js?v=4.6"></script>
+  <script src="js/parse-diagram-json.js?v=4.6"></script>
+  <script src="js/diagram-api.js?v=4.6"></script>
+  <script src="js/multi-diagram-loader.js?v=4.6"></script>
+  <script src="js/dropdown-controller.js?v=4.8"></script>
+  <script src="js/properties-modal.js?v=5.0"></script>
+  <script src="js/context-menu.js?v=5.3"></script>
+  <script src="js/dirty-tracker.js?v=4.9"></script>
+
+  <!-- M9+: Demo Diagram — commented out for M1/M2 baseline -->
+  <!-- <script src="js/demo-diagram-builder.js?v=9.1"></script> -->
+
+  <script src="js/theme-controller.js?v=1.0"></script>
+  <script src="js/main_v2.js?v=9.1"></script>
+
+
+</body>
+</html>
