@@ -52,7 +52,20 @@ const DragHandler = (() => {
     // each tick without accumulating floating-point drift.
     _childSnapshots = {};
     if (handle === 'move') {
-      _snapshotDescendants(shapeId, allShapes);
+      if (typeof EnumerateContainerSubtree !== 'undefined') {
+        const descIds = EnumerateContainerSubtree.getDescendants(shapeId, allShapes);
+        for (const childId of descIds) {
+          const child = allShapes.find(s => s.ShapeID === childId);
+          if (child) {
+            _childSnapshots[childId] = {
+              WorldX: child.WorldX,
+              WorldY: child.WorldY,
+            };
+          }
+        }
+      } else {
+        _snapshotDescendants(shapeId, allShapes);
+      }
     }
 
     document.body.style.cursor = _getCursorForHandle(handle);
@@ -129,13 +142,16 @@ const DragHandler = (() => {
       const parentDeltaY = newY - _shapeSnapshot.WorldY;
 
       if (parentDeltaX !== 0 || parentDeltaY !== 0) {
-        for (const [childId, snap] of Object.entries(_childSnapshots)) {
-          CanvasState.updateShape(childId, {
-            WorldX: snap.WorldX + parentDeltaX,
-            WorldY: snap.WorldY + parentDeltaY,
-          });
+        if (typeof MoveContainerSubtree !== 'undefined') {
+          MoveContainerSubtree.translateSubtree(Object.keys(_childSnapshots), parentDeltaX, parentDeltaY, _childSnapshots);
+        } else {
+          for (const [childId, snap] of Object.entries(_childSnapshots)) {
+            CanvasState.updateShape(childId, {
+              WorldX: snap.WorldX + parentDeltaX,
+              WorldY: snap.WorldY + parentDeltaY,
+            });
+          }
         }
-
       }
 
     } else {
@@ -439,71 +455,92 @@ const DragHandler = (() => {
           }
         }
 
-        if (_activeHandle === 'move' && typeof ContainmentEngine !== 'undefined') {
-          const movedShape  = CanvasState.getShapes().find(s => s.ShapeID === _draggedShapeId);
-          const parentShape = movedShape ? ContainmentEngine.getParentShape(movedShape, allShapes) : null;
+        if (_activeHandle === 'move') {
+          const descendantIds = Object.keys(_childSnapshots);
+          if (typeof ValidateContainerSubtree !== 'undefined') {
+            const validationResult = ValidateContainerSubtree.validateSubtree(_draggedShapeId, descendantIds, allShapes);
+            if (!validationResult.valid) {
+              console.warn('[DragHandler] Subtree validation failed:', validationResult.reason);
+              if (typeof DropHandler !== 'undefined' && DropHandler.showError) {
+                DropHandler.showError(validationResult.reason);
+              }
+              
+              // Visual shake effect
+              const element = document.getElementById(_draggedShapeId);
+              if (element) {
+                element.classList.add('validation-error-glow');
+                setTimeout(() => element.classList.remove('validation-error-glow'), 400);
+              }
 
-          // 1. Final containment check
-          if (movedShape && parentShape) {
-            const containOk = ContainmentEngine.validateChildInParent(movedShape, parentShape);
-            if (!containOk.valid) {
-              console.warn('[DragHandler] M9 Containment violated — snapping back:', containOk.reason);
               _snapBack();
               RenderCanvas.render();
               _reset();
               return;
             }
-          }
+          } else if (typeof ContainmentEngine !== 'undefined') {
+            const movedShape  = CanvasState.getShapes().find(s => s.ShapeID === _draggedShapeId);
+            const parentShape = movedShape ? ContainmentEngine.getParentShape(movedShape, allShapes) : null;
 
-          // 2. N-1 sibling overlap check (M10: typed Protection-Padding validation)
-          if (movedShape) {
-            const siblings  = ContainmentEngine.getSiblings(_draggedShapeId, allShapes);
-            const geomType  = (movedShape.GeometryType || movedShape.Type || '').toLowerCase();
-            const isCircle  = geomType === 'circle' || geomType === 'ellipse';
-            let siblingRejected = false;
-
-            if (isCircle && typeof SiblingCircleOverlapValidation !== 'undefined') {
-              const r       = movedShape.Radius ?? movedShape.Width / 2;
-              const padding = ContainmentEngine.getCircleProtectionPadding(movedShape);
-              const sibRes  = SiblingCircleOverlapValidation.validateChildCircleAgainstSiblingCircles(
-                _draggedShapeId, { x: movedShape.WorldX, y: movedShape.WorldY }, r + padding, siblings
-              );
-              if (!sibRes.valid) {
-                console.warn('[DragHandler] M10 Sibling circle overlap — snapping back:', sibRes.reason);
-                siblingRejected = true;
+            // 1. Final containment check
+            if (movedShape && parentShape) {
+              const containOk = ContainmentEngine.validateChildInParent(movedShape, parentShape);
+              if (!containOk.valid) {
+                console.warn('[DragHandler] M9 Containment violated — snapping back:', containOk.reason);
+                _snapBack();
+                RenderCanvas.render();
+                _reset();
+                return;
               }
-            } else if (!isCircle && typeof SiblingRectangleOverlapValidation !== 'undefined') {
-              const { ChildProtectionPaddingX: px, ChildProtectionPaddingY: py } = ContainmentEngine.getRectProtectionPadding(movedShape);
-              const paddedBounds = window.recalculateChildRectangleProtectionPadding(
-                movedShape.WorldX, movedShape.WorldY, movedShape.Width / 2, movedShape.Height / 2, px, py
-              );
-              if (paddedBounds) {
-                const sibRes = SiblingRectangleOverlapValidation.validateChildRectangleAgainstSiblingRectangles(
-                  _draggedShapeId, paddedBounds, siblings
+            }
+
+            // 2. N-1 sibling overlap check (M10: typed Protection-Padding validation)
+            if (movedShape) {
+              const siblings  = ContainmentEngine.getSiblings(_draggedShapeId, allShapes);
+              const geomType  = (movedShape.GeometryType || movedShape.Type || '').toLowerCase();
+              const isCircle  = geomType === 'circle' || geomType === 'ellipse';
+              let siblingRejected = false;
+
+              if (isCircle && typeof SiblingCircleOverlapValidation !== 'undefined') {
+                const r       = movedShape.Radius ?? movedShape.Width / 2;
+                const padding = ContainmentEngine.getCircleProtectionPadding(movedShape);
+                const sibRes  = SiblingCircleOverlapValidation.validateChildCircleAgainstSiblingCircles(
+                  _draggedShapeId, { x: movedShape.WorldX, y: movedShape.WorldY }, r + padding, siblings
                 );
                 if (!sibRes.valid) {
-                  console.warn('[DragHandler] M10 Sibling rect overlap — snapping back:', sibRes.reason);
+                  console.warn('[DragHandler] M10 Sibling circle overlap — snapping back:', sibRes.reason);
+                  siblingRejected = true;
+                }
+              } else if (!isCircle && typeof SiblingRectangleOverlapValidation !== 'undefined') {
+                const { ChildProtectionPaddingX: px, ChildProtectionPaddingY: py } = ContainmentEngine.getRectProtectionPadding(movedShape);
+                const paddedBounds = window.recalculateChildRectangleProtectionPadding(
+                  movedShape.WorldX, movedShape.WorldY, movedShape.Width / 2, movedShape.Height / 2, px, py
+                );
+                if (paddedBounds) {
+                  const sibRes = SiblingRectangleOverlapValidation.validateChildRectangleAgainstSiblingRectangles(
+                    _draggedShapeId, paddedBounds, siblings
+                  );
+                  if (!sibRes.valid) {
+                    console.warn('[DragHandler] M10 Sibling rect overlap — snapping back:', sibRes.reason);
+                    siblingRejected = true;
+                  }
+                }
+              } else {
+                // Fallback: generic M9 check
+                const sibResult = ContainmentEngine.checkSiblingOverlap(movedShape, siblings);
+                if (sibResult.collided) {
+                  console.warn('[DragHandler] M9 Sibling overlap — snapping back. Sibling:', sibResult.siblingId);
                   siblingRejected = true;
                 }
               }
-            } else {
-              // Fallback: generic M9 check
-              const sibResult = ContainmentEngine.checkSiblingOverlap(movedShape, siblings);
-              if (sibResult.collided) {
-                console.warn('[DragHandler] M9 Sibling overlap — snapping back. Sibling:', sibResult.siblingId);
-                siblingRejected = true;
+
+              if (siblingRejected) {
+                _snapBack();
+                RenderCanvas.render();
+                _reset();
+                return;
               }
             }
-
-            if (siblingRejected) {
-              _snapBack();
-              RenderCanvas.render();
-              _reset();
-              return;
-            }
           }
-
-          // 3. Children were already moved in real-time during onMouseMove — no re-propagation needed
         }
 
         // ── M9/M10: On resize, validate parent and children ────────
@@ -595,20 +632,24 @@ const DragHandler = (() => {
         if (typeof DirtyTracker   !== 'undefined') DirtyTracker.markDirty();
 
         // ── M8: Recalculate attached COCs when parent shape moves/resizes ──
-        if (typeof RecalculateEdgeCirclesOnParentChange !== 'undefined') {
-          if (_activeHandle === 'move') {
-            RecalculateEdgeCirclesOnParentChange.onParentMoved(finalShape.ShapeID);
-          } else {
-            RecalculateEdgeCirclesOnParentChange.onParentResized(finalShape.ShapeID);
+        if (_activeHandle === 'move' && typeof RecalcMovedSubtree !== 'undefined') {
+          RecalcMovedSubtree.recalculateSubtree(_draggedShapeId, Object.keys(_childSnapshots));
+        } else {
+          if (typeof RecalculateEdgeCirclesOnParentChange !== 'undefined') {
+            if (_activeHandle === 'move') {
+              RecalculateEdgeCirclesOnParentChange.onParentMoved(finalShape.ShapeID);
+            } else {
+              RecalculateEdgeCirclesOnParentChange.onParentResized(finalShape.ShapeID);
+            }
           }
-        }
 
-        // M6 / M7 circle events
-        const t           = (finalShape.Type || 'rectangle').toLowerCase();
-        const isCircleGeom = t === 'circle' || t === 'ellipse' || finalShape.GeometryType === 'circle';
-        if (isCircleGeom && typeof CircleEvents !== 'undefined') {
-          if (_activeHandle === 'move') CircleEvents.dispatchMoved(finalShape.ShapeID);
-          else                          CircleEvents.dispatchResized(finalShape.ShapeID);
+          // M6 / M7 circle events
+          const t           = (finalShape.Type || 'rectangle').toLowerCase();
+          const isCircleGeom = t === 'circle' || t === 'ellipse' || finalShape.GeometryType === 'circle';
+          if (isCircleGeom && typeof CircleEvents !== 'undefined') {
+            if (_activeHandle === 'move') CircleEvents.dispatchMoved(finalShape.ShapeID);
+            else                          CircleEvents.dispatchResized(finalShape.ShapeID);
+          }
         }
       }
     }
