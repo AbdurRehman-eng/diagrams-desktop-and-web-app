@@ -207,6 +207,16 @@ const InputController = (() => {
         return;
       }
 
+      // ── Delete selected connection ────────────────────────────────────────
+      const selectedConnId = typeof CanvasState !== 'undefined' ? CanvasState.getSelectedConnectionId() : null;
+      if (selectedConnId) {
+        CanvasState.removeConnection(selectedConnId);
+        if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
+        if (typeof DirtyTracker   !== 'undefined') DirtyTracker.markDirty();
+        RenderCanvas.render();
+        return;
+      }
+
       // ── Delete selected regular shape ─────────────────────────────────────
       const selected = CanvasState.getSelectedId();
       if (selected) {

@@ -58,14 +58,16 @@ const ContextMenuController = (() => {
       let cocEl   = null;
 
       for (const el of path) {
-        if (el.getAttribute && el.getAttribute('data-obj-id')) { shapeEl = el; break; }
-        if (el.dataset && el.dataset.connectionId) { connEl = el; break; }
-        if (el.dataset && el.dataset.cocId)        { cocEl  = el; break; }
+        if (el.getAttribute) {
+          if (el.getAttribute('data-obj-id')) { shapeEl = el; break; }
+          if (el.getAttribute('data-connection-id')) { connEl = el; break; }
+          if (el.getAttribute('data-coc-id'))        { cocEl  = el; break; }
+        }
         if (el.id === 'MainCanvasViewport') break;
       }
 
       if (shapeEl) {
-        _lastTargetShapeId = shapeEl.dataset.objId;
+        _lastTargetShapeId = shapeEl.getAttribute('data-obj-id');
         _lastTargetConnId = null;
         _lastTargetCocId  = null;
         CanvasState.selectShape(_lastTargetShapeId);
@@ -76,7 +78,7 @@ const ContextMenuController = (() => {
         btnDeleteConn.style.display = 'none';
         btnDeleteCoc.style.display  = 'none';
       } else if (connEl) {
-        _lastTargetConnId  = connEl.dataset.connectionId;
+        _lastTargetConnId  = connEl.getAttribute('data-connection-id');
         _lastTargetShapeId = null;
         _lastTargetCocId   = null;
         CanvasState.selectConnection(_lastTargetConnId);
@@ -87,7 +89,7 @@ const ContextMenuController = (() => {
         btnDeleteConn.style.display = 'flex';
         btnDeleteCoc.style.display  = 'none';
       } else if (cocEl) {
-        _lastTargetCocId   = cocEl.dataset.cocId;
+        _lastTargetCocId   = cocEl.getAttribute('data-coc-id');
         _lastTargetShapeId = null;
         _lastTargetConnId  = null;
         if (typeof CircleOnContainerState !== 'undefined')
