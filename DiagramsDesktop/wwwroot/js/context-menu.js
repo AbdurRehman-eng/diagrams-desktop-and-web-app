@@ -73,6 +73,7 @@ const ContextMenuController = (() => {
         CanvasState.selectShape(_lastTargetShapeId);
         RenderCanvas.render();
         labelProps.textContent = 'Edit Shape Properties';
+        btnEditProps.style.display  = 'flex';
         btnConnect.style.display    = 'flex';
         btnDelete.style.display     = 'flex';
         btnDeleteConn.style.display = 'none';
@@ -83,7 +84,7 @@ const ContextMenuController = (() => {
         _lastTargetCocId   = null;
         CanvasState.selectConnection(_lastTargetConnId);
         RenderCanvas.render();
-        labelProps.textContent = 'Edit Canvas Properties';
+        btnEditProps.style.display  = 'none';
         btnConnect.style.display    = 'none';
         btnDelete.style.display     = 'none';
         btnDeleteConn.style.display = 'flex';
@@ -96,6 +97,7 @@ const ContextMenuController = (() => {
           CircleOnContainerState.selectCircleOnContainer(_lastTargetCocId);
         RenderCanvas.render();
         labelProps.textContent = 'Edit Edge Device Properties';
+        btnEditProps.style.display  = 'flex';
         btnConnect.style.display    = 'flex';   // ← Allow connecting FROM a COC (e.g. IGW → Route Table)
         btnDelete.style.display     = 'none';
         btnDeleteConn.style.display = 'none';
@@ -105,9 +107,11 @@ const ContextMenuController = (() => {
         _lastTargetConnId  = null;
         _lastTargetCocId   = null;
         CanvasState.selectShape(null);
+        CanvasState.selectConnection(null);
         if (typeof CircleOnContainerState !== 'undefined') CircleOnContainerState.clearSelection();
         RenderCanvas.render();
         labelProps.textContent = 'Edit Canvas Properties';
+        btnEditProps.style.display  = 'flex';
         btnConnect.style.display    = 'none';
         btnDelete.style.display     = 'none';
         btnDeleteConn.style.display = 'none';

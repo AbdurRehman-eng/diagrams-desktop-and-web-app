@@ -44,13 +44,19 @@ const InputController = (() => {
     let isCocResize = false;
     let cocResizeHandleCode = null;
     let isCocElement = false;
+    let connId = null;
 
     for (const el of path) {
       if (el.getAttribute) {
         const hCode    = el.getAttribute('data-handle');
         const oId      = el.getAttribute('data-obj-id');
         const cId      = el.getAttribute('data-coc-id') || (el.dataset ? el.dataset.cocId : null);
+        const conn_id  = el.getAttribute('data-connection-id');
         const cssClass = el.getAttribute('class') || '';
+
+        if (conn_id) {
+          connId = conn_id;
+        }
 
         if (cId) {
           cocId = cId;
@@ -114,6 +120,9 @@ const InputController = (() => {
       e.preventDefault();
 
       CanvasState.selectShape(null);
+      if (typeof CanvasState.selectConnection !== 'undefined') {
+        CanvasState.selectConnection(null);
+      }
       if (cocId) {
         CircleOnContainerState.selectCircleOnContainer(cocId);
 
@@ -125,6 +134,14 @@ const InputController = (() => {
           }
         }
       }
+      RenderCanvas.render();
+      return;
+    }
+
+    if (connId) {
+      e.stopPropagation();
+      e.preventDefault();
+      CanvasState.selectConnection(connId);
       RenderCanvas.render();
       return;
     }
@@ -157,6 +174,9 @@ const InputController = (() => {
     }
 
     CanvasState.selectShape(null);
+    if (typeof CanvasState.selectConnection !== 'undefined') {
+      CanvasState.selectConnection(null);
+    }
     PanHandler.onMouseDown(e);
     RenderCanvas.render();
   }
