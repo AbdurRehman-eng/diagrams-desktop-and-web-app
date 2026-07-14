@@ -203,9 +203,17 @@ const MoveCircleOnContainer = (() => {
       const allShapes = CanvasState.getShapes();
       const cocObj = { type: 'circle', cx: coc.CenterX, cy: coc.CenterY, r: coc.Radius };
 
+      const ancestorIds = new Set();
+      let currParentId = coc.ParentContainerID;
+      while (currParentId) {
+        ancestorIds.add(currParentId);
+        const pShape = allShapes.find(s => s.ShapeID === currParentId);
+        currParentId = pShape ? pShape.ParentContainerID : null;
+      }
+
       for (const shape of allShapes) {
-        // Skip the parent container it's attached to
-        if (shape.ShapeID === coc.ParentContainerID) continue;
+        // Skip the parent container it's attached to and its ancestors
+        if (ancestorIds.has(shape.ShapeID)) continue;
 
         const geom = (shape.GeometryType || shape.Type || '').toLowerCase();
         let shapeObj;

@@ -326,10 +326,18 @@ const DropHandler = (() => {
       const igwObj = { type: 'circle', cx: model.CenterX, cy: model.CenterY, r: model.Radius };
       let collided = false;
 
-      // Check against all shapes EXCEPT the host VPC itself
+      // Check against all shapes EXCEPT the host VPC itself and its ancestor containers
       const allShapes = CanvasState.getShapes();
+      const ancestorIds = new Set();
+      let currParentId = bestContainer.ShapeID;
+      while (currParentId) {
+        ancestorIds.add(currParentId);
+        const pShape = allShapes.find(s => s.ShapeID === currParentId);
+        currParentId = pShape ? pShape.ParentContainerID : null;
+      }
+
       for (const s of allShapes) {
-        if (s.ShapeID === bestContainer.ShapeID) continue; // skip own host VPC only
+        if (ancestorIds.has(s.ShapeID)) continue;
         if (Collision.checkCollision(igwObj, _objFromShape(s))) {
           collided = true; break;
         }
