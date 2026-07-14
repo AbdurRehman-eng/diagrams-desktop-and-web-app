@@ -37,19 +37,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof HierarchyLoader !== 'undefined') {
     await HierarchyLoader.load();
   }
-  // // M8: Load device-on-container-edge rules
-  // if (typeof EdgeAttachmentRulesLoader !== 'undefined') {
-  //   await EdgeAttachmentRulesLoader.load();
-  // }
-  // if (typeof ConnectionTypeLookupCsv !== 'undefined') {
-  //   await ConnectionTypeLookupCsv.load();
-  // }
-  // if (typeof ConnectionTypeLookupDb !== 'undefined') {
-  //   await ConnectionTypeLookupDb.load();
-  // }
-  // if (typeof GlobalConnectionDefaults !== 'undefined') {
-  //   await GlobalConnectionDefaults.load();
-  // }
+  // M8: Load device-on-container-edge rules
+  if (typeof EdgeAttachmentRulesLoader !== 'undefined') {
+    await EdgeAttachmentRulesLoader.load();
+  }
+  if (typeof ConnectionTypeLookupCsv !== 'undefined') {
+    await ConnectionTypeLookupCsv.load();
+  }
+  if (typeof ConnectionTypeLookupDb !== 'undefined') {
+    await ConnectionTypeLookupDb.load();
+  }
+  if (typeof GlobalConnectionDefaults !== 'undefined') {
+    await GlobalConnectionDefaults.load();
+  }
 
   // ── 3. Shapes Panel (BUG-02 fix — was never called from here) ───
   if (typeof RenderShapesPanel !== 'undefined') {
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof InputController !== 'undefined') InputController.init();
 
   // ── 4.5. Hover detection (M5) ───────────────────────────────────
-  // if (typeof HoverManager !== 'undefined') HoverManager.init();
+  if (typeof HoverManager !== 'undefined') HoverManager.init();
 
   // ── 5. Drop handler ─────────────────────────────────────────────
   if (typeof DropHandler !== 'undefined') DropHandler.init();
@@ -91,17 +91,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ── 8.7. M5+ UI Enhancements (commented out for M1/M2 baseline) ─
   if (typeof PropertiesModal       !== 'undefined') PropertiesModal.init();
-  // if (typeof ContextMenuController !== 'undefined') ContextMenuController.init();
-  // if (typeof ConnectionOptionsMenu !== 'undefined') ConnectionOptionsMenu.init();
-  // if (typeof DirtyTracker          !== 'undefined') DirtyTracker.init();
+  if (typeof ContextMenuController !== 'undefined') ContextMenuController.init();
+  if (typeof ConnectionOptionsMenu !== 'undefined') ConnectionOptionsMenu.init();
+  if (typeof DirtyTracker          !== 'undefined') DirtyTracker.init();
 
   // ── 9. Toolbar ──────────────────────────────────────────────────
   _setupToolbarV2();
 
   // ── M9: Auto-build demo diagram (commented out for M1/M2 baseline) ──────────
-  // if (typeof DemoDiagramBuilder !== 'undefined') { DemoDiagramBuilder.build(); }
+  if (typeof DemoDiagramBuilder !== 'undefined') { DemoDiagramBuilder.build(); }
 
-  console.log('[Main] Application Ready - Milestones 3 & 4 Active');
+  console.log('[Main] Application Ready - Milestones 7 & 8 Active');
 });
 
 function _setupToolbarV2() {
@@ -139,16 +139,23 @@ function _setupToolbarV2() {
     };
   }
 
-  // 3. Tool Selection (Select only — Connect is M7+)
+  // 3. Tool Selection
   const btnSelect = document.getElementById('btn-select');
-  // const btnConnect = document.getElementById('btn-connect'); // M7+
+  const btnConnect = document.getElementById('btn-connect');
 
   if (btnSelect) {
     btnSelect.onclick = () => {
       InputController.setTool('select');
-      if (btnSelect) btnSelect.classList.add('toolbar-btn--active');
+      btnSelect.classList.add('toolbar-btn--active');
+      if (btnConnect) btnConnect.classList.remove('toolbar-btn--active');
     };
-    btnSelect.classList.add('toolbar-btn--active'); // default active state
+  }
+  if (btnConnect) {
+    btnConnect.onclick = () => {
+      InputController.setTool('connect');
+      btnConnect.classList.add('toolbar-btn--active');
+      if (btnSelect) btnSelect.classList.remove('toolbar-btn--active');
+    };
   }
 
   // 4. Undo/Redo (M3+)

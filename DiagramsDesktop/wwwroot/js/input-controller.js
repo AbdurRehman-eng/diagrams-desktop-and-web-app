@@ -94,7 +94,18 @@ const InputController = (() => {
     }
 
     if (activeTool === 'connect') {
-      console.log('[InputController] Connect tool active — logic placeholder');
+      const sourceId = (shapeEl ? shapeEl.dataset.objId : null) || cocId;
+      if (sourceId) {
+        setTool('select');
+        const btnSelect = document.getElementById('btn-select');
+        const btnConnect = document.getElementById('btn-connect');
+        if (btnSelect) btnSelect.classList.add('toolbar-btn--active');
+        if (btnConnect) btnConnect.classList.remove('toolbar-btn--active');
+
+        if (typeof ConnectToMode !== 'undefined') {
+          ConnectToMode.start(sourceId);
+        }
+      }
       return;
     }
 
