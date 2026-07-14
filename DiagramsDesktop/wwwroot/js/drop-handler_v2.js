@@ -108,8 +108,6 @@ const DropHandler = (() => {
     // ── Collision Check before drop (regular shapes + COC circles) ──────────
     if (typeof Collision !== 'undefined') {
       const allShapes = CanvasState.getShapes();
-      const dropObj = _obj(newShape);
-      let collided = false;
       
       let intendedParentId = null;
       if (itemDef && itemDef.parentType && typeof ParentDropValidator !== 'undefined') {
@@ -124,8 +122,18 @@ const DropHandler = (() => {
             worldPos.y >= s.WorldY - hh && worldPos.y <= s.WorldY + hh
           );
         }).sort((a, b) => (a.Width * a.Height) - (b.Width * b.Height));
-        if (overlappingParents.length > 0) intendedParentId = overlappingParents[0].ShapeID;
+        
+        if (overlappingParents.length > 0) {
+          const pShape = overlappingParents[0];
+          intendedParentId = pShape.ShapeID;
+          if (typeof ContainmentEngine !== 'undefined') {
+            ContainmentEngine.fitShapeToParent(newShape, pShape);
+          }
+        }
       }
+
+      const dropObj = _obj(newShape);
+      let collided = false;
 
       const ancestorIds = new Set();
       let currParentId = intendedParentId;
@@ -186,8 +194,8 @@ const DropHandler = (() => {
         const hw = s.Width / 2;
         const hh = s.Height / 2;
         return (
-          worldPos.x >= s.WorldX - hw && worldPos.x <= s.WorldX + hw &&
-          worldPos.y >= s.WorldY - hh && worldPos.y <= s.WorldY + hh
+          newShape.WorldX >= s.WorldX - hw && newShape.WorldX <= s.WorldX + hw &&
+          newShape.WorldY >= s.WorldY - hh && newShape.WorldY <= s.WorldY + hh
         );
       });
       if (parentShape) {

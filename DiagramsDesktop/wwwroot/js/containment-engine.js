@@ -177,14 +177,78 @@ const ContainmentEngine = (() => {
     return { collided: false, siblingId: null };
   }
 
-  // ── Public: Parent resize validation ─────────────────────────────────────
-
-  /**
-   * validateParentResize
-   * Validates that a candidate parent resize does not leave any child outside.
-   */
   function validateParentResize(candidateBounds, parentShapeId, allShapes) {
     return ParentRectangleResizeValidation.validate(candidateBounds, parentShapeId, allShapes);
+  }
+
+  /**
+   * fitShapeToParent
+   * Adjusts the shape's width, height, radius, and center coordinates (WorldX, WorldY)
+   * to fit fully within the parentShape's inner boundaries, including protection padding.
+   */
+  function fitShapeToParent(shape, parentShape) {
+    if (!parentShape || !shape) return;
+
+    const geom = (shape.GeometryType || shape.Type || '').toLowerCase();
+    const isCircle = geom === 'circle' || geom === 'ellipse';
+
+    let ratio = 0.10;
+    if (typeof CanvasState !== 'undefined') {
+      const gv = CanvasState.getGlobalVars();
+      if (gv) {
+        if (isCircle) {
+          ratio = gv.circle?.protectionPaddingRatio ?? 0.10;
+        } else {
+          ratio = gv.rectangle?.protectionPaddingRatio ?? 0.10;
+        }
+      }
+    }
+
+    // Maximum allowed width and height for child to fit in parent inner boundary
+    // Equation: TotalNeededWidth = width * (1 + ratio) + 2 * EPSILON <= parentShape.Width
+    const maxW = (parentShape.Width - 2 * EPSILON) / (1 + ratio);
+    const maxH = (parentShape.Height - 2 * EPSILON) / (1 + ratio);
+
+    let width = shape.Width;
+    let height = shape.Height;
+    let resized = false;
+
+    if (width > maxW) {
+      width = maxW;
+      resized = true;
+    }
+    if (height > maxH) {
+      height = maxH;
+      resized = true;
+    }
+
+    if (isCircle) {
+      const minDim = Math.min(width, height);
+      if (shape.Width !== minDim || shape.Height !== minDim) {
+        width = minDim;
+        height = minDim;
+        resized = true;
+      }
+    }
+
+    if (resized) {
+      shape.Width = width;
+      shape.Height = height;
+      if (isCircle) {
+        shape.Radius = width / 2;
+      }
+    }
+
+    // Now clamp coordinates using ContainmentEngine clamping
+    if (isCircle) {
+      const clamped = clampChildCircle(shape.WorldX, shape.WorldY, shape, parentShape);
+      shape.WorldX = clamped.x;
+      shape.WorldY = clamped.y;
+    } else {
+      const clamped = clampChildRect(shape.WorldX, shape.WorldY, shape, parentShape);
+      shape.WorldX = clamped.x;
+      shape.WorldY = clamped.y;
+    }
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
@@ -214,6 +278,7 @@ const ContainmentEngine = (() => {
     getSiblings,
     checkSiblingOverlap,
     validateParentResize,
+    fitShapeToParent,
   };
 
 })();

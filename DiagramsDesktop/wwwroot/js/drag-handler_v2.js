@@ -274,8 +274,78 @@ const DragHandler = (() => {
 
     const finalShape = CanvasState.getShapes().find(s => s.ShapeID === _draggedShapeId);
     if (finalShape && _shapeSnapshot) {
-      let collided = false;
       const allShapes = CanvasState.getShapes();
+
+      // Auto-fit to parent container if applicable
+      if (_activeHandle === 'move' && typeof ShapeCategories !== 'undefined') {
+        const itemDef = ShapeCategories.getItemByType(finalShape.Type);
+        if (itemDef && itemDef.parentType) {
+          const requiredTypes = Array.isArray(itemDef.parentType) ? itemDef.parentType : [itemDef.parentType];
+          const parentShape = allShapes.find(s => {
+            if (s.ShapeID === finalShape.ShapeID) return false;
+            if (!requiredTypes.includes(s.Type)) return false;
+            if (s.Type === finalShape.Type) return false;
+            const hw = s.Width / 2;
+            const hh = s.Height / 2;
+            return (
+              finalShape.WorldX >= s.WorldX - hw && finalShape.WorldX <= s.WorldX + hw &&
+              finalShape.WorldY >= s.WorldY - hh && finalShape.WorldY <= s.WorldY + hh
+            );
+          });
+
+          if (parentShape) {
+            const oldX = finalShape.WorldX;
+            const oldY = finalShape.WorldY;
+            const oldW = finalShape.Width;
+            const oldH = finalShape.Height;
+
+            if (typeof ContainmentEngine !== 'undefined') {
+              ContainmentEngine.fitShapeToParent(finalShape, parentShape);
+            }
+
+            const adjX = finalShape.WorldX - oldX;
+            const adjY = finalShape.WorldY - oldY;
+
+            CanvasState.updateShape(finalShape.ShapeID, {
+              WorldX: finalShape.WorldX,
+              WorldY: finalShape.WorldY,
+              Width: finalShape.Width,
+              Height: finalShape.Height,
+              Radius: finalShape.Radius,
+              ParentContainerID: parentShape.ShapeID
+            });
+
+            // Shift descendants by the adjustment delta
+            if (adjX !== 0 || adjY !== 0) {
+              const descendants = _getDescendantIds(finalShape.ShapeID, allShapes);
+              for (const childId of descendants) {
+                const child = allShapes.find(s => s.ShapeID === childId);
+                if (child) {
+                  CanvasState.updateShape(childId, {
+                    WorldX: child.WorldX + adjX,
+                    WorldY: child.WorldY + adjY
+                  });
+                }
+              }
+            }
+
+            // If the shape shrunk, check that children are not excluded
+            if ((finalShape.Width < oldW || finalShape.Height < oldH) && typeof DeriveParentInnerBoundaries !== 'undefined' && typeof ContainmentEngine !== 'undefined') {
+              const newBounds = DeriveParentInnerBoundaries.fromShape(finalShape);
+              const parentResult = ContainmentEngine.validateParentResize(newBounds, finalShape.ShapeID, allShapes);
+              if (!parentResult.valid) {
+                console.warn('[DragHandler] M9 Parent auto-shrink rejected due to child exclusion:', parentResult.reason);
+                _snapBack();
+                RenderCanvas.render();
+                _reset();
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      let collided = false;
 
       // Collect all descendants — parent always "overlaps" its own children, skip them
       const descendantIds = _getDescendantIds(_draggedShapeId, allShapes);
