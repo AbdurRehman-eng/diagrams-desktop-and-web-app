@@ -33,3 +33,7 @@ const SvgPlacementCircle = (() => {
   };
 
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = SvgPlacementCircle;
+}

@@ -44,3 +44,7 @@ const SvgPlacementRectangle = (() => {
   };
 
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = SvgPlacementRectangle;
+}

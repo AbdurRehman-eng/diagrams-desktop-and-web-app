@@ -29,12 +29,12 @@ const RenderShapes = (() => {
       const pos        = WorldToScreen.convert(shape.WorldX, shape.WorldY, width, height);
       const isSelected = (shape.ShapeID === selectedId);
       const isHovered  = (shape.ShapeID === hoveredId) && !isSelected;
-      const g          = _buildShapeGroup(shape, pos, zoom, isSelected, isHovered);
+      const g          = _buildShapeGroup(shape, pos, zoom, isSelected, isHovered, width, height);
       svg.appendChild(g);
     });
   }
 
-  function _buildShapeGroup(shape, pos, zoom, isSelected, isHovered) {
+  function _buildShapeGroup(shape, pos, zoom, isSelected, isHovered, width, height) {
     const g = document.createElementNS(NS, 'g');
     g.id            = shape.ShapeID;
     g.style.cursor  = 'move';
@@ -63,6 +63,9 @@ const RenderShapes = (() => {
     if (shape.SvgIcon) {
       _renderIcon(g, shape, pos, zoom, effectiveGeom);
     }
+
+    // Render custom SVG attachments
+    _renderSvgAttachments(g, shape, pos, zoom, width, height);
 
     // 3. Resize Handles — show on hover OR selection
     if (isSelected || isHovered) {
@@ -383,6 +386,93 @@ const RenderShapes = (() => {
     text.style.pointerEvents = 'none';
     text.textContent = shape.Label;
     g.appendChild(text);
+  }
+
+  function _renderSvgAttachments(g, shape, pos, zoom, canvasWidth, canvasHeight) {
+    if (typeof CanvasState === 'undefined' || typeof SvgScaleHostCoupling === 'undefined') return;
+
+    const attachments = CanvasState.getSvgAttachments().filter(att => att.HostShapeID === shape.ShapeID);
+    if (!attachments || attachments.length === 0) return;
+
+    const assets = CanvasState.getSvgAssets();
+
+    attachments.forEach(att => {
+      const asset = assets.find(a => a.AssetID === att.AssetID);
+      if (!asset || !asset.RawSvgContent) return;
+
+      const ar = typeof SvgAssetMetadata !== 'undefined'
+        ? SvgAssetMetadata.getNaturalAspectRatio(asset.RawSvgContent)
+        : 1.0;
+
+      const screenBounds = _getScreenContentBounds(shape, pos, zoom, canvasWidth, canvasHeight);
+      const layout = SvgScaleHostCoupling.computeCoupling(att, screenBounds, ar);
+
+      try {
+        const nestedSvg = document.createElementNS(NS, 'svg');
+        nestedSvg.id = `svg-attachment-${att.AttachmentID}`;
+        nestedSvg.setAttribute('x', layout.x);
+        nestedSvg.setAttribute('y', layout.y);
+        nestedSvg.setAttribute('width', layout.width);
+        nestedSvg.setAttribute('height', layout.height);
+        nestedSvg.setAttribute('class', 'svg-attachment-item');
+        nestedSvg.style.pointerEvents = 'none';
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(asset.RawSvgContent, 'image/svg+xml');
+        const imported = document.importNode(doc.documentElement, true);
+
+        imported.setAttribute('width', '100%');
+        imported.setAttribute('height', '100%');
+        imported.setAttribute('preserveAspectRatio', layout.preserveAspectRatio);
+        imported.removeAttribute('x');
+        imported.removeAttribute('y');
+
+        nestedSvg.appendChild(imported);
+        g.appendChild(nestedSvg);
+      } catch (err) {
+        console.error('[RenderShapes] Failed to render SVG attachment:', att.AttachmentID, err);
+      }
+    });
+  }
+
+  function _getScreenContentBounds(shape, pos, zoom, canvasWidth, canvasHeight) {
+    const type = (shape.Type || '').toLowerCase();
+    const isContainer = type.includes('vpc') || type.includes('subnet') || type.includes('region') || type.includes('container');
+    const isCircle = shape.Type === 'Circle' || (typeof shape.Radius === 'number' && shape.Radius > 0 && !shape.Width);
+
+    if (isCircle) {
+      const r = (shape.Radius ?? (shape.Width / 2)) * zoom;
+      const side = r * Math.sqrt(2);
+      return {
+        width: side,
+        height: side,
+        centerX: pos.x,
+        centerY: pos.y
+      };
+    } else {
+      if (isContainer && typeof DeriveParentInnerBoundaries !== 'undefined') {
+        const inner = DeriveParentInnerBoundaries.fromShape(shape);
+        if (inner) {
+          const innerWidth = (inner.right - inner.left) * zoom;
+          const innerHeight = (inner.top - inner.bottom) * zoom;
+          const worldCenterX = (inner.left + inner.right) / 2;
+          const worldCenterY = (inner.bottom + inner.top) / 2;
+          const screenCenter = WorldToScreen.convert(worldCenterX, worldCenterY, canvasWidth, canvasHeight);
+          return {
+            width: innerWidth,
+            height: innerHeight,
+            centerX: screenCenter.x,
+            centerY: screenCenter.y
+          };
+        }
+      }
+      return {
+        width: shape.Width * zoom,
+        height: shape.Height * zoom,
+        centerX: pos.x,
+        centerY: pos.y
+      };
+    }
   }
 
   return { render };

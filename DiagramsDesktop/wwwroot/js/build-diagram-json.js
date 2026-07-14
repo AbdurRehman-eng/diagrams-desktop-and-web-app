@@ -73,7 +73,13 @@ const BuildDiagramJson = (() => {
       Connections: (diagram.Connections || []).map(conn => ({ ...conn, DiagramID: diagram.DiagramID })),
 
       // CircleOnContainers (M8)
-      CircleOnContainers: (diagram.CircleOnContainers || []).map(coc => ({ ...coc, DiagramID: diagram.DiagramID }))
+      CircleOnContainers: (diagram.CircleOnContainers || []).map(coc => ({ ...coc, DiagramID: diagram.DiagramID })),
+
+      // SvgAssets (M12)
+      SvgAssets: (diagram.SvgAssets || []).map(asset => ({ ...asset, DiagramID: diagram.DiagramID })),
+
+      // SvgAttachments (M12)
+      SvgAttachments: (diagram.SvgAttachments || []).map(att => ({ ...att, DiagramID: diagram.DiagramID }))
     };
   }
 

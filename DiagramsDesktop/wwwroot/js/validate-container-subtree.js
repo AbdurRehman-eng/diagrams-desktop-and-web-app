@@ -110,3 +110,7 @@ const ValidateContainerSubtree = (() => {
   };
 
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ValidateContainerSubtree;
+}

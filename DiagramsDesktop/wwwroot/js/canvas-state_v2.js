@@ -93,7 +93,9 @@ const CanvasState = (() => {
         },
         Shapes: config.Shapes || [],
         Connections: config.Connections || [],
-        CircleOnContainers: config.CircleOnContainers || []
+        CircleOnContainers: config.CircleOnContainers || [],
+        SvgAssets: config.SvgAssets || [],
+        SvgAttachments: config.SvgAttachments || []
       };
       return true;
     } catch (err) {
@@ -169,6 +171,7 @@ const CanvasState = (() => {
     if (activeDiagram) {
       activeDiagram.Shapes = [];
       activeDiagram.CircleOnContainers = [];
+      activeDiagram.SvgAttachments = [];
       if (typeof CircleOnContainerState !== 'undefined') CircleOnContainerState.clearSelection();
     }
   }
@@ -222,6 +225,9 @@ const CanvasState = (() => {
     addCircleOnContainer,
     updateCircleOnContainer,
     removeCircleOnContainer,
+    // M12 SVG attachments
+    getSvgAssets: () => (activeDiagram ? activeDiagram.SvgAssets : []),
+    getSvgAttachments: () => (activeDiagram ? activeDiagram.SvgAttachments : []),
   };
 
 })();

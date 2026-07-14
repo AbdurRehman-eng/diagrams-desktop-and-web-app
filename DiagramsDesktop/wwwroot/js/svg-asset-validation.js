@@ -53,3 +53,7 @@ const SvgAssetValidation = (() => {
   };
 
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = SvgAssetValidation;
+}
