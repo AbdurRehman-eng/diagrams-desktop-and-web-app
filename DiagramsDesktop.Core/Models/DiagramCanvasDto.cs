@@ -42,6 +42,8 @@ namespace DiagramsDesktop.Core.Models
         public List<ShapeDto> Shapes { get; set; } = new();
         public List<ConnectionDto> Connections { get; set; } = new();
         public List<CircleOnContainerDto> CircleOnContainers { get; set; } = new();
+        public List<SvgAssetDto> SvgAssets { get; set; } = new();
+        public List<SvgAttachmentDto> SvgAttachments { get; set; } = new();
     }
 
     public class ShapeDto
@@ -134,6 +136,32 @@ namespace DiagramsDesktop.Core.Models
         public string? Label { get; set; }
         public string? SvgIcon { get; set; }
         public bool IsDeleted { get; set; }
+        public string? CreatedAt { get; set; }
+        public string? UpdatedAt { get; set; }
+    }
+
+    public class SvgAssetDto
+    {
+        public string? AssetID { get; set; }
+        public string? DiagramID { get; set; }
+        public string? AssetName { get; set; }
+        public string? RawSvgContent { get; set; }
+        public string? CreatedAt { get; set; }
+        public string? UpdatedAt { get; set; }
+    }
+
+    public class SvgAttachmentDto
+    {
+        public string? AttachmentID { get; set; }
+        public string? DiagramID { get; set; }
+        public string? AssetID { get; set; }
+        public string? HostShapeID { get; set; }
+        public string? FittingType { get; set; }
+        public double ScaleX { get; set; }
+        public double ScaleY { get; set; }
+        public double OffsetX { get; set; }
+        public double OffsetY { get; set; }
+        public int ZOrder { get; set; }
         public string? CreatedAt { get; set; }
         public string? UpdatedAt { get; set; }
     }

@@ -72,11 +72,15 @@ namespace DiagramsDesktop.Core.Repositories
             var shapesSql = "SELECT * FROM DiagramShapes WHERE DiagramID = @DiagramID AND IsDeleted = 0";
             var connectionsSql = "SELECT * FROM DiagramConnections WHERE DiagramID = @DiagramID AND IsDeleted = 0";
             var cocSql = "SELECT * FROM CircleOnContainers WHERE DiagramID = @DiagramID AND IsDeleted = 0";
-
+            var assetsSql = "SELECT * FROM SvgAssets WHERE DiagramID = @DiagramID";
+            var attachmentsSql = "SELECT * FROM SvgAttachments WHERE DiagramID = @DiagramID";
+ 
             var shapes = await connection.QueryAsync<ShapeDto>(shapesSql, new { DiagramID = diagramId });
             var connections = await connection.QueryAsync<ConnectionDto>(connectionsSql, new { DiagramID = diagramId });
             var cocs = await connection.QueryAsync<CircleOnContainerDto>(cocSql, new { DiagramID = diagramId });
-
+            var assets = await connection.QueryAsync<SvgAssetDto>(assetsSql, new { DiagramID = diagramId });
+            var attachments = await connection.QueryAsync<SvgAttachmentDto>(attachmentsSql, new { DiagramID = diagramId });
+ 
             var connectionList = connections.ToList();
             if (connectionList.Any())
             {
@@ -91,11 +95,13 @@ namespace DiagramsDesktop.Core.Repositories
                     }
                 }
             }
-
+ 
             diagram.Shapes = shapes.ToList();
             diagram.Connections = connectionList;
             diagram.CircleOnContainers = cocs.ToList();
-
+            diagram.SvgAssets = assets.ToList();
+            diagram.SvgAttachments = attachments.ToList();
+ 
             return diagram;
         }
 
@@ -182,11 +188,12 @@ namespace DiagramsDesktop.Core.Repositories
                     await connection.ExecuteAsync(insertCanvasSql, dto, transaction);
                 }
 
-                // 3. Clear existing child items for this diagram ID
                 await connection.ExecuteAsync("DELETE FROM DiagramShapes WHERE DiagramID = @DiagramID", new { dto.DiagramID }, transaction);
                 await connection.ExecuteAsync("DELETE FROM DiagramConnectionDetails WHERE ConnectionID IN (SELECT ConnectionID FROM DiagramConnections WHERE DiagramID = @DiagramID)", new { dto.DiagramID }, transaction);
                 await connection.ExecuteAsync("DELETE FROM DiagramConnections WHERE DiagramID = @DiagramID", new { dto.DiagramID }, transaction);
                 await connection.ExecuteAsync("DELETE FROM CircleOnContainers WHERE DiagramID = @DiagramID", new { dto.DiagramID }, transaction);
+                await connection.ExecuteAsync("DELETE FROM SvgAssets WHERE DiagramID = @DiagramID", new { dto.DiagramID }, transaction);
+                await connection.ExecuteAsync("DELETE FROM SvgAttachments WHERE DiagramID = @DiagramID", new { dto.DiagramID }, transaction);
 
                 // 4. Insert shapes
                 if (dto.Shapes != null && dto.Shapes.Any())
@@ -259,6 +266,32 @@ namespace DiagramsDesktop.Core.Repositories
                     await connection.ExecuteAsync(insertCocSql, dto.CircleOnContainers, transaction);
                 }
 
+                // 7. Insert SvgAssets
+                if (dto.SvgAssets != null && dto.SvgAssets.Any())
+                {
+                    var insertAssetSql = @"
+                        INSERT INTO SvgAssets (
+                            AssetID, DiagramID, AssetName, RawSvgContent, CreatedAt, UpdatedAt
+                        ) VALUES (
+                            @AssetID, @DiagramID, @AssetName, @RawSvgContent, @CreatedAt, @UpdatedAt
+                        )";
+                    await connection.ExecuteAsync(insertAssetSql, dto.SvgAssets, transaction);
+                }
+
+                // 8. Insert SvgAttachments
+                if (dto.SvgAttachments != null && dto.SvgAttachments.Any())
+                {
+                    var insertAttachmentSql = @"
+                        INSERT INTO SvgAttachments (
+                            AttachmentID, DiagramID, AssetID, HostShapeID, FittingType,
+                            ScaleX, ScaleY, OffsetX, OffsetY, ZOrder, CreatedAt, UpdatedAt
+                        ) VALUES (
+                            @AttachmentID, @DiagramID, @AssetID, @HostShapeID, @FittingType,
+                            @ScaleX, @ScaleY, @OffsetX, @OffsetY, @ZOrder, @CreatedAt, @UpdatedAt
+                        )";
+                    await connection.ExecuteAsync(insertAttachmentSql, dto.SvgAttachments, transaction);
+                }
+ 
                 transaction.Commit();
             }
             catch (Exception)

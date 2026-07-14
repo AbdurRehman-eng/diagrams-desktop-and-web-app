@@ -191,6 +191,34 @@ namespace DiagramsDesktop.Core.Repositories
                     PRIMARY KEY (SourceDeviceType, DestinationDeviceType)
                 );";
 
+            // Create SvgAssets table
+            var createSvgAssetsTable = @"
+                CREATE TABLE IF NOT EXISTS SvgAssets (
+                    AssetID TEXT PRIMARY KEY,
+                    DiagramID TEXT,
+                    AssetName TEXT,
+                    RawSvgContent TEXT,
+                    CreatedAt TEXT,
+                    UpdatedAt TEXT
+                );";
+
+            // Create SvgAttachments table
+            var createSvgAttachmentsTable = @"
+                CREATE TABLE IF NOT EXISTS SvgAttachments (
+                    AttachmentID TEXT PRIMARY KEY,
+                    DiagramID TEXT,
+                    AssetID TEXT,
+                    HostShapeID TEXT,
+                    FittingType TEXT,
+                    ScaleX REAL,
+                    ScaleY REAL,
+                    OffsetX REAL,
+                    OffsetY REAL,
+                    ZOrder INTEGER,
+                    CreatedAt TEXT,
+                    UpdatedAt TEXT
+                );";
+
             using var cmd1 = new SqliteCommand(createDiagramsTable, connection);
             cmd1.ExecuteNonQuery();
 
@@ -214,6 +242,12 @@ namespace DiagramsDesktop.Core.Repositories
 
             using var cmd8 = new SqliteCommand(createConnectionTypeLookupsTable, connection);
             cmd8.ExecuteNonQuery();
+
+            using var cmd9 = new SqliteCommand(createSvgAssetsTable, connection);
+            cmd9.ExecuteNonQuery();
+
+            using var cmd10 = new SqliteCommand(createSvgAttachmentsTable, connection);
+            cmd10.ExecuteNonQuery();
 
             // Seed ConnectionStyleDefaults
             var seedStyleDefaults = @"
