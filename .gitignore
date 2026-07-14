@@ -21,3 +21,6 @@
 # SQLite databases
 diagrams.db
 diagrams-test.db
+
+# Project Zips
+DiagramsDesktop.zip

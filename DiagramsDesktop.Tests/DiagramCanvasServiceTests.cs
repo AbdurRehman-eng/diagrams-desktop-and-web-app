@@ -198,5 +198,54 @@ namespace DiagramsDesktop.Tests
             Assert.Contains(list, d => d.DiagramID == "d1" && d.DiagramName == "Diagram 1");
             Assert.Contains(list, d => d.DiagramID == "d2" && d.DiagramName == "Diagram 2");
         }
+
+        [Fact]
+        public async Task SaveAndGetDiagram_PersistsCircleSpecificFields()
+        {
+            // Arrange
+            var diagramId = Guid.NewGuid().ToString();
+            var shapeId = Guid.NewGuid().ToString();
+            var parentId = Guid.NewGuid().ToString();
+
+            var dto = new DiagramCanvasDto
+            {
+                DiagramID = diagramId,
+                DiagramName = "Circle Fields Test",
+                CanvasID = Guid.NewGuid().ToString(),
+                Shapes = new()
+                {
+                    new ShapeDto
+                    {
+                        ShapeID = shapeId,
+                        DiagramID = diagramId,
+                        Type = "circle",
+                        Label = "Test Circle Child",
+                        WorldX = 45.0,
+                        WorldY = 90.0,
+                        Radius = 25.0,
+                        HoverPaddingRadiusRatio = 1.15,
+                        ProtectionPaddingRadiusRatio = 1.25,
+                        ParentContainerID = parentId,
+                        IsDeleted = false
+                    }
+                }
+            };
+
+            // Act
+            await _service.SaveDiagramAsync(dto);
+            var loaded = await _service.GetDiagramAsync(diagramId);
+
+            // Assert
+            Assert.NotNull(loaded);
+            Assert.Single(loaded.Shapes);
+            var circleShape = loaded.Shapes[0];
+            Assert.Equal(shapeId, circleShape.ShapeID);
+            Assert.Equal("circle", circleShape.Type);
+            Assert.Equal(25.0, circleShape.Radius);
+            Assert.Equal(1.15, circleShape.HoverPaddingRadiusRatio);
+            Assert.Equal(1.25, circleShape.ProtectionPaddingRadiusRatio);
+            Assert.Equal(parentId, circleShape.ParentContainerID);
+        }
     }
 }
+
