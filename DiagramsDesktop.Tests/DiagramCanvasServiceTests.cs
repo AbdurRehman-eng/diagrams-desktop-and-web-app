@@ -246,6 +246,106 @@ namespace DiagramsDesktop.Tests
             Assert.Equal(1.25, circleShape.ProtectionPaddingRadiusRatio);
             Assert.Equal(parentId, circleShape.ParentContainerID);
         }
+
+        [Fact]
+        public async Task SaveAndGetDiagram_PersistsConnectionDetailFields()
+        {
+            // Arrange
+            var diagramId = Guid.NewGuid().ToString();
+            var connectionId = Guid.NewGuid().ToString();
+            
+            var detailDto = new ConnectionDetailDto
+            {
+                ConnectionID = connectionId,
+                LineType = "dashed",
+                LineWidth = 3.5,
+                LineColor = "#ff00ff",
+                IsDirectional = true,
+                ConnectionRouteType = "orthogonal",
+                StartJunctionID = "start-id",
+                StartJunctionX = 12.3,
+                StartJunctionY = 45.6,
+                EndJunctionID = "end-id",
+                EndJunctionX = 78.9,
+                EndJunctionY = 101.11,
+                SourceJunctionText = "SrcLbl",
+                DestinationJunctionText = "DstLbl",
+                MiddleLineText = "MidLbl"
+            };
+
+            var dto = new DiagramCanvasDto
+            {
+                DiagramID = diagramId,
+                DiagramName = "Connection Details Test",
+                CanvasID = Guid.NewGuid().ToString(),
+                Connections = new()
+                {
+                    new ConnectionDto
+                    {
+                        ConnectionID = connectionId,
+                        DiagramID = diagramId,
+                        SourceItemID = "src-shape",
+                        SourceItemKind = "SHAPE",
+                        DestinationItemID = "dst-shape",
+                        DestinationItemKind = "SHAPE",
+                        ConnectionType = "IPsec tunnel",
+                        IsDeleted = false,
+                        Detail = detailDto
+                    }
+                }
+            };
+
+            // Act
+            await _service.SaveDiagramAsync(dto);
+            var loaded = await _service.GetDiagramAsync(diagramId);
+
+            // Assert
+            Assert.NotNull(loaded);
+            Assert.Single(loaded.Connections);
+            var conn = loaded.Connections[0];
+            Assert.Equal(connectionId, conn.ConnectionID);
+            Assert.NotNull(conn.Detail);
+            Assert.Equal("dashed", conn.Detail.LineType);
+            Assert.Equal(3.5, conn.Detail.LineWidth);
+            Assert.Equal("#ff00ff", conn.Detail.LineColor);
+            Assert.True(conn.Detail.IsDirectional);
+            Assert.Equal("orthogonal", conn.Detail.ConnectionRouteType);
+            Assert.Equal("start-id", conn.Detail.StartJunctionID);
+            Assert.Equal(12.3, conn.Detail.StartJunctionX);
+            Assert.Equal(45.6, conn.Detail.StartJunctionY);
+            Assert.Equal("end-id", conn.Detail.EndJunctionID);
+            Assert.Equal(78.9, conn.Detail.EndJunctionX);
+            Assert.Equal(101.11, conn.Detail.EndJunctionY);
+            Assert.Equal("SrcLbl", conn.Detail.SourceJunctionText);
+            Assert.Equal("DstLbl", conn.Detail.DestinationJunctionText);
+            Assert.Equal("MidLbl", conn.Detail.MiddleLineText);
+        }
+
+        [Fact]
+        public async Task ConnectionService_ReturnsSeededLookupsAndDefaults()
+        {
+            // Arrange
+            var connectionRepo = new ConnectionRepository(_connectionString);
+            var connectionService = new ConnectionService(connectionRepo);
+
+            // Act
+            var lookups = (await connectionService.GetConnectionTypeLookupsAsync()).ToList();
+            var defaults = (await connectionService.GetConnectionStyleDefaultsAsync()).ToList();
+
+            // Assert
+            Assert.NotEmpty(lookups);
+            Assert.NotEmpty(defaults);
+
+            var vpcLookup = lookups.FirstOrDefault(l => l.SourceDeviceType == "AWS VPC" && l.DestinationDeviceType == "AWS VPC");
+            Assert.NotNull(vpcLookup);
+            Assert.Equal("IPsec tunnel OR VPC Peer link", vpcLookup.PossibleConnections);
+
+            var ipsecDefault = defaults.FirstOrDefault(d => d.ConnectionType == "IPsec tunnel");
+            Assert.NotNull(ipsecDefault);
+            Assert.Equal("#f59e0b", ipsecDefault.StrokeColor);
+            Assert.Equal("dashed", ipsecDefault.LineType);
+            Assert.Equal(2.0, ipsecDefault.LineWidth);
+        }
     }
 }
 

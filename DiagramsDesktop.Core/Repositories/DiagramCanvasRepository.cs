@@ -77,8 +77,23 @@ namespace DiagramsDesktop.Core.Repositories
             var connections = await connection.QueryAsync<ConnectionDto>(connectionsSql, new { DiagramID = diagramId });
             var cocs = await connection.QueryAsync<CircleOnContainerDto>(cocSql, new { DiagramID = diagramId });
 
+            var connectionList = connections.ToList();
+            if (connectionList.Any())
+            {
+                var detailsSql = "SELECT * FROM DiagramConnectionDetails WHERE ConnectionID IN (SELECT ConnectionID FROM DiagramConnections WHERE DiagramID = @DiagramID AND IsDeleted = 0)";
+                var details = await connection.QueryAsync<ConnectionDetailDto>(detailsSql, new { DiagramID = diagramId });
+                var detailsDict = details.ToDictionary(d => d.ConnectionID!);
+                foreach (var conn in connectionList)
+                {
+                    if (conn.ConnectionID != null && detailsDict.TryGetValue(conn.ConnectionID, out var detail))
+                    {
+                        conn.Detail = detail;
+                    }
+                }
+            }
+
             diagram.Shapes = shapes.ToList();
-            diagram.Connections = connections.ToList();
+            diagram.Connections = connectionList;
             diagram.CircleOnContainers = cocs.ToList();
 
             return diagram;
@@ -169,6 +184,7 @@ namespace DiagramsDesktop.Core.Repositories
 
                 // 3. Clear existing child items for this diagram ID
                 await connection.ExecuteAsync("DELETE FROM DiagramShapes WHERE DiagramID = @DiagramID", new { dto.DiagramID }, transaction);
+                await connection.ExecuteAsync("DELETE FROM DiagramConnectionDetails WHERE ConnectionID IN (SELECT ConnectionID FROM DiagramConnections WHERE DiagramID = @DiagramID)", new { dto.DiagramID }, transaction);
                 await connection.ExecuteAsync("DELETE FROM DiagramConnections WHERE DiagramID = @DiagramID", new { dto.DiagramID }, transaction);
                 await connection.ExecuteAsync("DELETE FROM CircleOnContainers WHERE DiagramID = @DiagramID", new { dto.DiagramID }, transaction);
 
@@ -198,6 +214,29 @@ namespace DiagramsDesktop.Core.Repositories
                             @ConnectionID, @DiagramID, @SourceItemID, @SourceItemKind, @DestinationItemID, @DestinationItemKind, @ConnectionType, @IsDeleted
                         )";
                     await connection.ExecuteAsync(insertConnectionSql, dto.Connections, transaction);
+
+                    var connectionDetails = dto.Connections
+                        .Where(c => c.Detail != null)
+                        .Select(c => {
+                            c.Detail!.ConnectionID = c.ConnectionID;
+                            return c.Detail;
+                        })
+                        .ToList();
+
+                    if (connectionDetails.Any())
+                    {
+                        var insertDetailSql = @"
+                            INSERT INTO DiagramConnectionDetails (
+                                ConnectionID, LineType, LineWidth, LineColor, IsDirectional, ConnectionRouteType,
+                                StartJunctionID, StartJunctionX, StartJunctionY, EndJunctionID, EndJunctionX, EndJunctionY,
+                                SourceJunctionText, DestinationJunctionText, MiddleLineText
+                            ) VALUES (
+                                @ConnectionID, @LineType, @LineWidth, @LineColor, @IsDirectional, @ConnectionRouteType,
+                                @StartJunctionID, @StartJunctionX, @StartJunctionY, @EndJunctionID, @EndJunctionX, @EndJunctionY,
+                                @SourceJunctionText, @DestinationJunctionText, @MiddleLineText
+                            )";
+                        await connection.ExecuteAsync(insertDetailSql, connectionDetails, transaction);
+                    }
                 }
 
                 // 6. Insert circle-on-containers

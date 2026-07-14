@@ -121,6 +121,8 @@ public static class MauiProgram
                 // Configure Services and Inject dependencies
                 builder.Services.AddSingleton<IDiagramCanvasRepository>(new DiagramCanvasRepository(connectionString));
                 builder.Services.AddSingleton<IDiagramCanvasService, DiagramCanvasService>();
+                builder.Services.AddSingleton<IConnectionRepository>(new ConnectionRepository(connectionString));
+                builder.Services.AddSingleton<IConnectionService, ConnectionService>();
 
                 builder.Services.AddControllers()
                     .AddJsonOptions(options =>

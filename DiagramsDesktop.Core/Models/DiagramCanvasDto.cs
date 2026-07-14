@@ -81,6 +81,26 @@ namespace DiagramsDesktop.Core.Models
         public string? DestinationItemKind { get; set; }
         public string? ConnectionType { get; set; }
         public bool IsDeleted { get; set; }
+        public ConnectionDetailDto? Detail { get; set; }
+    }
+
+    public class ConnectionDetailDto
+    {
+        public string? ConnectionID { get; set; }
+        public string? LineType { get; set; }
+        public double LineWidth { get; set; }
+        public string? LineColor { get; set; }
+        public bool IsDirectional { get; set; }
+        public string? ConnectionRouteType { get; set; }
+        public string? StartJunctionID { get; set; }
+        public double StartJunctionX { get; set; }
+        public double StartJunctionY { get; set; }
+        public string? EndJunctionID { get; set; }
+        public double EndJunctionX { get; set; }
+        public double EndJunctionY { get; set; }
+        public string? SourceJunctionText { get; set; }
+        public string? DestinationJunctionText { get; set; }
+        public string? MiddleLineText { get; set; }
     }
 
     public class CircleOnContainerDto
