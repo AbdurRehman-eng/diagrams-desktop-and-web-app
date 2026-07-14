@@ -76,7 +76,7 @@ const ContainmentEngine = (() => {
       bounds.ParentInnerTopY,  bounds.ParentInnerBottomY,
       hw, hh,
       ChildProtectionPaddingX, ChildProtectionPaddingY,
-      EPSILON
+      EPSILON + 0.05
     );
     return { x: clamped.ClampedChildCenterX, y: clamped.ClampedChildCenterY };
   }
@@ -96,7 +96,7 @@ const ContainmentEngine = (() => {
       tx, ty,
       bounds.ParentInnerLeftX, bounds.ParentInnerRightX,
       bounds.ParentInnerTopY,  bounds.ParentInnerBottomY,
-      ppR, EPSILON
+      ppR, EPSILON + 0.05
     );
     return { x: clamped.ClampedChildCircleCenterX, y: clamped.ClampedChildCircleCenterY };
   }
@@ -205,9 +205,9 @@ const ContainmentEngine = (() => {
     }
 
     // Maximum allowed width and height for child to fit in parent inner boundary
-    // Equation: TotalNeededWidth = width * (1 + ratio) + 2 * EPSILON <= parentShape.Width
-    const maxW = (parentShape.Width - 2 * EPSILON) / (1 + ratio);
-    const maxH = (parentShape.Height - 2 * EPSILON) / (1 + ratio);
+    // Equation: TotalNeededWidth = width * (1 + ratio) + 2 * (EPSILON + 0.05) <= parentShape.Width
+    const maxW = (parentShape.Width - 2 * (EPSILON + 0.05)) / (1 + ratio);
+    const maxH = (parentShape.Height - 2 * (EPSILON + 0.05)) / (1 + ratio);
 
     let width = shape.Width;
     let height = shape.Height;
