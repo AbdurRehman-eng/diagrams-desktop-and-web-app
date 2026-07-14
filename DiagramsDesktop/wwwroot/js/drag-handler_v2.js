@@ -370,14 +370,14 @@ const DragHandler = (() => {
       }
 
       // ── COC collision check ───────────────────────────────────────────────
-      // During MOVE:   skip COC that belongs to the moved shape (own IGW)
-      // During RESIZE: skip COC that belongs to the RESIZED shape (its own IGW)
+      // During MOVE:   skip COC that belongs to the moved shape (own IGW) and its descendants
+      // During RESIZE: skip COC that belongs to the RESIZED shape (its own IGW) and its descendants
       //               but DO check all other COC circles for overlap
       if (!collided && typeof CircleOnContainerState !== 'undefined') {
         const cocs = CircleOnContainerState.getAll();
         for (const coc of cocs) {
-          // Skip IGW attached to the shape being dragged/resized
-          if (coc.ParentContainerID === _draggedShapeId) continue;
+          // Skip IGW attached to the shape being dragged/resized, or any of its descendants
+          if (coc.ParentContainerID === _draggedShapeId || descendantIds.has(coc.ParentContainerID)) continue;
           const cocObj = { type: 'circle', cx: coc.CenterX, cy: coc.CenterY, r: coc.Radius };
           if (Collision.checkCollision(_obj(finalShape), cocObj)) {
             collided = true;
