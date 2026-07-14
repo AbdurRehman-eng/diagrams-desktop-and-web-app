@@ -10,6 +10,14 @@
 const SaveDiagramJson = (() => {
 
   async function save() {
+    if (typeof ContainmentSaveValidation !== 'undefined') {
+      const valResult = ContainmentSaveValidation.validate();
+      if (!valResult.ok) {
+        alert('Save aborted. Multi-child containment validation failed:\n' + valResult.errors.join('\n'));
+        return;
+      }
+    }
+
     const payload = BuildDiagramJson.build();
     if (!payload) return;
 

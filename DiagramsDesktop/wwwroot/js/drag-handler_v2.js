@@ -455,12 +455,47 @@ const DragHandler = (() => {
             }
           }
 
-          // 2. N-1 sibling overlap check
+          // 2. N-1 sibling overlap check (M10: typed Protection-Padding validation)
           if (movedShape) {
             const siblings  = ContainmentEngine.getSiblings(_draggedShapeId, allShapes);
-            const sibResult = ContainmentEngine.checkSiblingOverlap(movedShape, siblings);
-            if (sibResult.collided) {
-              console.warn('[DragHandler] M9 Sibling overlap — snapping back. Sibling:', sibResult.siblingId);
+            const geomType  = (movedShape.GeometryType || movedShape.Type || '').toLowerCase();
+            const isCircle  = geomType === 'circle' || geomType === 'ellipse';
+            let siblingRejected = false;
+
+            if (isCircle && typeof SiblingCircleOverlapValidation !== 'undefined') {
+              const r       = movedShape.Radius ?? movedShape.Width / 2;
+              const padding = ContainmentEngine.getCircleProtectionPadding(movedShape);
+              const sibRes  = SiblingCircleOverlapValidation.validateChildCircleAgainstSiblingCircles(
+                _draggedShapeId, { x: movedShape.WorldX, y: movedShape.WorldY }, r + padding, siblings
+              );
+              if (!sibRes.valid) {
+                console.warn('[DragHandler] M10 Sibling circle overlap — snapping back:', sibRes.reason);
+                siblingRejected = true;
+              }
+            } else if (!isCircle && typeof SiblingRectangleOverlapValidation !== 'undefined') {
+              const { ChildProtectionPaddingX: px, ChildProtectionPaddingY: py } = ContainmentEngine.getRectProtectionPadding(movedShape);
+              const paddedBounds = window.recalculateChildRectangleProtectionPadding(
+                movedShape.WorldX, movedShape.WorldY, movedShape.Width / 2, movedShape.Height / 2, px, py
+              );
+              if (paddedBounds) {
+                const sibRes = SiblingRectangleOverlapValidation.validateChildRectangleAgainstSiblingRectangles(
+                  _draggedShapeId, paddedBounds, siblings
+                );
+                if (!sibRes.valid) {
+                  console.warn('[DragHandler] M10 Sibling rect overlap — snapping back:', sibRes.reason);
+                  siblingRejected = true;
+                }
+              }
+            } else {
+              // Fallback: generic M9 check
+              const sibResult = ContainmentEngine.checkSiblingOverlap(movedShape, siblings);
+              if (sibResult.collided) {
+                console.warn('[DragHandler] M9 Sibling overlap — snapping back. Sibling:', sibResult.siblingId);
+                siblingRejected = true;
+              }
+            }
+
+            if (siblingRejected) {
               _snapBack();
               RenderCanvas.render();
               _reset();
@@ -471,10 +506,50 @@ const DragHandler = (() => {
           // 3. Children were already moved in real-time during onMouseMove — no re-propagation needed
         }
 
-        // ── M9: On resize, validate parent doesn't exclude children ────────
+        // ── M9/M10: On resize, validate parent and children ────────
         if (_activeHandle !== 'move' && typeof ContainmentEngine !== 'undefined') {
           const resizedShape = CanvasState.getShapes().find(s => s.ShapeID === _draggedShapeId);
           if (resizedShape) {
+            // A. If the resized shape has a parent (i.e., it is a child shape being resized), check sibling overlap
+            if (resizedShape.ParentContainerID) {
+              const geomType = (resizedShape.GeometryType || resizedShape.Type || '').toLowerCase();
+              const isCircle = geomType === 'circle' || geomType === 'ellipse';
+              const siblings = ContainmentEngine.getSiblings(_draggedShapeId, allShapes);
+              if (isCircle) {
+                const r = resizedShape.Radius ?? resizedShape.Width / 2;
+                const padding = ContainmentEngine.getCircleProtectionPadding(resizedShape);
+                const paddedR = r + padding;
+                if (typeof SiblingCircleOverlapValidation !== 'undefined') {
+                  const sibResult = SiblingCircleOverlapValidation.validateChildCircleResizeAgainstSiblingCircles(
+                    _draggedShapeId, { x: resizedShape.WorldX, y: resizedShape.WorldY }, paddedR, siblings
+                  );
+                  if (!sibResult.valid) {
+                    console.warn('[DragHandler] M10 Sibling circle resize overlap — snapping back');
+                    _snapBack();
+                    RenderCanvas.render();
+                    _reset();
+                    return;
+                  }
+                }
+              } else {
+                const { ChildProtectionPaddingX: px, ChildProtectionPaddingY: py } = ContainmentEngine.getRectProtectionPadding(resizedShape);
+                const bounds = window.recalculateChildRectangleProtectionPadding(resizedShape.WorldX, resizedShape.WorldY, resizedShape.Width / 2, resizedShape.Height / 2, px, py);
+                if (typeof SiblingRectangleOverlapValidation !== 'undefined') {
+                  const sibResult = SiblingRectangleOverlapValidation.validateChildRectangleResizeAgainstSiblingRectangles(
+                    _draggedShapeId, bounds, siblings
+                  );
+                  if (!sibResult.valid) {
+                    console.warn('[DragHandler] M10 Sibling rectangle resize overlap — snapping back');
+                    _snapBack();
+                    RenderCanvas.render();
+                    _reset();
+                    return;
+                  }
+                }
+              }
+            }
+
+            // B. If it has children (i.e. it is a parent container), check that resize does not exclude them
             const newBounds    = DeriveParentInnerBoundaries.fromShape(resizedShape);
             const parentResult = ContainmentEngine.validateParentResize(newBounds, _draggedShapeId, CanvasState.getShapes());
             if (!parentResult.valid) {
@@ -483,6 +558,34 @@ const DragHandler = (() => {
               RenderCanvas.render();
               _reset();
               return;
+            }
+
+            // C. Validate attached COCs (Circle On Containers) on parent resize (Phase 10.8)
+            if (typeof CircleOnContainerRadiusRangeValidation !== 'undefined') {
+              const cocs = CanvasState.getCircleOnContainers().filter(c => c.ParentContainerID === _draggedShapeId);
+              for (const coc of cocs) {
+                const rangeResult = CircleOnContainerRadiusRangeValidation.validateOnParentResize(coc, resizedShape);
+                if (!rangeResult.valid) {
+                  console.warn('[DragHandler] M10 Parent resize rejected due to invalid COC radius:', rangeResult.reason);
+                  _snapBack();
+                  RenderCanvas.render();
+                  _reset();
+                  return;
+                }
+                
+                if (typeof ValidateEdgeCirclePlacement !== 'undefined') {
+                  const center = CalculateEdgeCircleCenter.fromEdge(resizedShape, coc.HostEdge, coc.EdgeParameterT);
+                  const tempCoc = Object.assign({}, coc, { CenterX: center.CenterX, CenterY: center.CenterY });
+                  const cocVal = ValidateEdgeCirclePlacement.validate(tempCoc, resizedShape);
+                  if (!cocVal.ok) {
+                    console.warn('[DragHandler] M10 Parent resize rejected due to COC placement/overlap violation:', cocVal.reason);
+                    _snapBack();
+                    RenderCanvas.render();
+                    _reset();
+                    return;
+                  }
+                }
+              }
             }
           }
         }

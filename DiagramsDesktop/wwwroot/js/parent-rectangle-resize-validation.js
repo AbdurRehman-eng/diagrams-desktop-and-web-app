@@ -67,6 +67,14 @@ const ParentRectangleResizeValidation = (() => {
     return { valid: true, reason: 'ok' };
   }
 
-  return { validate };
+  function validateParentResizeAgainstAllChildRectangles(candidateBounds, parentShapeId, allShapes) {
+    return validate(candidateBounds, parentShapeId, allShapes);
+  }
+
+  function validateParentResizeAgainstAllChildCircles(candidateBounds, parentShapeId, allShapes) {
+    return validate(candidateBounds, parentShapeId, allShapes);
+  }
+
+  return { validate, validateParentResizeAgainstAllChildRectangles, validateParentResizeAgainstAllChildCircles };
 
 })();

@@ -58,6 +58,15 @@ const DiagramApi = (() => {
     // Update name in state
     CanvasState.updateDiagramMeta({ DiagramName: finalName });
 
+    // Validate containment and sibling overlap first
+    if (typeof ContainmentSaveValidation !== 'undefined') {
+      const valResult = ContainmentSaveValidation.validate();
+      if (!valResult.ok) {
+        alert('Save aborted. Multi-child containment validation failed:\n' + valResult.errors.join('\n'));
+        return;
+      }
+    }
+
     // Build payload and save
     const payload = (typeof BuildDiagramJson !== 'undefined') 
       ? BuildDiagramJson.buildFlatDto() 
