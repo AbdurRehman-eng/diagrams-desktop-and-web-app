@@ -54,9 +54,17 @@ const ValidateEdgeCirclePlacement = (() => {
       const cocCircle = { type: 'circle', cx: candidate.CenterX, cy: candidate.CenterY, r: candidate.Radius };
       const allShapes = CanvasState.getShapes();
 
+      const ancestorIds = new Set();
+      let currParentId = candidate.ParentContainerID;
+      while (currParentId) {
+        ancestorIds.add(currParentId);
+        const pShape = allShapes.find(s => s.ShapeID === currParentId);
+        currParentId = pShape ? pShape.ParentContainerID : null;
+      }
+
       for (const shape of allShapes) {
-        // Never check against own parent container
-        if (shape.ShapeID === candidate.ParentContainerID) continue;
+        // Never check against own parent container or parent's ancestor containers
+        if (ancestorIds.has(shape.ShapeID)) continue;
 
         const geom = (shape.GeometryType || shape.Type || '').toLowerCase();
         let shapeObj;

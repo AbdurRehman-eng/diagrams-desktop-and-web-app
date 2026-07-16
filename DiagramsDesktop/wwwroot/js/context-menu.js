@@ -58,42 +58,46 @@ const ContextMenuController = (() => {
       let cocEl   = null;
 
       for (const el of path) {
-        if (el.getAttribute && el.getAttribute('data-obj-id')) { shapeEl = el; break; }
-        if (el.dataset && el.dataset.connectionId) { connEl = el; break; }
-        if (el.dataset && el.dataset.cocId)        { cocEl  = el; break; }
+        if (el.getAttribute) {
+          if (el.getAttribute('data-obj-id')) { shapeEl = el; break; }
+          if (el.getAttribute('data-connection-id')) { connEl = el; break; }
+          if (el.getAttribute('data-coc-id'))        { cocEl  = el; break; }
+        }
         if (el.id === 'MainCanvasViewport') break;
       }
 
       if (shapeEl) {
-        _lastTargetShapeId = shapeEl.dataset.objId;
+        _lastTargetShapeId = shapeEl.getAttribute('data-obj-id');
         _lastTargetConnId = null;
         _lastTargetCocId  = null;
         CanvasState.selectShape(_lastTargetShapeId);
         RenderCanvas.render();
         labelProps.textContent = 'Edit Shape Properties';
+        btnEditProps.style.display  = 'flex';
         btnConnect.style.display    = 'flex';
         btnDelete.style.display     = 'flex';
         btnDeleteConn.style.display = 'none';
         btnDeleteCoc.style.display  = 'none';
       } else if (connEl) {
-        _lastTargetConnId  = connEl.dataset.connectionId;
+        _lastTargetConnId  = connEl.getAttribute('data-connection-id');
         _lastTargetShapeId = null;
         _lastTargetCocId   = null;
         CanvasState.selectConnection(_lastTargetConnId);
         RenderCanvas.render();
-        labelProps.textContent = 'Edit Canvas Properties';
+        btnEditProps.style.display  = 'none';
         btnConnect.style.display    = 'none';
         btnDelete.style.display     = 'none';
         btnDeleteConn.style.display = 'flex';
         btnDeleteCoc.style.display  = 'none';
       } else if (cocEl) {
-        _lastTargetCocId   = cocEl.dataset.cocId;
+        _lastTargetCocId   = cocEl.getAttribute('data-coc-id');
         _lastTargetShapeId = null;
         _lastTargetConnId  = null;
         if (typeof CircleOnContainerState !== 'undefined')
           CircleOnContainerState.selectCircleOnContainer(_lastTargetCocId);
         RenderCanvas.render();
         labelProps.textContent = 'Edit Edge Device Properties';
+        btnEditProps.style.display  = 'flex';
         btnConnect.style.display    = 'flex';   // ← Allow connecting FROM a COC (e.g. IGW → Route Table)
         btnDelete.style.display     = 'none';
         btnDeleteConn.style.display = 'none';
@@ -103,9 +107,11 @@ const ContextMenuController = (() => {
         _lastTargetConnId  = null;
         _lastTargetCocId   = null;
         CanvasState.selectShape(null);
+        CanvasState.selectConnection(null);
         if (typeof CircleOnContainerState !== 'undefined') CircleOnContainerState.clearSelection();
         RenderCanvas.render();
         labelProps.textContent = 'Edit Canvas Properties';
+        btnEditProps.style.display  = 'flex';
         btnConnect.style.display    = 'none';
         btnDelete.style.display     = 'none';
         btnDeleteConn.style.display = 'none';

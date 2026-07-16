@@ -1,0 +1,23 @@
+/**
+ * nested-container-move.css
+ * =========================
+ * Styling for container subtree movement, dragging previews, and snapback visual cues.
+ */
+
+.subtree-dragging {
+  opacity: 0.85;
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15));
+  transition: transform 0.05s ease-out;
+}
+
+.validation-error-glow {
+  animation: validation-error-shake 0.4s ease-in-out;
+  stroke: #ef4444 !important;
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+}
+
+@keyframes validation-error-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}

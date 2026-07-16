@@ -44,13 +44,19 @@ const InputController = (() => {
     let isCocResize = false;
     let cocResizeHandleCode = null;
     let isCocElement = false;
+    let connId = null;
 
     for (const el of path) {
       if (el.getAttribute) {
         const hCode    = el.getAttribute('data-handle');
         const oId      = el.getAttribute('data-obj-id');
         const cId      = el.getAttribute('data-coc-id') || (el.dataset ? el.dataset.cocId : null);
+        const conn_id  = el.getAttribute('data-connection-id');
         const cssClass = el.getAttribute('class') || '';
+
+        if (conn_id) {
+          connId = conn_id;
+        }
 
         if (cId) {
           cocId = cId;
@@ -94,7 +100,18 @@ const InputController = (() => {
     }
 
     if (activeTool === 'connect') {
-      console.log('[InputController] Connect tool active — logic placeholder');
+      const sourceId = (shapeEl ? shapeEl.dataset.objId : null) || cocId;
+      if (sourceId) {
+        setTool('select');
+        const btnSelect = document.getElementById('btn-select');
+        const btnConnect = document.getElementById('btn-connect');
+        if (btnSelect) btnSelect.classList.add('toolbar-btn--active');
+        if (btnConnect) btnConnect.classList.remove('toolbar-btn--active');
+
+        if (typeof ConnectToMode !== 'undefined') {
+          ConnectToMode.start(sourceId);
+        }
+      }
       return;
     }
 
@@ -103,6 +120,9 @@ const InputController = (() => {
       e.preventDefault();
 
       CanvasState.selectShape(null);
+      if (typeof CanvasState.selectConnection !== 'undefined') {
+        CanvasState.selectConnection(null);
+      }
       if (cocId) {
         CircleOnContainerState.selectCircleOnContainer(cocId);
 
@@ -114,6 +134,14 @@ const InputController = (() => {
           }
         }
       }
+      RenderCanvas.render();
+      return;
+    }
+
+    if (connId) {
+      e.stopPropagation();
+      e.preventDefault();
+      CanvasState.selectConnection(connId);
       RenderCanvas.render();
       return;
     }
@@ -146,6 +174,9 @@ const InputController = (() => {
     }
 
     CanvasState.selectShape(null);
+    if (typeof CanvasState.selectConnection !== 'undefined') {
+      CanvasState.selectConnection(null);
+    }
     PanHandler.onMouseDown(e);
     RenderCanvas.render();
   }
@@ -190,6 +221,16 @@ const InputController = (() => {
       if (selectedCocId) {
         CanvasState.removeCircleOnContainer(selectedCocId);
         CircleOnContainerState.clearSelection();
+        if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
+        if (typeof DirtyTracker   !== 'undefined') DirtyTracker.markDirty();
+        RenderCanvas.render();
+        return;
+      }
+
+      // ── Delete selected connection ────────────────────────────────────────
+      const selectedConnId = typeof CanvasState !== 'undefined' ? CanvasState.getSelectedConnectionId() : null;
+      if (selectedConnId) {
+        CanvasState.removeConnection(selectedConnId);
         if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
         if (typeof DirtyTracker   !== 'undefined') DirtyTracker.markDirty();
         RenderCanvas.render();

@@ -18,6 +18,15 @@ const ContainmentSaveValidation = (() => {
    */
   function validate() {
     const allShapes = CanvasState.getShapes();
+    if (typeof MultiChildContainmentProtectionPaddingRecalculation !== 'undefined' &&
+        typeof MultiChildContainmentSaveValidation !== 'undefined') {
+      const geom = MultiChildContainmentProtectionPaddingRecalculation.recalculateAllMultiChildContainmentProtectionPaddingGeometry(
+        null, null, null, allShapes, null, null
+      );
+      return MultiChildContainmentSaveValidation.validateCommittedMultiChildContainmentState(
+        null, null, null, geom, null, null
+      );
+    }
     return ContainmentProtectionPaddingRecalculation.recalculateAll(allShapes);
   }
 

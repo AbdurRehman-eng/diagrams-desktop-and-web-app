@@ -175,6 +175,59 @@ const PropertiesModal = (() => {
                   <div class="prop-label">Height</div>
                   <input type="number" class="prop-input" id="prop-shape-height" min="0" max="2000" />
                 </div>
+
+                <div class="prop-section-title" style="margin-top:16px;">SVG Attachments</div>
+                <div class="prop-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+                  <div class="prop-label">Upload custom SVG</div>
+                  <input type="file" id="prop-svg-upload-file" accept=".svg" style="font-size: 11px; margin-top: 4px;" />
+                  <div id="prop-svg-upload-error" style="color: #f87171; font-size: 10px; margin-top: 4px;" class="hidden"></div>
+                </div>
+
+                <div class="prop-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:12px;">
+                  <div class="prop-label">Attach Existing Asset</div>
+                  <select id="prop-svg-asset-select" class="prop-input" style="width: 100%; font-size:12px;"></select>
+                  <button type="button" class="prop-btn" id="btn-prop-attach-svg" style="margin-top: 6px; padding: 4px 8px; font-size: 11px;">Attach</button>
+                </div>
+
+                <div class="prop-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:12px;">
+                  <div class="prop-label">Active Attachments</div>
+                  <div id="prop-svg-attachments-list" style="width: 100%; display: flex; flex-direction: column; gap: 6px;"></div>
+                </div>
+
+                <!-- SVG Attachment Configuration Subform (Hidden unless an attachment is selected) -->
+                <div id="prop-svg-attachment-details" class="hidden" style="border: 1px solid var(--color-border); border-radius: 6px; padding: 10px; margin-top: 12px; background-color: var(--color-bg-secondary);">
+                  <div class="prop-label" style="font-weight: 600; margin-bottom: 8px;">Attachment Settings</div>
+                  <div class="prop-row">
+                    <div class="prop-label">Fitting Type</div>
+                    <select id="prop-svg-fit-type" class="prop-input" style="font-size:12px;">
+                      <option value="fit-aspect">Fit Aspect Ratio</option>
+                      <option value="fit-stretch">Stretch to Fill</option>
+                      <option value="custom-offset">Custom Scaling & Offset</option>
+                    </select>
+                  </div>
+                  <div id="prop-svg-custom-settings" class="hidden">
+                    <div class="prop-row" style="margin-top: 8px;">
+                      <div class="prop-label">Scale X</div>
+                      <input type="number" id="prop-svg-scale-x" class="prop-input" step="0.05" min="0.05" max="5.0" style="font-size:12px;" />
+                    </div>
+                    <div class="prop-row">
+                      <div class="prop-label">Scale Y</div>
+                      <input type="number" id="prop-svg-scale-y" class="prop-input" step="0.05" min="0.05" max="5.0" style="font-size:12px;" />
+                    </div>
+                    <div class="prop-row">
+                      <div class="prop-label">Offset X</div>
+                      <input type="number" id="prop-svg-offset-x" class="prop-input" step="1" style="font-size:12px;" />
+                    </div>
+                    <div class="prop-row">
+                      <div class="prop-label">Offset Y</div>
+                      <input type="number" id="prop-svg-offset-y" class="prop-input" step="1" style="font-size:12px;" />
+                    </div>
+                  </div>
+                  <div class="prop-row" style="margin-top: 10px; justify-content: flex-end; gap: 8px;">
+                    <button type="button" class="prop-btn" id="btn-prop-remove-svg" style="background-color: #ef4444; color: white; padding: 4px 8px; font-size: 11px;">Remove</button>
+                    <button type="button" class="prop-btn" id="btn-prop-save-svg-settings" style="padding: 4px 8px; font-size: 11px;">Save Settings</button>
+                  </div>
+                </div>
               </div>
 
             </div><!-- end prop-body -->
@@ -214,6 +267,96 @@ const PropertiesModal = (() => {
     document.querySelectorAll('.prop-sidebar-item').forEach(t =>
       t.addEventListener('click', () => _switchTab(t.dataset.target))
     );
+
+    // SVG Attachments event bindings
+    const fileInput = document.getElementById('prop-svg-upload-file');
+    const assetSelect = document.getElementById('prop-svg-asset-select');
+    const attachBtn = document.getElementById('btn-prop-attach-svg');
+    const fitSelect = document.getElementById('prop-svg-fit-type');
+    const customSettings = document.getElementById('prop-svg-custom-settings');
+    const removeBtn = document.getElementById('btn-prop-remove-svg');
+    const saveSettingsBtn = document.getElementById('btn-prop-save-svg-settings');
+    const uploadError = document.getElementById('prop-svg-upload-error');
+
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target.result;
+        try {
+          if (typeof SvgAttachmentManager === 'undefined') throw new Error('SvgAttachmentManager module not loaded.');
+          const asset = SvgAttachmentManager.addAsset(CanvasState.getActiveDiagram(), file.name, text);
+          uploadError.classList.add('hidden');
+          uploadError.textContent = '';
+          fileInput.value = ''; // Reset input
+          _refreshAssetDropdown();
+          assetSelect.value = asset.AssetID;
+        } catch (err) {
+          uploadError.textContent = err.message;
+          uploadError.classList.remove('hidden');
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    attachBtn.onclick = () => {
+      const assetId = assetSelect.value;
+      if (!assetId) {
+        alert('Please upload or select an SVG asset first.');
+        return;
+      }
+      try {
+        if (typeof SvgAttachmentManager === 'undefined') throw new Error('SvgAttachmentManager module not loaded.');
+        const att = SvgAttachmentManager.attachAsset(CanvasState.getActiveDiagram(), assetId, _activeShapeId);
+        _refreshAttachmentsList();
+        _selectAttachment(att.AttachmentID);
+        RenderCanvas.render();
+        if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+
+    fitSelect.onchange = () => {
+      if (fitSelect.value === 'custom-offset') {
+        customSettings.classList.remove('hidden');
+      } else {
+        customSettings.classList.add('hidden');
+      }
+    };
+
+    saveSettingsBtn.onclick = () => {
+      if (!_selectedAttachmentId) return;
+      const updates = {
+        FittingType: fitSelect.value,
+        ScaleX: parseFloat(document.getElementById('prop-svg-scale-x').value) || 1.0,
+        ScaleY: parseFloat(document.getElementById('prop-svg-scale-y').value) || 1.0,
+        OffsetX: parseFloat(document.getElementById('prop-svg-offset-x').value) || 0,
+        OffsetY: parseFloat(document.getElementById('prop-svg-offset-y').value) || 0
+      };
+      if (typeof SvgAttachmentManager !== 'undefined') {
+        SvgAttachmentManager.updateAttachment(CanvasState.getActiveDiagram(), _selectedAttachmentId, updates);
+        _refreshAttachmentsList();
+        RenderCanvas.render();
+        if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
+      }
+    };
+
+    removeBtn.onclick = () => {
+      if (!_selectedAttachmentId) return;
+      if (confirm('Are you sure you want to remove this SVG attachment?')) {
+        if (typeof SvgAttachmentManager !== 'undefined') {
+          SvgAttachmentManager.removeAttachment(CanvasState.getActiveDiagram(), _selectedAttachmentId);
+          _selectedAttachmentId = null;
+          document.getElementById('prop-svg-attachment-details').classList.add('hidden');
+          _refreshAttachmentsList();
+          RenderCanvas.render();
+          if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
+        }
+      }
+    };
 
     console.log('[PropertiesModal] Initialized — M3 (Circle + Rectangle global tabs).');
   }
@@ -412,6 +555,13 @@ const PropertiesModal = (() => {
     _updateActiveSwatches('swatch-grid-fill',   _sel.fill);
     document.getElementById('prop-shape-width').value  = shape.Width;
     document.getElementById('prop-shape-height').value = shape.Height;
+
+    // M12: Populate custom SVG list and dropdowns
+    _selectedAttachmentId = null;
+    const detailsDiv = document.getElementById('prop-svg-attachment-details');
+    if (detailsDiv) detailsDiv.classList.add('hidden');
+    _refreshAssetDropdown();
+    _refreshAttachmentsList();
   }
 
   function _applyShapeForm() {
@@ -441,6 +591,90 @@ const PropertiesModal = (() => {
     container.querySelectorAll('.prop-swatch').forEach(s => {
       s.classList.toggle('active', s.dataset.color.toLowerCase() === (color || '').toLowerCase());
     });
+  }
+
+  // ── M12 SVG attachment helper functions ────────────────────────────────────
+  let _selectedAttachmentId = null;
+
+  function _refreshAssetDropdown() {
+    const select = document.getElementById('prop-svg-asset-select');
+    if (!select) return;
+    select.innerHTML = '';
+    const assets = typeof CanvasState !== 'undefined' ? CanvasState.getSvgAssets() : [];
+    if (assets.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '-- No SVG Assets Uploaded --';
+      select.appendChild(opt);
+      return;
+    }
+    assets.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.AssetID;
+      opt.textContent = a.AssetName;
+      select.appendChild(opt);
+    });
+  }
+
+  function _refreshAttachmentsList() {
+    const list = document.getElementById('prop-svg-attachments-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (typeof CanvasState === 'undefined' || typeof SvgAttachmentManager === 'undefined') return;
+
+    const atts = SvgAttachmentManager.getAttachmentsForShape(CanvasState.getActiveDiagram(), _activeShapeId);
+    if (atts.length === 0) {
+      list.innerHTML = '<div style="font-size: 11px; color: var(--color-text-secondary); font-style:italic;">No active attachments for this shape.</div>';
+      return;
+    }
+
+    atts.forEach(att => {
+      const asset = CanvasState.getSvgAssets().find(a => a.AssetID === att.AssetID);
+      const name = asset ? asset.AssetName : 'Unknown Asset';
+
+      const row = document.createElement('div');
+      row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-bg-tertiary); cursor: pointer; font-size: 11px;';
+      if (_selectedAttachmentId === att.AttachmentID) {
+        row.style.borderColor = 'var(--color-primary-active, #3b82f6)';
+        row.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+      }
+      row.onclick = () => _selectAttachment(att.AttachmentID);
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = name;
+      row.appendChild(nameSpan);
+
+      const typeSpan = document.createElement('span');
+      typeSpan.style.fontSize = '9px';
+      typeSpan.style.color = 'var(--color-text-secondary, #64748b)';
+      typeSpan.textContent = att.FittingType || 'fit-aspect';
+      row.appendChild(typeSpan);
+
+      list.appendChild(row);
+    });
+  }
+
+  function _selectAttachment(attId) {
+    _selectedAttachmentId = attId;
+    if (typeof CanvasState === 'undefined') return;
+    const att = CanvasState.getSvgAttachments().find(a => a.AttachmentID === attId);
+    if (!att) return;
+
+    document.getElementById('prop-svg-fit-type').value = att.FittingType || 'fit-aspect';
+    document.getElementById('prop-svg-scale-x').value = att.ScaleX !== undefined ? att.ScaleX : 1.0;
+    document.getElementById('prop-svg-scale-y').value = att.ScaleY !== undefined ? att.ScaleY : 1.0;
+    document.getElementById('prop-svg-offset-x').value = att.OffsetX !== undefined ? att.OffsetX : 0;
+    document.getElementById('prop-svg-offset-y').value = att.OffsetY !== undefined ? att.OffsetY : 0;
+
+    const customSettings = document.getElementById('prop-svg-custom-settings');
+    if (att.FittingType === 'custom-offset') {
+      customSettings.classList.remove('hidden');
+    } else {
+      customSettings.classList.add('hidden');
+    }
+
+    document.getElementById('prop-svg-attachment-details').classList.remove('hidden');
+    _refreshAttachmentsList();
   }
 
   return { init, openForCanvas, openForShape, close };

@@ -34,6 +34,21 @@ public static class MauiProgram
 
     public static MauiApp CreateMauiApp()
     {
+#if WINDOWS
+        // Redirect WebView2 cache to a writable AppData path to prevent Program Files write-permission issues
+        var wWebView2CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DiagramsDesktop", "WebView2Cache");
+        try
+        {
+            Directory.CreateDirectory(wWebView2CachePath);
+            Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", wWebView2CachePath);
+            LogToFile($"[WebView2] Redirected user data folder to: {wWebView2CachePath}");
+        }
+        catch (Exception ex)
+        {
+            LogToFile($"[WebView2] Failed to set cache directory: {ex.Message}");
+        }
+#endif
+
         LogToFile("=========================================");
         LogToFile("Application Starting...");
         LogToFile($"AppContext.BaseDirectory: {AppContext.BaseDirectory}");
@@ -97,15 +112,17 @@ public static class MauiProgram
                     Args = Array.Empty<string>()
                 });
 
-                // Listen only on loopback address (supporting IPv4 and IPv6) for security
+                // Listen only on IPv4 loopback address (127.0.0.1) for security and alignment
                 builder.WebHost.ConfigureKestrel(options =>
                 {
-                    options.ListenLocalhost(port);
+                    options.Listen(IPAddress.Loopback, port);
                 });
 
                 // Configure Services and Inject dependencies
                 builder.Services.AddSingleton<IDiagramCanvasRepository>(new DiagramCanvasRepository(connectionString));
                 builder.Services.AddSingleton<IDiagramCanvasService, DiagramCanvasService>();
+                builder.Services.AddSingleton<IConnectionRepository>(new ConnectionRepository(connectionString));
+                builder.Services.AddSingleton<IConnectionService, ConnectionService>();
 
                 builder.Services.AddControllers()
                     .AddJsonOptions(options =>

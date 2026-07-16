@@ -63,6 +63,7 @@ const RenderConnections = (() => {
 
       const pathGroup = document.createElementNS(NS, 'g');
       pathGroup.setAttribute('class', 'diagram-connection');
+      pathGroup.setAttribute('data-connection-id', conn.ConnectionID);
       pathGroup.dataset.connectionId = conn.ConnectionID;
 
       const spacing = 5 * zoom; // pixels between lines

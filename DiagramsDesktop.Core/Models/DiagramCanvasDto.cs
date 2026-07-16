@@ -42,6 +42,8 @@ namespace DiagramsDesktop.Core.Models
         public List<ShapeDto> Shapes { get; set; } = new();
         public List<ConnectionDto> Connections { get; set; } = new();
         public List<CircleOnContainerDto> CircleOnContainers { get; set; } = new();
+        public List<SvgAssetDto> SvgAssets { get; set; } = new();
+        public List<SvgAttachmentDto> SvgAttachments { get; set; } = new();
     }
 
     public class ShapeDto
@@ -81,6 +83,26 @@ namespace DiagramsDesktop.Core.Models
         public string? DestinationItemKind { get; set; }
         public string? ConnectionType { get; set; }
         public bool IsDeleted { get; set; }
+        public ConnectionDetailDto? Detail { get; set; }
+    }
+
+    public class ConnectionDetailDto
+    {
+        public string? ConnectionID { get; set; }
+        public string? LineType { get; set; }
+        public double LineWidth { get; set; }
+        public string? LineColor { get; set; }
+        public bool IsDirectional { get; set; }
+        public string? ConnectionRouteType { get; set; }
+        public string? StartJunctionID { get; set; }
+        public double StartJunctionX { get; set; }
+        public double StartJunctionY { get; set; }
+        public string? EndJunctionID { get; set; }
+        public double EndJunctionX { get; set; }
+        public double EndJunctionY { get; set; }
+        public string? SourceJunctionText { get; set; }
+        public string? DestinationJunctionText { get; set; }
+        public string? MiddleLineText { get; set; }
     }
 
     public class CircleOnContainerDto
@@ -114,6 +136,32 @@ namespace DiagramsDesktop.Core.Models
         public string? Label { get; set; }
         public string? SvgIcon { get; set; }
         public bool IsDeleted { get; set; }
+        public string? CreatedAt { get; set; }
+        public string? UpdatedAt { get; set; }
+    }
+
+    public class SvgAssetDto
+    {
+        public string? AssetID { get; set; }
+        public string? DiagramID { get; set; }
+        public string? AssetName { get; set; }
+        public string? RawSvgContent { get; set; }
+        public string? CreatedAt { get; set; }
+        public string? UpdatedAt { get; set; }
+    }
+
+    public class SvgAttachmentDto
+    {
+        public string? AttachmentID { get; set; }
+        public string? DiagramID { get; set; }
+        public string? AssetID { get; set; }
+        public string? HostShapeID { get; set; }
+        public string? FittingType { get; set; }
+        public double ScaleX { get; set; }
+        public double ScaleY { get; set; }
+        public double OffsetX { get; set; }
+        public double OffsetY { get; set; }
+        public int ZOrder { get; set; }
         public string? CreatedAt { get; set; }
         public string? UpdatedAt { get; set; }
     }

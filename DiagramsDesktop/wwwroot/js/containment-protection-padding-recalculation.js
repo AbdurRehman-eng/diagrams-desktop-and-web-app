@@ -19,6 +19,12 @@ const ContainmentProtectionPaddingRecalculation = (() => {
    * @returns {{ ok: boolean, errors: string[] }}
    */
   function recalculateAll(allShapes) {
+    if (typeof MultiChildContainmentProtectionPaddingRecalculation !== 'undefined') {
+      return MultiChildContainmentProtectionPaddingRecalculation.recalculateAllMultiChildContainmentProtectionPaddingGeometry(
+        null, null, null, allShapes, null, null
+      );
+    }
+
     const errors = [];
     const containerShapes = allShapes.filter(s => s.ParentContainerID);
 

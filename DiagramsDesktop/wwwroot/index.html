@@ -26,7 +26,9 @@
   <link rel="stylesheet" href="css/context-menu.css" />
 
   <!-- M8+: Circle-on-container CSS — commented out for M1/M2 baseline -->
-  <!-- <link rel="stylesheet" href="css/circle-on-container.css" /> -->
+  <link rel="stylesheet" href="css/circle-on-container.css" />
+  <!-- M11+: Subtree movement styling -->
+  <link rel="stylesheet" href="css/nested-container-move.css" />
 </head>
 <body>
   <div id="app-root">
@@ -42,7 +44,7 @@
             <rect x="14" y="14" width="10" height="10" rx="2.5" fill="#c4b5fd" opacity="0.7"/>
           </svg>
           <span class="brand-name">DiagramEngine</span>
-          <span class="brand-badge">M4</span>
+          <span class="brand-badge">M6</span>
         </div>
 
         <nav class="toolbar-center" style="margin-left: auto;">
@@ -63,7 +65,7 @@
           <div class="toolbar-sep"></div>
           <button class="toolbar-btn toolbar-btn--active" id="btn-select" title="Select tool">Select</button>
           <!-- M7+: Connect button commented out for M1/M2 baseline -->
-          <!-- <button class="toolbar-btn" id="btn-connect" title="Connector tool">Connect</button> -->
+          <button class="toolbar-btn" id="btn-connect" title="Connector tool">Connect</button>
           <div class="toolbar-sep"></div>
           <button class="toolbar-btn" id="btn-theme-toggle" title="Toggle theme">
             <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -180,17 +182,15 @@
   <script src="js/child-rectangle-container-clamp.js?v=4.6"></script>
 
   <!-- M6+: Circle Interaction — commented out for M1/M2 baseline -->
-  <!--
   <script src="js/circle-interaction-state.js?v=6.0"></script>
   <script src="js/circle-events.js?v=6.0"></script>
   <script src="js/circle-derived-geometry.js?v=6.0"></script>
   <script src="js/circle-hover-selection.js?v=6.0"></script>
   <script src="js/circle-resize.js?v=6.0"></script>
   <script src="js/circle-move.js?v=6.0"></script>
-  -->
+
 
   <!-- M7+: Connections — commented out for M1/M2 baseline -->
-  <!--
   <script src="js/connection-type-lookup-csv.js?v=7.0"></script>
   <script src="js/connection-type-lookup-db.js?v=7.0"></script>
   <script src="js/connection-mode-state.js?v=7.0"></script>
@@ -201,10 +201,8 @@
   <script src="js/connection-shortest-path.js?v=7.1"></script>
   <script src="js/connection-builder.js?v=7.0"></script>
   <script src="js/render-connections.js?v=7.1"></script>
-  -->
 
   <!-- M8+: Circle On Container — commented out for M1/M2 baseline -->
-  <!--
   <script src="js/edge-attachment-rules-loader.js?v=8.0"></script>
   <script src="js/calculate-edge-circle-center.js?v=8.0"></script>
   <script src="js/project-pointer-to-container-edge.js?v=8.0"></script>
@@ -214,12 +212,9 @@
   <script src="js/circle-on-container-state.js?v=8.0"></script>
   <script src="js/move-circle-on-container.js?v=8.3"></script>
   <script src="js/render-circle-on-container.js?v=8.3"></script>
-  -->
 
   <!-- M9+: Protection Padding Math — commented out for M1/M2 baseline -->
-  <!--
   <script src="js/child-rectangle-protection-padding.js?v=9.1"></script>
-  <script src="js/child-rectangle-container-clamp.js?v=9.1"></script>
   <script src="js/child-circle-protection-padding.js?v=9.1"></script>
   <script src="js/child-circle-container-clamp.js?v=9.1"></script>
   <script src="js/derive-parent-inner-boundaries.js?v=9.1"></script>
@@ -238,7 +233,31 @@
   <script src="js/containment-save-validation.js?v=9.1"></script>
   <script src="js/circle-on-container-protection-padding-validation.js?v=9.1"></script>
   <script src="js/circle-on-container-radius-range-validation.js?v=9.1"></script>
-  -->
+
+  <!-- M10+: Multi-Child Sibling Overlap and Save Validation -->
+  <script src="js/parent-child-grouping.js?v=10.0"></script>
+  <script src="js/sibling-rectangle-overlap-validation.js?v=10.0"></script>
+  <script src="js/sibling-circle-overlap-validation.js?v=10.0"></script>
+  <script src="js/multi-child-containment-protection-padding-recalculation.js?v=10.0"></script>
+  <script src="js/multi-child-containment-save-validation.js?v=10.0"></script>
+
+  <!-- M11+: Subtree Dragging and Validation -->
+  <script src="js/enumerate-container-subtree.js"></script>
+  <script src="js/move-container-subtree.js"></script>
+  <script src="js/validate-container-subtree.js"></script>
+  <script src="js/recalc-moved-subtree.js"></script>
+
+  <!-- M12: SVG Assets and Attachments -->
+  <script src="js/svg-asset-validation.js"></script>
+  <script src="js/svg-asset-metadata.js"></script>
+  <script src="js/svg-placement-rectangle.js"></script>
+  <script src="js/svg-placement-circle.js"></script>
+  <script src="js/svg-scale-host-coupling.js"></script>
+  <script src="js/svg-follow-host.js"></script>
+  <script src="js/svg-attachment-manager.js"></script>
+  <script src="js/svg-attachment-recalculation.js"></script>
+
+
 
   <script src="js/render-background.js?v=4.6"></script>
   <script src="js/render-grid.js?v=4.6"></script>
@@ -250,7 +269,7 @@
 
   <script src="js/pan.js?v=4.6"></script>
   <script src="js/zoom.js?v=4.6"></script>
-  <script src="js/drag-handler_v2.js?v=9.8"></script>
+  <script src="js/drag-handler_v2.js?v=10.0"></script>
   <script src="js/hover-manager.js?v=5.0"></script>
   <script src="js/delete-guard.js?v=1.0"></script>
   <script src="js/input-controller.js?v=4.8"></script>

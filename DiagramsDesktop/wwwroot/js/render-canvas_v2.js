@@ -48,13 +48,13 @@ const RenderCanvas = (() => {
     if (canvas.GridVisible) RenderGrid.render(svgLayer, canvas, width, height);
     if (canvas.ShowAxes) RenderAxes.render(svgLayer, canvas, width, height);
     if (canvas.ShowOriginMarker) RenderOrigin.render(svgLayer, canvas, width, height);
-    // Connections (draw underneath shapes)
+    // Multi-shape rendering
+    RenderShapes.render(svgLayer, canvas, width, height);
+
+    // Connections (draw on top of shapes so they are clickable/right-clickable)
     if (typeof RenderConnections !== 'undefined') {
       RenderConnections.render(svgLayer, CanvasState.getActiveDiagram(), canvas.ZoomScale, width, height);
     }
-
-    // Multi-shape rendering
-    RenderShapes.render(svgLayer, canvas, width, height);
 
     // M8: Circle On Container rendering (above shapes so it occludes the border)
     if (typeof RenderCircleOnContainer !== 'undefined') {
