@@ -7,8 +7,6 @@
 
 A hybrid desktop and web application for drawing interactive hierarchical system diagrams (e.g., AWS cloud architectures). This app embeds a high-performance interactive HTML5 SVG canvas inside a native Windows desktop shell powered by **.NET MAUI** and **Windows App SDK (WinUI 3)**.
 
----
-
 ## 🏗️ Project Architecture
 
 The repository is organized into distinct modular layers separating native Windows desktop integration, core business logic/persistence, front-end web client, and installer packaging:
@@ -25,8 +23,6 @@ The repository is organized into distinct modular layers separating native Windo
 └── DiagramsDesktop.slnx        # Visual Studio XML solution file
 ```
 
----
-
 ## ✨ Key Features
 
 - **Hierarchical Layouts & Containers**: Organize diagrams using parent-child container boundaries (such as VPCs, Regions, and Subnets).
@@ -36,8 +32,6 @@ The repository is organized into distinct modular layers separating native Windo
 - **Smart Connection Engine**: Dynamic routing of connection lines (shortest path) with custom endcap decorators, left-click line selection, and deletion support.
 - **SVG Attachment Integration**: Upload and embed custom SVG images inside container shapes with aspect-ratio scaling options (fit-aspect, fit-stretch, customized offsets) and automatic scaling host coupling.
 - **Local Database Persistence**: Built-in high-performance SQLite engine that automatically saves and retrieves diagram configurations locally.
-
----
 
 ## 🛠️ Getting Started
 
@@ -69,8 +63,6 @@ cd DiagramsDesktop/wwwroot/js
 node run_m11_m12_tests.js
 ```
 
----
-
 ## 📦 Publishing & Deployment (MSI Installer)
 
 We use the **WiX Toolset (v4)** to harvest, package, and generate standard, clean Windows MSI setup installers.
@@ -87,8 +79,6 @@ The build command automatically:
 
 The generated installer will be created at:
 📂 `DiagramsDesktop.Installer\bin\Release\DiagramsDesktop-1.0.0-Setup.msi`
-
----
 
 ## 📄 License
 
