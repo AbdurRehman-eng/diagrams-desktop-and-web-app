@@ -58,3 +58,7 @@ const DeriveParentInnerBoundaries = (() => {
   return { fromShape, fromBounds };
 
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = DeriveParentInnerBoundaries;
+}

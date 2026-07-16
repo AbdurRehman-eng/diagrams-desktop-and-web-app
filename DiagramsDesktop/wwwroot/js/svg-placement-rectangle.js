@@ -23,10 +23,10 @@ const SvgPlacementRectangle = (() => {
       const inner = DeriveParentInnerBoundaries.fromShape(hostShape);
       if (inner) {
         return {
-          width: inner.right - inner.left,
-          height: inner.top - inner.bottom,
-          centerX: (inner.left + inner.right) / 2,
-          centerY: (inner.bottom + inner.top) / 2
+          width: inner.ParentInnerRightX - inner.ParentInnerLeftX,
+          height: inner.ParentInnerTopY - inner.ParentInnerBottomY,
+          centerX: (inner.ParentInnerLeftX + inner.ParentInnerRightX) / 2,
+          centerY: (inner.ParentInnerBottomY + inner.ParentInnerTopY) / 2
         };
       }
     }

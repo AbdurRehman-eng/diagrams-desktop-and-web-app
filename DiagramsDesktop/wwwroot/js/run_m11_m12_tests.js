@@ -124,10 +124,12 @@ const SvgPlacementRectangle = require('./svg-placement-rectangle.js');
 const SvgPlacementCircle = require('./svg-placement-circle.js');
 const SvgScaleHostCoupling = require('./svg-scale-host-coupling.js');
 const SvgAttachmentManager = require('./svg-attachment-manager.js');
+const DeriveParentInnerBoundaries = require('./derive-parent-inner-boundaries.js');
 
 // Expose loaded modules to global namespace if they reference each other globally
 global.SvgAssetValidation = SvgAssetValidation;
 global.SvgAssetMetadata = SvgAssetMetadata;
+global.DeriveParentInnerBoundaries = DeriveParentInnerBoundaries;
 
 // ── 3. Test Runner ──────────────────────────────────────────────────────────
 let passed = 0;
@@ -222,6 +224,13 @@ const hostRect = { ShapeID: 'r', Type: 'rectangle', WorldX: 100, WorldY: 100, Wi
 const boundsRect = SvgPlacementRectangle.getContentBounds(hostRect);
 assert('Placement rectangle center matches host shape', boundsRect.centerX, 100);
 assert('Placement rectangle width matches host width', boundsRect.width, 160);
+
+const hostContainer = { ShapeID: 'vpc', Type: 'aws-vpc', WorldX: 150, WorldY: 120, Width: 200, Height: 180 };
+const boundsContainer = SvgPlacementRectangle.getContentBounds(hostContainer);
+assert('Placement container center X matches host shape', boundsContainer.centerX, 150);
+assert('Placement container center Y matches host shape', boundsContainer.centerY, 120);
+assert('Placement container width matches host width', boundsContainer.width, 200);
+assert('Placement container height matches host height', boundsContainer.height, 180);
 
 const hostCircle = { ShapeID: 'c', Type: 'circle', GeometryType: 'circle', WorldX: 200, WorldY: 200, Radius: 50 };
 const boundsCircle = SvgPlacementCircle.getContentBounds(hostCircle);

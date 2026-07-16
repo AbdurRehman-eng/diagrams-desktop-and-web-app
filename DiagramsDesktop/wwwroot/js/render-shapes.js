@@ -453,10 +453,10 @@ const RenderShapes = (() => {
       if (isContainer && typeof DeriveParentInnerBoundaries !== 'undefined') {
         const inner = DeriveParentInnerBoundaries.fromShape(shape);
         if (inner) {
-          const innerWidth = (inner.right - inner.left) * zoom;
-          const innerHeight = (inner.top - inner.bottom) * zoom;
-          const worldCenterX = (inner.left + inner.right) / 2;
-          const worldCenterY = (inner.bottom + inner.top) / 2;
+          const innerWidth = (inner.ParentInnerRightX - inner.ParentInnerLeftX) * zoom;
+          const innerHeight = (inner.ParentInnerTopY - inner.ParentInnerBottomY) * zoom;
+          const worldCenterX = (inner.ParentInnerLeftX + inner.ParentInnerRightX) / 2;
+          const worldCenterY = (inner.ParentInnerBottomY + inner.ParentInnerTopY) / 2;
           const screenCenter = WorldToScreen.convert(worldCenterX, worldCenterY, canvasWidth, canvasHeight);
           return {
             width: innerWidth,
