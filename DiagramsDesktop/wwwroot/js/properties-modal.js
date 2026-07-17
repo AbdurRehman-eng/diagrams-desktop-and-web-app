@@ -60,6 +60,13 @@ const PropertiesModal = (() => {
                     <span>Enabled</span>
                   </div>
                 </div>
+                <div class="prop-row" style="margin-top:12px;">
+                  <div class="prop-label">Troubleshooting console visible</div>
+                  <div class="prop-checkbox-wrap">
+                    <input type="checkbox" class="prop-input" id="prop-trouble-visible" />
+                    <span>Enabled</span>
+                  </div>
+                </div>
                 <div class="prop-row" style="flex-direction:column;align-items:flex-start;gap:8px;margin-top:12px;">
                   <div class="prop-label">Grid color</div>
                   <div class="prop-swatch-grid" id="swatch-grid-grid"></div>
@@ -457,6 +464,7 @@ const PropertiesModal = (() => {
     _updateActiveSwatches('swatch-grid-bg',   _sel.bg);
     _updateActiveSwatches('swatch-grid-grid', _sel.grid);
     document.getElementById('prop-grid-visible').checked  = canvas.GridVisible !== false;
+    document.getElementById('prop-trouble-visible').checked = !!canvas.TroubleshootingConsoleVisible;
     document.getElementById('prop-grid-x').value          = canvas.GridSpacingX || 25;
     document.getElementById('prop-grid-y').value          = canvas.GridSpacingY || 25;
     document.getElementById('prop-show-origin').checked   = canvas.ShowOriginMarker !== false;
@@ -467,6 +475,7 @@ const PropertiesModal = (() => {
     CanvasState.updateCanvas({
       BackgroundColor:  _sel.bg,
       GridVisible:      document.getElementById('prop-grid-visible').checked,
+      TroubleshootingConsoleVisible: document.getElementById('prop-trouble-visible').checked,
       GridColor:        _sel.grid,
       GridSpacingX:     parseInt(document.getElementById('prop-grid-x').value, 10),
       GridSpacingY:     parseInt(document.getElementById('prop-grid-y').value, 10),

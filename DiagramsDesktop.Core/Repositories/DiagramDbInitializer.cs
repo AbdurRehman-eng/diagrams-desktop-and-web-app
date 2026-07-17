@@ -70,6 +70,7 @@ namespace DiagramsDesktop.Core.Repositories
                     ShowAxes INTEGER,
                     PanEnabled INTEGER,
                     ZoomEnabled INTEGER,
+                    TroubleshootingConsoleVisible INTEGER,
                     UpdatedAt TEXT
                 );";
 
@@ -275,6 +276,17 @@ namespace DiagramsDesktop.Core.Repositories
                 ('AWS Route table', 'AWS NAT gateway', 'No choices. Solid black line', 1);";
             using var cmdLookups = new SqliteCommand(seedLookups, connection);
             cmdLookups.ExecuteNonQuery();
+
+            // Migration: Add TroubleshootingConsoleVisible column to DiagramCanvases if it does not exist
+            try
+            {
+                using var cmdMigrate = new SqliteCommand("ALTER TABLE DiagramCanvases ADD COLUMN TroubleshootingConsoleVisible INTEGER DEFAULT 0;", connection);
+                cmdMigrate.ExecuteNonQuery();
+            }
+            catch (SqliteException)
+            {
+                // Column already exists or another sqlite error occurred, safe to ignore
+            }
         }
     }
 }

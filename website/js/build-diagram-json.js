@@ -65,6 +65,7 @@ const BuildDiagramJson = (() => {
       ShowAxes:             c.ShowAxes,
       PanEnabled:           c.PanEnabled,
       ZoomEnabled:          c.ZoomEnabled,
+      TroubleshootingConsoleVisible: c.TroubleshootingConsoleVisible,
 
       // Shapes
       Shapes: (diagram.Shapes || []).map(s => ({ ...s, DiagramID: diagram.DiagramID })),

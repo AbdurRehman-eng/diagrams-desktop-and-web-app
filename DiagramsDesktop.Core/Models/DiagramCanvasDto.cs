@@ -37,6 +37,7 @@ namespace DiagramsDesktop.Core.Models
         public bool ShowAxes { get; set; }
         public bool PanEnabled { get; set; }
         public bool ZoomEnabled { get; set; }
+        public bool TroubleshootingConsoleVisible { get; set; }
 
         // Child Collections
         public List<ShapeDto> Shapes { get; set; } = new();

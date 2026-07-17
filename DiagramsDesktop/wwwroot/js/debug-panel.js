@@ -23,7 +23,17 @@ const DebugPanel = (() => {
 
     const canvas  = CanvasState.getCanvas();
     const diagram = CanvasState.getActiveDiagram();
-    if (!canvas || !diagram) return;
+    if (!canvas || !diagram) {
+      panel.classList.add('hidden');
+      return;
+    }
+
+    if (canvas.TroubleshootingConsoleVisible) {
+      panel.classList.remove('hidden');
+    } else {
+      panel.classList.add('hidden');
+      return;
+    }
 
     const shapes     = CanvasState.getShapes();
     const selectedId = CanvasState.getSelectedId();
@@ -80,6 +90,7 @@ const DebugPanel = (() => {
     }
 
     panel.innerHTML = `
+      <div class="debug-main-title">Troubleshooting Console</div>
       <div class="debug-title">Diagram</div>
       <div class="debug-row"><span class="debug-label">ID:</span><span class="debug-value">${diagram.DiagramID.slice(-8)}</span></div>
       <div class="debug-row"><span class="debug-label">Name:</span><span class="debug-value">${diagram.DiagramName}</span></div>

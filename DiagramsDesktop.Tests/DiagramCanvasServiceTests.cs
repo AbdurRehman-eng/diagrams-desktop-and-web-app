@@ -346,6 +346,43 @@ namespace DiagramsDesktop.Tests
             Assert.Equal("dashed", ipsecDefault.LineType);
             Assert.Equal(2.0, ipsecDefault.LineWidth);
         }
+
+        [Fact]
+        public async Task SaveAndGetDiagram_PersistsTroubleshootingConsoleVisible()
+        {
+            // Arrange
+            var diagramId = Guid.NewGuid().ToString();
+            var canvasId = Guid.NewGuid().ToString();
+
+            var dto = new DiagramCanvasDto
+            {
+                DiagramID = diagramId,
+                DiagramName = "Console Visibility Test",
+                CanvasID = canvasId,
+                CanvasName = "Test Canvas",
+                TroubleshootingConsoleVisible = true
+            };
+
+            // Act
+            await _service.SaveDiagramAsync(dto);
+            var loaded = await _service.GetDiagramAsync(diagramId);
+
+            // Assert
+            Assert.NotNull(loaded);
+            Assert.Equal(diagramId, loaded.DiagramID);
+            Assert.True(loaded.TroubleshootingConsoleVisible);
+
+            // Arrange toggle to false
+            dto.TroubleshootingConsoleVisible = false;
+
+            // Act toggle
+            await _service.SaveDiagramAsync(dto);
+            var loaded2 = await _service.GetDiagramAsync(diagramId);
+
+            // Assert toggle
+            Assert.NotNull(loaded2);
+            Assert.False(loaded2.TroubleshootingConsoleVisible);
+        }
     }
 }
 

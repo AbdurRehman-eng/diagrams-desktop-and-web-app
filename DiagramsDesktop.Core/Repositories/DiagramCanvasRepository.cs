@@ -66,6 +66,7 @@ namespace DiagramsDesktop.Core.Repositories
                 diagram.ShowAxes = canvas.ShowAxes;
                 diagram.PanEnabled = canvas.PanEnabled;
                 diagram.ZoomEnabled = canvas.ZoomEnabled;
+                diagram.TroubleshootingConsoleVisible = canvas.TroubleshootingConsoleVisible;
             }
 
             // 3. Get child collections
@@ -167,6 +168,7 @@ namespace DiagramsDesktop.Core.Repositories
                             ViewportWidth = @ViewportWidth, ViewportHeight = @ViewportHeight, ZoomScale = @ZoomScale,
                             GridVisible = @GridVisible, GridColor = @GridColor, GridSpacingX = @GridSpacingX, GridSpacingY = @GridSpacingY,
                             ShowOriginMarker = @ShowOriginMarker, ShowAxes = @ShowAxes, PanEnabled = @PanEnabled, ZoomEnabled = @ZoomEnabled,
+                            TroubleshootingConsoleVisible = @TroubleshootingConsoleVisible,
                             UpdatedAt = @UpdatedAt
                         WHERE CanvasID = @CanvasID";
                     await connection.ExecuteAsync(updateCanvasSql, dto, transaction);
@@ -178,12 +180,12 @@ namespace DiagramsDesktop.Core.Repositories
                             CanvasID, DiagramID, CanvasName, BackgroundColor, CoordinateSystemType, OriginDefinition,
                             AxisOrientationX, AxisOrientationY, AxisOrientationZ, IsInfiniteX, IsInfiniteY, IsInfiniteZ,
                             ViewportCenterX, ViewportCenterY, ViewportWidth, ViewportHeight, ZoomScale,
-                            GridVisible, GridColor, GridSpacingX, GridSpacingY, ShowOriginMarker, ShowAxes, PanEnabled, ZoomEnabled, UpdatedAt
+                            GridVisible, GridColor, GridSpacingX, GridSpacingY, ShowOriginMarker, ShowAxes, PanEnabled, ZoomEnabled, TroubleshootingConsoleVisible, UpdatedAt
                         ) VALUES (
                             @CanvasID, @DiagramID, @CanvasName, @BackgroundColor, @CoordinateSystemType, @OriginDefinition,
                             @AxisOrientationX, @AxisOrientationY, @AxisOrientationZ, @IsInfiniteX, @IsInfiniteY, @IsInfiniteZ,
                             @ViewportCenterX, @ViewportCenterY, @ViewportWidth, @ViewportHeight, @ZoomScale,
-                            @GridVisible, @GridColor, @GridSpacingX, @GridSpacingY, @ShowOriginMarker, @ShowAxes, @PanEnabled, @ZoomEnabled, @UpdatedAt
+                            @GridVisible, @GridColor, @GridSpacingX, @GridSpacingY, @ShowOriginMarker, @ShowAxes, @PanEnabled, @ZoomEnabled, @TroubleshootingConsoleVisible, @UpdatedAt
                         )";
                     await connection.ExecuteAsync(insertCanvasSql, dto, transaction);
                 }

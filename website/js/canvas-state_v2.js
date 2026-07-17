@@ -90,6 +90,7 @@ const CanvasState = (() => {
           ShowAxes:         c.ShowAxes         !== undefined ? c.ShowAxes         : true,
           PanEnabled:  c.PanEnabled  !== undefined ? c.PanEnabled  : true,
           ZoomEnabled: c.ZoomEnabled !== undefined ? c.ZoomEnabled : true,
+          TroubleshootingConsoleVisible: c.TroubleshootingConsoleVisible !== undefined ? c.TroubleshootingConsoleVisible : false,
         },
         Shapes: config.Shapes || [],
         Connections: config.Connections || [],

@@ -41,8 +41,20 @@
 .debug-title {
   font-weight: bold;
   text-transform: uppercase;
+  margin-top: 10px;
   margin-bottom: 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding-bottom: 4px;
   color: #ffffff;
+}
+
+.debug-main-title {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-size: 12px;
+  border-bottom: 2px solid #38bdf8;
+  padding-bottom: 6px;
+  color: #38bdf8;
+  text-align: center;
 }
