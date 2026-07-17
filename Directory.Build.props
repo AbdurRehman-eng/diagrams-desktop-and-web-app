@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <MicrosoftNETCoreAppRuntimeVersion>10.0.8</MicrosoftNETCoreAppRuntimeVersion>
+    <MicrosoftAspNetCoreAppRuntimeVersion>10.0.8</MicrosoftAspNetCoreAppRuntimeVersion>
+    <MicrosoftWindowsDesktopAppRuntimeVersion>10.0.8</MicrosoftWindowsDesktopAppRuntimeVersion>
+    <MicrosoftNETCoreAppCrossgen2Version>10.0.8</MicrosoftNETCoreAppCrossgen2Version>
+    <MicrosoftNETCoreAppHostVersion>10.0.8</MicrosoftNETCoreAppHostVersion>
+  </PropertyGroup>
+</Project>

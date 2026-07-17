@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
@@ -146,6 +147,54 @@ public static class MauiProgram
                 var webRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot");
                 if (Directory.Exists(webRootPath))
                 {
+                    // Custom middleware to serve and decrypt password-protected data CSV files
+                    app.Use(async (context, next) =>
+                    {
+                        var path = context.Request.Path.Value ?? "";
+                        if (path.StartsWith("/data/", StringComparison.OrdinalIgnoreCase) && path.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var relativePath = path.TrimStart('/');
+                            var filePath = Path.Combine(webRootPath, relativePath);
+                            if (File.Exists(filePath))
+                            {
+                                try
+                                {
+                                    byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+                                    
+                                    // Check magic header "GMLENC" (71, 77, 76, 69, 78, 67)
+                                    if (fileBytes.Length >= 6 &&
+                                        fileBytes[0] == 71 && fileBytes[1] == 77 && fileBytes[2] == 76 &&
+                                        fileBytes[3] == 69 && fileBytes[4] == 78 && fileBytes[5] == 67)
+                                    {
+                                        // Decrypt the payload
+                                        byte[] cipherBytes = new byte[fileBytes.Length - 6];
+                                        Buffer.BlockCopy(fileBytes, 6, cipherBytes, 0, cipherBytes.Length);
+                                        
+                                        byte[] decryptedBytes = CsvEncryption.Decrypt(cipherBytes, "GmlDiagramsSecretPassword2026!");
+                                        context.Response.ContentType = "text/csv; charset=utf-8";
+                                        await context.Response.Body.WriteAsync(decryptedBytes, 0, decryptedBytes.Length);
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        // Serve as plain text (fallback for development)
+                                        context.Response.ContentType = "text/csv; charset=utf-8";
+                                        await context.Response.Body.WriteAsync(fileBytes, 0, fileBytes.Length);
+                                        return;
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogToFile($"[CsvMiddleware] Error reading/decrypting file {path}: {ex.Message}");
+                                    context.Response.StatusCode = 500;
+                                    await context.Response.WriteAsync("Error reading data file.");
+                                    return;
+                                }
+                            }
+                        }
+                        await next();
+                    });
+
                     app.UseDefaultFiles(new DefaultFilesOptions
                     {
                         FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(webRootPath),

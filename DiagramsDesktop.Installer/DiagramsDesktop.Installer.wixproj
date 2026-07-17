@@ -31,6 +31,7 @@
   <Target Name="PublishApp" BeforeTargets="BeforeBuild">
     <RemoveDir Directories="$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop" />
     <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\DiagramsDesktop\DiagramsDesktop.csproj&quot; -c $(Configuration) -f net10.0-windows10.0.19041.0 -o &quot;$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop&quot; -r win-x64 --self-contained true -p:PublishSingleFile=false" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)encrypt-data.ps1&quot; -TargetDir &quot;$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop\wwwroot\data&quot; -Password &quot;GmlDiagramsSecretPassword2026!&quot;" />
   </Target>
 
 </Project>
