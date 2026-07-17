@@ -17,8 +17,8 @@ const InputController = (() => {
     if (!container) return;
 
     container.addEventListener('mousedown', onMouseDown, { capture: true });
-    window.addEventListener('mousemove', onMouseMove, { passive: false });
-    window.addEventListener('mouseup',   onMouseUp);
+    document.addEventListener('mousemove', onMouseMove, { passive: false });
+    document.addEventListener('mouseup',   onMouseUp);
     container.addEventListener('wheel',   onWheel, { passive: false });
 
     console.log('[InputController] Initialized — M2.9');
