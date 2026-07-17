@@ -91,26 +91,9 @@ const DebugPanel = (() => {
 
     panel.innerHTML = `
       <div class="debug-main-title">Troubleshooting Console</div>
-      <div class="debug-title">Diagram</div>
-      <div class="debug-row"><span class="debug-label">ID:</span><span class="debug-value">${diagram.DiagramID.slice(-8)}</span></div>
-      <div class="debug-row"><span class="debug-label">Name:</span><span class="debug-value">${diagram.DiagramName}</span></div>
-      <div class="debug-row"><span class="debug-label">Shapes:</span><span class="debug-value">${shapes.length}</span></div>
-
-      <div class="debug-title">Viewport</div>
-      <div class="debug-row"><span class="debug-label">Center X:</span><span class="debug-value">${canvas.ViewportCenterX.toFixed(2)}</span></div>
-      <div class="debug-row"><span class="debug-label">Center Y:</span><span class="debug-value">${canvas.ViewportCenterY.toFixed(2)}</span></div>
-      <div class="debug-row"><span class="debug-label">Zoom:</span><span class="debug-value">${(canvas.ZoomScale * 100).toFixed(0)}%</span></div>
-      <div class="debug-row"><span class="debug-label">Canvas:</span><span class="debug-value">${sW}×${sH}px</span></div>
-
-      <div class="debug-title">Interaction (M5)</div>
-      ${selectedRows}
-      ${hoveredRow}
-
-      <div class="debug-title">GlobalVars</div>
-      <div class="debug-row"><span class="debug-label">Rect hover:</span><span class="debug-value">${gv.rectangle.hoverPaddingRatio}</span></div>
-      <div class="debug-row"><span class="debug-label">Rect prot:</span><span class="debug-value">${gv.rectangle.protectionPaddingRatio}</span></div>
-      <div class="debug-row"><span class="debug-label">Circle hover:</span><span class="debug-value">${gv.circle.hoverPaddingRatio}</span></div>
-      <div class="debug-row"><span class="debug-label">Circle prot:</span><span class="debug-value">${gv.circle.protectionPaddingRatio}</span></div>
+      <div class="debug-logs-placeholder" style="color: var(--color-text-secondary); text-align: center; margin-top: 20px; font-style: italic;">
+        Console is empty.
+      </div>
     `;
   }
 

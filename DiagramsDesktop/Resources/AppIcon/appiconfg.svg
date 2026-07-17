@@ -1,29 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <!-- Outer container shape representing a Region/VPC -->
-  <rect x="68" y="68" width="320" height="320" rx="36" ry="36" 
-        fill="none" stroke="#38BDF8" stroke-width="12" stroke-dasharray="16 12" />
+  <!-- A central bold connection network visible even at tiny scales -->
+  <!-- Connection lines with thick strokes -->
+  <path d="M 228,128 L 128,308 L 328,308 Z" fill="none" stroke="#475569" stroke-width="28" stroke-linejoin="round" />
+  
+  <!-- Top Node (Cyan) -->
+  <circle cx="228" cy="128" r="56" fill="#38BDF8" />
+  <circle cx="228" cy="128" r="22" fill="#FFFFFF" />
 
-  <!-- A small tag/label icon on the top-left of the container -->
-  <rect x="100" y="50" width="100" height="36" rx="10" ry="10" fill="#38BDF8" />
-  <rect x="120" y="62" width="60" height="12" rx="6" ry="6" fill="#0F172A" />
+  <!-- Bottom-Left Node (Indigo) -->
+  <circle cx="128" cy="308" r="56" fill="#6366F1" />
+  <circle cx="128" cy="308" r="22" fill="#FFFFFF" />
 
-  <!-- Dotted Connection Line -->
-  <path d="M 180,180 C 230,180 220,280 270,280" 
-        fill="none" stroke="#94A3B8" stroke-width="8" stroke-dasharray="12 8" stroke-linecap="round" />
-
-  <!-- Node 1 (Source) - Sky Blue -->
-  <g>
-    <rect x="110" y="130" width="100" height="100" rx="20" ry="20" fill="#0284C7" />
-    <circle cx="160" cy="180" r="18" fill="none" stroke="#FFFFFF" stroke-width="6" />
-    <circle cx="160" cy="180" r="6" fill="#FFFFFF" />
-  </g>
-
-  <!-- Node 2 (Destination) - Emerald Green -->
-  <g>
-    <rect x="246" y="230" width="100" height="100" rx="20" ry="20" fill="#059669" />
-    <!-- Node 2 Icon detail (a mini database/storage cylinder symbol) -->
-    <path d="M 281,265 C 281,259 311,259 311,265 M 281,265 L 281,295 C 281,301 311,301 311,295 L 311,265 M 281,280 C 281,286 311,286 311,280" 
-          fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
-  </g>
+  <!-- Bottom-Right Node (Emerald) -->
+  <circle cx="328" cy="308" r="56" fill="#10B981" />
+  <circle cx="328" cy="308" r="22" fill="#FFFFFF" />
 </svg>
