@@ -74,7 +74,7 @@ const HoverManager = (() => {
           : gv.rectangle.hoverPaddingRatio;
 
         const minDim = Math.min(s.Width, s.Height);
-        const pad    = minDim * ratio;
+        const pad    = Math.max(minDim * ratio, 15);
 
         if (_hitTest(s, type, worldPos, pad)) {
           hitShapeId = s.ShapeID;

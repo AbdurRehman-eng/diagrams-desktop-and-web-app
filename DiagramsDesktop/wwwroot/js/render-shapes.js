@@ -69,7 +69,7 @@ const RenderShapes = (() => {
 
     // 3. Resize Handles — show on hover OR selection
     if (isSelected || isHovered) {
-      _renderHandles(g, shape, pos, zoom, type, isSelected, effectiveGeom);
+      _renderHandles(g, shape, pos, zoom, type, isSelected || isHovered, effectiveGeom);
     }
 
     // 4. Label
