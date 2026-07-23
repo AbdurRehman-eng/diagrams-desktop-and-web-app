@@ -19,8 +19,9 @@ public class LocalLicenseAuthorizationFilter : IAsyncActionFilter
     {
         var path = context.HttpContext.Request.Path.Value ?? string.Empty;
 
-        // Bypass authorization filter for license endpoints so activation and checks can occur
-        if (path.Contains("/api/license", StringComparison.OrdinalIgnoreCase))
+        // Bypass authorization filter for license and credentials endpoints so activation and credentials setup can occur
+        if (path.Contains("/api/license", StringComparison.OrdinalIgnoreCase) ||
+            path.Contains("/api/credentials", StringComparison.OrdinalIgnoreCase))
         {
             await next();
             return;

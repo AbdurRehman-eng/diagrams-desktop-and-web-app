@@ -220,6 +220,21 @@ namespace DiagramsDesktop.Core.Repositories
                     UpdatedAt TEXT
                 );";
 
+            // Create CredentialsMetadata table
+            var createCredentialsTable = @"
+                CREATE TABLE IF NOT EXISTS CredentialsMetadata (
+                    CredentialId TEXT PRIMARY KEY,
+                    Provider TEXT NOT NULL,
+                    Description TEXT NOT NULL,
+                    Identifier1 TEXT,
+                    Identifier2 TEXT,
+                    Identifier3 TEXT,
+                    Identifier4 TEXT,
+                    TargetName TEXT NOT NULL,
+                    CreatedAt TEXT NOT NULL,
+                    UpdatedAt TEXT NOT NULL
+                );";
+
             using var cmd1 = new SqliteCommand(createDiagramsTable, connection);
             cmd1.ExecuteNonQuery();
 
@@ -249,6 +264,9 @@ namespace DiagramsDesktop.Core.Repositories
 
             using var cmd10 = new SqliteCommand(createSvgAttachmentsTable, connection);
             cmd10.ExecuteNonQuery();
+
+            using var cmd11 = new SqliteCommand(createCredentialsTable, connection);
+            cmd11.ExecuteNonQuery();
 
             // Seed ConnectionStyleDefaults
             var seedStyleDefaults = @"

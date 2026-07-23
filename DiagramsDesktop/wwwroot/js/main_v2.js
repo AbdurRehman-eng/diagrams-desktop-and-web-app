@@ -197,4 +197,16 @@ function _setupToolbarV2() {
   if (btnGlobalVars && typeof PropertiesModal !== 'undefined') {
     btnGlobalVars.onclick = () => PropertiesModal.openForCanvas();
   }
+
+  // Credentials Manager Opening
+  const btnManageCredentials = document.getElementById('btn-manage-credentials');
+  if (btnManageCredentials) {
+    btnManageCredentials.onclick = async () => {
+      try {
+        await fetch('/api/credentials/ui/open', { method: 'POST' });
+      } catch (err) {
+        console.error('[Main] Failed to open credentials UI:', err);
+      }
+    };
+  }
 }

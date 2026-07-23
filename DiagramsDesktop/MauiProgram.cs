@@ -136,6 +136,10 @@ public static class MauiProgram
                 builder.Services.AddSingleton<ILicenseManager, LicenseManager>();
                 builder.Services.AddScoped<LocalLicenseAuthorizationFilter>();
 
+                // Credentials Services
+                builder.Services.AddSingleton<ICredentialRepository>(new CredentialRepository(connectionString));
+                builder.Services.AddSingleton<ICredentialService, CredentialService>();
+
                 builder.Services.AddControllers(options =>
                     {
                         options.Filters.Add<LocalLicenseAuthorizationFilter>();
