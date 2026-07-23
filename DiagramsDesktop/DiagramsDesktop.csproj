@@ -63,6 +63,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
+		<PackageReference Include="System.Management" Version="10.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -84,9 +85,7 @@
 		<ItemGroup>
 			<MyContentFiles Include="wwwroot\**\*" />
 		</ItemGroup>
-		<Copy SourceFiles="@(MyContentFiles)" 
-		      DestinationFolder="$(PublishDir)\wwwroot\%(RecursiveDir)" 
-		      SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(MyContentFiles)" DestinationFolder="$(PublishDir)\wwwroot\%(RecursiveDir)" SkipUnchangedFiles="true" />
 	</Target>
 
 	<Target Name="CleanSatelliteResources" AfterTargets="CopyCustomContentToPublish">

@@ -19,6 +19,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   console.log('[Main] APPLICATION BOOTSTRAP - M1/M2 Baseline');
 
+  // ── 0. Licensing Check ──────────────────────────────────────────
+  if (typeof Licensing !== 'undefined') {
+    await Licensing.init();
+  }
+
   // ── 1. State ────────────────────────────────────────────────────
   if (typeof CanvasState === 'undefined') {
     console.error('[Main] CRITICAL: CanvasState module not found — aborting.');
@@ -174,6 +179,17 @@ function _setupToolbarV2() {
   const btnThemeToggle = document.getElementById('btn-theme-toggle');
   if (btnThemeToggle && typeof ThemeController !== 'undefined') {
     btnThemeToggle.onclick = () => ThemeController.toggle();
+  }
+
+  // Licensing Actions (Updates & Deactivation)
+  const btnCheckUpdate = document.getElementById('btn-check-update');
+  if (btnCheckUpdate && typeof Licensing !== 'undefined') {
+    btnCheckUpdate.onclick = () => Licensing.checkAppUpdate();
+  }
+
+  const btnDeactivateLicense = document.getElementById('btn-deactivate-license');
+  if (btnDeactivateLicense && typeof Licensing !== 'undefined') {
+    btnDeactivateLicense.onclick = () => Licensing.deactivateDevice();
   }
 
   // 6. Properties Modal (M5+)

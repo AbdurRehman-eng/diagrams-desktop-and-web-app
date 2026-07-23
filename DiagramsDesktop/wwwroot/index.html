@@ -29,6 +29,8 @@
   <link rel="stylesheet" href="css/circle-on-container.css" />
   <!-- M11+: Subtree movement styling -->
   <link rel="stylesheet" href="css/nested-container-move.css" />
+  <!-- Licensing UI CSS -->
+  <link rel="stylesheet" href="css/licensing.css" />
 </head>
 <body>
   <div id="app-root">
@@ -87,6 +89,8 @@
             <div class="dropdown-item" id="btn-list-db"><span>List DB</span></div>
             <div class="dropdown-item" id="btn-save-db"><span>Save to DB</span></div>
             <div class="dropdown-item" id="btn-save-json"><span>Export JSON</span></div>
+            <div class="dropdown-item" id="btn-check-update"><span>Check for Updates</span></div>
+            <div class="dropdown-item" id="btn-deactivate-license"><span>Deactivate License</span></div>
           </div>
         </div>
 
@@ -152,6 +156,60 @@
       <span id="status-canvas-info">World Space · [0, 0]</span>
     </footer>
 
+  </div>
+
+  <!-- Licensing Activation Overlay -->
+  <div id="activation-overlay" class="license-overlay hidden">
+    <div class="license-card">
+      <div class="license-card-header">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+        </svg>
+        <h2>Activate Product Key</h2>
+      </div>
+      <div class="license-card-body">
+        <p>Please enter your Grade My Labs serial product key to activate your device and unlock the diagram editor canvas.</p>
+        <div class="license-input-wrapper">
+          <label for="product-key-input">Product Key / Serial Key</label>
+          <input type="text" id="product-key-input" class="license-input" placeholder="GML-XXXX-XXXX-XXXX-XXXX" />
+        </div>
+        <button id="btn-activate-submit" class="license-btn" onclick="Licensing.activateProductKey()">Activate Product</button>
+        <div id="activation-status-msg" class="license-status-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- License Violation Overlay -->
+  <div id="violation-overlay" class="license-overlay hidden">
+    <div class="license-card" style="border-color: rgba(239, 68, 68, 0.4);">
+      <div class="license-card-header">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h2 id="violation-title">License Violation</h2>
+      </div>
+      <div class="license-card-body">
+        <p>An issue was detected with your product license check. Canvas editing is currently disabled.</p>
+        <div class="violation-detail-box">
+          <pre id="violation-message">Violation details here.</pre>
+        </div>
+        <button class="license-btn" style="background: #ef4444;" onclick="Licensing.checkStatus()">Retry Check</button>
+        <a class="license-secondary-link" onclick="Licensing.deactivateDevice()">Activate Different Product Key</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advertisement Panel -->
+  <div id="ad-panel" class="license-ad-panel hidden">
+    <div class="license-ad-title">
+      <span id="ad-title-text">Sponsored</span>
+      <span class="license-ad-close" onclick="Licensing.hideAd()">&times;</span>
+    </div>
+    <div class="license-ad-header">Advertisement</div>
+    <img id="ad-img" class="license-ad-image" src="" alt="Advertisement image" />
+    <a id="ad-btn" class="license-ad-link" href="#" target="_blank">Learn More</a>
   </div>
 
   <!-- ═══════════════════════════════════════════════════
@@ -291,6 +349,7 @@
   <!-- <script src="js/demo-diagram-builder.js?v=9.1"></script> -->
 
   <script src="js/theme-controller.js?v=1.0"></script>
+  <script src="js/licensing.js"></script>
   <script src="js/main_v2.js?v=9.1"></script>
 
 

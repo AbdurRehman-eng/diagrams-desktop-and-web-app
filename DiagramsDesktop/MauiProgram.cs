@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 using System;
 using DiagramsDesktop.Core.Repositories;
 using DiagramsDesktop.Core.Services;
+using DiagramsDesktop.Services;
+using DiagramsDesktop.Filters;
+using System.Net.Http;
+
 
 namespace DiagramsDesktop;
 
@@ -125,7 +129,17 @@ public static class MauiProgram
                 builder.Services.AddSingleton<IConnectionRepository>(new ConnectionRepository(connectionString));
                 builder.Services.AddSingleton<IConnectionService, ConnectionService>();
 
-                builder.Services.AddControllers()
+                // Licensing Services
+                builder.Services.AddSingleton<HttpClient>();
+                builder.Services.AddSingleton<IHardwareInfoProvider, HardwareInfoProvider>();
+                builder.Services.AddSingleton<ILicenseClient, LicenseClient>();
+                builder.Services.AddSingleton<ILicenseManager, LicenseManager>();
+                builder.Services.AddScoped<LocalLicenseAuthorizationFilter>();
+
+                builder.Services.AddControllers(options =>
+                    {
+                        options.Filters.Add<LocalLicenseAuthorizationFilter>();
+                    })
                     .AddJsonOptions(options =>
                     {
                         options.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -142,6 +156,20 @@ public static class MauiProgram
                 var app = builder.Build();
 
                 app.UseCors("AllowAll");
+
+                // Initialize licensing manager asynchronously on startup
+                var licenseManager = app.Services.GetRequiredService<ILicenseManager>();
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await licenseManager.InitializeAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogToFile($"[MauiProgram] LicenseManager initialization failed: {ex.Message}");
+                    }
+                });
 
                 // Serve static files from the wwwroot directory in output path
                 var webRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot");
