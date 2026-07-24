@@ -9,8 +9,52 @@ public partial class MainPage : ContentPage
 	public MainPage()
 	{
 		InitializeComponent();
+		
+#if WINDOWS
+		DiagramWebView.Navigating += (s, e) => TryHookScriptDialog();
+		DiagramWebView.Navigated += (s, e) => TryHookScriptDialog();
+		DiagramWebView.HandlerChanged += (s, e) => TryHookScriptDialog();
+#endif
+
 		LoadWebViewAsync();
 	}
+
+#if WINDOWS
+	private void TryHookScriptDialog()
+	{
+		try
+		{
+			if (DiagramWebView.Handler?.PlatformView is Microsoft.UI.Xaml.Controls.WebView2 winWebView)
+			{
+				if (winWebView.CoreWebView2 != null)
+				{
+					winWebView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = false; // Disable default dialogs!
+					winWebView.CoreWebView2.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
+					winWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+				}
+				else
+				{
+					winWebView.CoreWebView2Initialized -= OnCoreWebView2Initialized;
+					winWebView.CoreWebView2Initialized += OnCoreWebView2Initialized;
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"[ScriptDialog] Hook error: {ex.Message}");
+		}
+	}
+
+	private void OnCoreWebView2Initialized(object? sender, Microsoft.UI.Xaml.Controls.CoreWebView2InitializedEventArgs args)
+	{
+		if (DiagramWebView.Handler?.PlatformView is Microsoft.UI.Xaml.Controls.WebView2 winWebView && winWebView.CoreWebView2 != null)
+		{
+			winWebView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = false; // Disable default dialogs!
+			winWebView.CoreWebView2.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
+			winWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+		}
+	}
+#endif
 
 	private async void LoadWebViewAsync()
 	{
@@ -46,40 +90,7 @@ public partial class MainPage : ContentPage
 		if (isServerResponsive)
 		{
 #if WINDOWS
-			if (DiagramWebView.Handler?.PlatformView is Microsoft.UI.Xaml.Controls.WebView2 winWebView)
-			{
-				if (winWebView.CoreWebView2 != null)
-				{
-					winWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
-				}
-				else
-				{
-					winWebView.CoreWebView2Initialized += (sender, args) =>
-					{
-						winWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
-					};
-				}
-			}
-			else
-			{
-				DiagramWebView.HandlerChanged += (s, e) =>
-				{
-					if (DiagramWebView.Handler?.PlatformView is Microsoft.UI.Xaml.Controls.WebView2 wWebView)
-					{
-						if (wWebView.CoreWebView2 != null)
-						{
-							wWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
-						}
-						else
-						{
-							wWebView.CoreWebView2Initialized += (sender, args) =>
-							{
-								wWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
-							};
-						}
-					}
-				};
-			}
+			TryHookScriptDialog();
 #endif
 			// Once the port is open and responding, set the WebView Source to navigate
 			DiagramWebView.Source = url;
