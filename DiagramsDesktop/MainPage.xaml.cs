@@ -45,6 +45,42 @@ public partial class MainPage : ContentPage
 
 		if (isServerResponsive)
 		{
+#if WINDOWS
+			if (DiagramWebView.Handler?.PlatformView is Microsoft.UI.Xaml.Controls.WebView2 winWebView)
+			{
+				if (winWebView.CoreWebView2 != null)
+				{
+					winWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+				}
+				else
+				{
+					winWebView.CoreWebView2Initialized += (sender, args) =>
+					{
+						winWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+					};
+				}
+			}
+			else
+			{
+				DiagramWebView.HandlerChanged += (s, e) =>
+				{
+					if (DiagramWebView.Handler?.PlatformView is Microsoft.UI.Xaml.Controls.WebView2 wWebView)
+					{
+						if (wWebView.CoreWebView2 != null)
+						{
+							wWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+						}
+						else
+						{
+							wWebView.CoreWebView2Initialized += (sender, args) =>
+							{
+								wWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+							};
+						}
+					}
+				};
+			}
+#endif
 			// Once the port is open and responding, set the WebView Source to navigate
 			DiagramWebView.Source = url;
 		}
@@ -140,4 +176,51 @@ p {{
 			};
 		}
 	}
+
+#if WINDOWS
+	private void CoreWebView2_ScriptDialogOpening(object sender, Microsoft.Web.WebView2.Core.CoreWebView2ScriptDialogOpeningEventArgs e)
+	{
+		var deferral = e.GetDeferral();
+		var message = e.Message;
+		var kind = e.Kind;
+		var defaultText = e.DefaultText;
+
+		Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
+		{
+			try
+			{
+				if (kind == Microsoft.Web.WebView2.Core.CoreWebView2ScriptDialogKind.Alert)
+				{
+					await DisplayAlert("Diagrams Desktop", message, "OK");
+					e.Accept();
+				}
+				else if (kind == Microsoft.Web.WebView2.Core.CoreWebView2ScriptDialogKind.Confirm)
+				{
+					bool accepted = await DisplayAlert("Diagrams Desktop", message, "OK", "Cancel");
+					if (accepted)
+					{
+						e.Accept();
+					}
+				}
+				else if (kind == Microsoft.Web.WebView2.Core.CoreWebView2ScriptDialogKind.Prompt)
+				{
+					string result = await DisplayPromptAsync("Diagrams Desktop", message, "OK", "Cancel", defaultText);
+					if (result != null)
+					{
+						e.ResultText = result;
+						e.Accept();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[ScriptDialog] Error showing dialog: {ex.Message}");
+			}
+			finally
+			{
+				deferral.Complete();
+			}
+		});
+	}
+#endif
 }

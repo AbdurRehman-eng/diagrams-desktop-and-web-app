@@ -36,7 +36,7 @@ public class LicenseManager : ILicenseManager
 
     private readonly ILicenseClient _client;
     private readonly IHardwareInfoProvider _hardwareProvider;
-    private readonly string _serverUrl = "http://localhost:5080"; // Default remote website URL
+    private readonly string _serverUrl = "https://grademylabs.com"; // Default remote website URL
     private readonly string _token = "GML-ACTIVE-TEST-KEY-1234"; // Default developer bypass key
 
     private CancellationTokenSource? _loopCts;
@@ -51,7 +51,7 @@ public class LicenseManager : ILicenseManager
     public LatestAdV1Response? LatestAd { get; private set; }
 
     public string ProductKey => Preferences.Default.Get(PrefProductKey, string.Empty);
-    public string ProductCode => "GML-DIAGRAMS"; // This app's product identifier
+    public string ProductCode => "GML_DIAGRAMS"; // This app's product identifier
     public string AppVersion => "1.0.0";
     public string DeviceName => Environment.MachineName;
 
