@@ -331,33 +331,33 @@ const CredentialsUI = (() => {
 
     const desc = document.getElementById('form-field-desc').value.trim();
     const payload = {
-      CredentialId: editingId,
-      Provider: activeTab,
-      Description: desc
+      credential_id: editingId,
+      provider: activeTab,
+      description: desc
     };
 
     // Extract dynamic fields per provider
     if (activeTab === 'AWS') {
-      payload.Identifier1 = document.getElementById('aws-access-key').value.trim();
-      payload.SecretValue = document.getElementById('aws-secret-key').value;
+      payload.identifier1 = document.getElementById('aws-access-key').value.trim();
+      payload.secret_value = document.getElementById('aws-secret-key').value;
     } 
     else if (activeTab === 'Azure') {
-      payload.Identifier1 = document.getElementById('azure-client-id').value.trim();
-      payload.Identifier2 = document.getElementById('azure-tenant-id').value.trim();
-      payload.Identifier3 = document.getElementById('azure-sub-id').value.trim();
-      payload.Identifier4 = document.getElementById('azure-secret-id').value.trim();
-      payload.SecretValue = document.getElementById('azure-secret-val').value;
+      payload.identifier1 = document.getElementById('azure-client-id').value.trim();
+      payload.identifier2 = document.getElementById('azure-tenant-id').value.trim();
+      payload.identifier3 = document.getElementById('azure-sub-id').value.trim();
+      payload.identifier4 = document.getElementById('azure-secret-id').value.trim();
+      payload.secret_value = document.getElementById('azure-secret-val').value;
     } 
     else if (activeTab === 'GCP') {
-      payload.Identifier1 = document.getElementById('gcp-project-id').value.trim();
-      payload.Identifier2 = document.getElementById('gcp-sa-email').value.trim();
-      payload.Identifier3 = document.getElementById('gcp-key-id').value.trim();
-      payload.SecretValue = document.getElementById('gcp-private-key').value;
+      payload.identifier1 = document.getElementById('gcp-project-id').value.trim();
+      payload.identifier2 = document.getElementById('gcp-sa-email').value.trim();
+      payload.identifier3 = document.getElementById('gcp-key-id').value.trim();
+      payload.secret_value = document.getElementById('gcp-private-key').value;
     } 
     else if (activeTab === 'VMwareVCenter') {
-      payload.Identifier1 = document.getElementById('vc-address').value.trim();
-      payload.Identifier2 = document.getElementById('vc-username').value.trim();
-      payload.SecretValue = document.getElementById('vc-password').value;
+      payload.identifier1 = document.getElementById('vc-address').value.trim();
+      payload.identifier2 = document.getElementById('vc-username').value.trim();
+      payload.secret_value = document.getElementById('vc-password').value;
     }
 
     try {
