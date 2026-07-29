@@ -15,6 +15,11 @@ using DiagramsDesktop.Services;
 using DiagramsDesktop.Filters;
 using System.Net.Http;
 
+#if WINDOWS
+using Microsoft.Maui.LifecycleEvents;
+using Microsoft.UI.Windowing;
+#endif
+
 
 namespace DiagramsDesktop;
 
@@ -90,6 +95,122 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            })
+            .ConfigureLifecycleEvents(events =>
+            {
+#if WINDOWS
+                events.AddWindows(windowsLifecycleBuilder =>
+                {
+                    windowsLifecycleBuilder.OnWindowCreated(window =>
+                    {
+                        var handle = WinRT.Interop.WindowNative.GetWindowHandle(window);
+                        var id = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(handle);
+                        var appWindow = AppWindow.GetFromWindowId(id);
+
+                        bool bypassCloseCheck = false;
+
+                        appWindow.Closing += async (s, e) =>
+                        {
+                            if (bypassCloseCheck)
+                            {
+                                return; // Let the window close normally
+                            }
+
+                            e.Cancel = true; // Prevent immediate close
+
+                            if (App.Current?.MainPage is MainPage mainPage)
+                            {
+                                var webView = mainPage.FindByName<WebView>("DiagramWebView");
+                                if (webView != null)
+                                {
+                                    try
+                                    {
+                                        // Evaluate JavaScript to check if diagram is dirty
+                                        var isDirtyResult = await mainPage.Dispatcher.DispatchAsync(async () =>
+                                        {
+                                            return await webView.EvaluateJavaScriptAsync("typeof DirtyTracker !== 'undefined' ? DirtyTracker.isDirty() : false");
+                                        });
+
+                                        bool isDirty = isDirtyResult == "true" || isDirtyResult == "1";
+
+                                        if (isDirty)
+                                        {
+                                            var action = await mainPage.Dispatcher.DispatchAsync(async () =>
+                                            {
+                                                return await mainPage.DisplayActionSheet(
+                                                    "Save changes to your diagram?",
+                                                    "Cancel Close",
+                                                    "Close Without Saving",
+                                                    "Save and Close"
+                                                );
+                                            });
+
+                                            if (action == "Save and Close")
+                                            {
+                                                // Trigger JS save flow
+                                                await mainPage.Dispatcher.DispatchAsync(async () =>
+                                                {
+                                                    await webView.EvaluateJavaScriptAsync("DiagramApi.promptAndSaveToDb()");
+                                                });
+
+                                                // Poll for dirty state to become clean (meaning save completed)
+                                                bool saveCompleted = false;
+                                                for (int i = 0; i < 60; i++) // Try for 30 seconds
+                                                {
+                                                    await Task.Delay(500);
+                                                    var checkResult = await mainPage.Dispatcher.DispatchAsync(async () =>
+                                                    {
+                                                        return await webView.EvaluateJavaScriptAsync("typeof DirtyTracker !== 'undefined' ? DirtyTracker.isDirty() : false");
+                                                    });
+                                                    if (checkResult == "false" || checkResult == "0")
+                                                    {
+                                                        saveCompleted = true;
+                                                        break;
+                                                    }
+                                                }
+
+                                                if (saveCompleted)
+                                                {
+                                                    bypassCloseCheck = true;
+                                                    mainPage.Dispatcher.Dispatch(() => window.Close());
+                                                }
+                                            }
+                                            else if (action == "Close Without Saving")
+                                            {
+                                                bypassCloseCheck = true;
+                                                mainPage.Dispatcher.Dispatch(() => window.Close());
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // Not dirty, just close
+                                            bypassCloseCheck = true;
+                                            mainPage.Dispatcher.Dispatch(() => window.Close());
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"[WindowClose] Error during close check: {ex.Message}");
+                                        // In case of error, default to letting them close
+                                        bypassCloseCheck = true;
+                                        mainPage.Dispatcher.Dispatch(() => window.Close());
+                                    }
+                                }
+                                else
+                                {
+                                    bypassCloseCheck = true;
+                                    mainPage.Dispatcher.Dispatch(() => window.Close());
+                                }
+                            }
+                            else
+                            {
+                                bypassCloseCheck = true;
+                                window.Close();
+                            }
+                        };
+                    });
+                });
+#endif
             });
 
 #if DEBUG
