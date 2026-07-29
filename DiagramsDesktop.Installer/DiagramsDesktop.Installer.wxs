@@ -27,6 +27,7 @@
     <!-- WiX standard GUI with directory picker -->
     <ui:WixUI Id="WixUI_InstallDir" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
 
     <!-- ═══════════════════════════════════════
          DIRECTORY LAYOUT
