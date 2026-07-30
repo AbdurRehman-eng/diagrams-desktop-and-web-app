@@ -31,6 +31,20 @@ public partial class MainPage : ContentPage
 					winWebView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = false; // Disable default dialogs!
 					winWebView.CoreWebView2.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
 					winWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+
+					winWebView.CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
+					winWebView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+					_ = winWebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
+						console.error = (function(oldError) {
+							return function() {
+								oldError.apply(console, arguments);
+								try { window.chrome.webview.postMessage('CONSOLE_ERROR: ' + Array.from(arguments).map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(' ')); } catch(e){}
+							};
+						})(console.error);
+						window.onerror = function(message, source, lineno, colno, error) {
+							try { window.chrome.webview.postMessage('WINDOW_ERROR: ' + message + ' (' + source + ':' + lineno + ')'); } catch(e){}
+						};
+					");
 				}
 				else
 				{
@@ -52,7 +66,34 @@ public partial class MainPage : ContentPage
 			winWebView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = false; // Disable default dialogs!
 			winWebView.CoreWebView2.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
 			winWebView.CoreWebView2.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+
+			winWebView.CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
+			winWebView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+			_ = winWebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
+				console.error = (function(oldError) {
+					return function() {
+						oldError.apply(console, arguments);
+						try { window.chrome.webview.postMessage('CONSOLE_ERROR: ' + Array.from(arguments).map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(' ')); } catch(e){}
+					};
+				})(console.error);
+				window.onerror = function(message, source, lineno, colno, error) {
+					try { window.chrome.webview.postMessage('WINDOW_ERROR: ' + message + ' (' + source + ':' + lineno + ')'); } catch(e){}
+				};
+			");
 		}
+	}
+
+	private void CoreWebView2_WebMessageReceived(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs e)
+	{
+		try
+		{
+			var message = e.TryGetWebMessageAsString();
+			if (!string.IsNullOrEmpty(message))
+			{
+				MauiProgram.LogToFile($"[WebViewConsole] {message}");
+			}
+		}
+		catch { }
 	}
 #endif
 
