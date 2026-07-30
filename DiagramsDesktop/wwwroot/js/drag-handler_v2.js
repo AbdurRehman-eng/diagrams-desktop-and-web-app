@@ -283,7 +283,7 @@ const DragHandler = (() => {
 
       RenderCanvas.render();
     } catch (err) {
-      console.error('[DragHandler] Exception in onMouseMove:', err);
+      console.error('[DragHandler] Exception in onMouseMove:', err.message, err.stack);
     }
   }
 
@@ -659,7 +659,7 @@ const DragHandler = (() => {
         }
       }
     } catch (err) {
-      console.error('[DragHandler] Exception in onMouseUp:', err);
+      console.error('[DragHandler] Exception in onMouseUp:', err.message, err.stack);
     } finally {
       _reset();
       RenderCanvas.render();
@@ -734,8 +734,12 @@ const DragHandler = (() => {
   function _getDescendantIds(parentId, allShapes) {
     const result = new Set();
     const queue  = [parentId];
+    const visited = new Set();
     while (queue.length > 0) {
       const current  = queue.shift();
+      if (visited.has(current)) continue;
+      visited.add(current);
+
       const children = allShapes.filter(s => s.ParentContainerID === current);
       for (const child of children) {
         result.add(child.ShapeID);

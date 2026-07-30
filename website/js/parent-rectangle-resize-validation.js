@@ -20,8 +20,12 @@ const ParentRectangleResizeValidation = (() => {
   function _getDescendantIds(parentId, allShapes) {
     const result = new Set();
     const queue  = [parentId];
+    const visited = new Set();
     while (queue.length > 0) {
       const current  = queue.shift();
+      if (visited.has(current)) continue;
+      visited.add(current);
+
       const children = allShapes.filter(s => s.ParentContainerID === current);
       for (const child of children) {
         result.add(child.ShapeID);
