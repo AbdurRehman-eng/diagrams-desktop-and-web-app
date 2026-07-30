@@ -23,7 +23,7 @@ public class CredentialManagerWrapper
         public int Persist;
         public int AttributeCount;
         public IntPtr Attributes;
-        public string TargetAlias;
+        public string? TargetAlias;
         public string UserName;
     }
 

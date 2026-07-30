@@ -243,12 +243,12 @@ p {{
 			{
 				if (kind == Microsoft.Web.WebView2.Core.CoreWebView2ScriptDialogKind.Alert)
 				{
-					await DisplayAlert("Diagrams Desktop", message, "OK");
+					await DisplayAlertAsync("Diagrams Desktop", message, "OK");
 					e.Accept();
 				}
 				else if (kind == Microsoft.Web.WebView2.Core.CoreWebView2ScriptDialogKind.Confirm)
 				{
-					bool accepted = await DisplayAlert("Diagrams Desktop", message, "OK", "Cancel");
+					bool accepted = await DisplayAlertAsync("Diagrams Desktop", message, "OK", "Cancel");
 					if (accepted)
 					{
 						e.Accept();

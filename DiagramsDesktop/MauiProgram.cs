@@ -118,7 +118,7 @@ public static class MauiProgram
 
                             e.Cancel = true; // Prevent immediate close
 
-                            var activePage = App.Current?.MainPage;
+                            var activePage = App.Current?.Windows.Count > 0 ? App.Current.Windows[0].Page : null;
                             if (activePage is Shell shell)
                             {
                                 activePage = shell.CurrentPage;
@@ -143,7 +143,7 @@ public static class MauiProgram
                                         {
                                             var action = await mainPage.Dispatcher.DispatchAsync(async () =>
                                             {
-                                                return await mainPage.DisplayActionSheet(
+                                                return await mainPage.DisplayActionSheetAsync(
                                                     "Save changes to your diagram?",
                                                     "Cancel Close",
                                                     "Close Without Saving",

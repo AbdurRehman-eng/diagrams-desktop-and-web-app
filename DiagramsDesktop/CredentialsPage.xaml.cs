@@ -67,12 +67,12 @@ public partial class CredentialsPage : ContentPage
 			{
 				if (kind == Microsoft.Web.WebView2.Core.CoreWebView2ScriptDialogKind.Alert)
 				{
-					await DisplayAlert("Credentials Manager", message, "OK");
+					await DisplayAlertAsync("Credentials Manager", message, "OK");
 					e.Accept();
 				}
 				else if (kind == Microsoft.Web.WebView2.Core.CoreWebView2ScriptDialogKind.Confirm)
 				{
-					bool accepted = await DisplayAlert("Credentials Manager", message, "OK", "Cancel");
+					bool accepted = await DisplayAlertAsync("Credentials Manager", message, "OK", "Cancel");
 					if (accepted)
 					{
 						e.Accept();
