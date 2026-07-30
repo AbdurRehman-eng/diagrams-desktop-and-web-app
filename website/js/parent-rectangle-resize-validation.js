@@ -17,6 +17,20 @@ const ParentRectangleResizeValidation = (() => {
 
   const EPSILON = 0.5;
 
+  function _getDescendantIds(parentId, allShapes) {
+    const result = new Set();
+    const queue  = [parentId];
+    while (queue.length > 0) {
+      const current  = queue.shift();
+      const children = allShapes.filter(s => s.ParentContainerID === current);
+      for (const child of children) {
+        result.add(child.ShapeID);
+        queue.push(child.ShapeID);
+      }
+    }
+    return result;
+  }
+
   /**
    * validate
    * --------
@@ -27,9 +41,10 @@ const ParentRectangleResizeValidation = (() => {
    */
   function validate(candidateBounds, parentShapeId, allShapes) {
     const { ParentInnerLeftX, ParentInnerRightX, ParentInnerTopY, ParentInnerBottomY } = candidateBounds;
-    const children = allShapes.filter(s => s.ParentContainerID === parentShapeId);
+    const descendantIds = _getDescendantIds(parentShapeId, allShapes);
+    const descendants = allShapes.filter(s => descendantIds.has(s.ShapeID));
 
-    for (const child of children) {
+    for (const child of descendants) {
       const result = _validateChild(child, ParentInnerLeftX, ParentInnerRightX, ParentInnerTopY, ParentInnerBottomY);
       if (!result.valid) {
         return { valid: false, reason: `Child "${child.Label || child.ShapeID}" would be outside new parent bounds: ${result.reason}` };
@@ -70,3 +85,10 @@ const ParentRectangleResizeValidation = (() => {
   return { validate };
 
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ParentRectangleResizeValidation;
+} else {
+  window.ParentRectangleResizeValidation = ParentRectangleResizeValidation;
+}
+

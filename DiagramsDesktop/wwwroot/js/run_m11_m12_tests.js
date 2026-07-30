@@ -283,6 +283,36 @@ assert('updateAttachment updates properties successfully', mockCanvasState.SvgAt
 SvgAttachmentManager.removeAttachment(mockCanvasState, att.AttachmentID);
 assert('removeAttachment removes the attachment successfully', mockCanvasState.SvgAttachments.length, 0);
 
+// ── 5.5. Grandchild Container/Shape Containment Resize Validation Test ───────
+section('Grandchild Container/Shape Containment Resize Validation');
+global.ParentRectangleResizeValidation = require('./parent-rectangle-resize-validation.js');
+
+const testShapes = [
+  { ShapeID: 'vpc', ParentContainerID: null, Type: 'aws-vpc', WorldX: 100, WorldY: 100, Width: 200, Height: 200 },
+  { ShapeID: 'az', ParentContainerID: 'vpc', Type: 'aws-availability-zone', WorldX: 100, WorldY: 100, Width: 150, Height: 150 },
+  { ShapeID: 'subnet', ParentContainerID: 'az', Type: 'aws-subnet', WorldX: 100, WorldY: 100, Width: 100, Height: 100 }
+];
+
+// VPC candidate bounds if resized to 120 x 120 (which is smaller than AZ [150x150] and would exclude AZ, and thus subnet)
+const candidateBoundsNarrow = {
+  ParentInnerLeftX: 40,
+  ParentInnerRightX: 160,
+  ParentInnerTopY: 160,
+  ParentInnerBottomY: 40
+};
+const resNarrow = ParentRectangleResizeValidation.validate(candidateBoundsNarrow, 'vpc', testShapes);
+assert('Grandparent resize that excludes AZ/Subnet should be rejected', resNarrow.valid, false);
+
+// VPC candidate bounds if resized to 165 x 165 (which contains AZ [150x150] and subnet [100x100] with padding)
+const candidateBoundsWide = {
+  ParentInnerLeftX: 10,
+  ParentInnerRightX: 190,
+  ParentInnerTopY: 190,
+  ParentInnerBottomY: 10
+};
+const resWide = ParentRectangleResizeValidation.validate(candidateBoundsWide, 'vpc', testShapes);
+assert('Grandparent resize that contains all descendants should be accepted', resWide.valid, true);
+
 // ── 6. Summary ───────────────────────────────────────────────────────────────
 console.log(`\n══════════════════════════════════════`);
 console.log(`  M11/M12 Results: ${passed} passed, ${failed} failed`);
