@@ -279,6 +279,8 @@ const ContainmentEngine = (() => {
     checkSiblingOverlap,
     validateParentResize,
     fitShapeToParent,
+    getRectProtectionPadding,
+    getCircleProtectionPadding,
   };
 
 })();
