@@ -118,7 +118,13 @@ public static class MauiProgram
 
                             e.Cancel = true; // Prevent immediate close
 
-                            if (App.Current?.MainPage is MainPage mainPage)
+                            var activePage = App.Current?.MainPage;
+                            if (activePage is Shell shell)
+                            {
+                                activePage = shell.CurrentPage;
+                            }
+
+                            if (activePage is MainPage mainPage)
                             {
                                 var webView = mainPage.FindByName<WebView>("DiagramWebView");
                                 if (webView != null)
