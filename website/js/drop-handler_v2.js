@@ -180,7 +180,7 @@ const DropHandler = (() => {
     if (itemDef && itemDef.parentType && typeof ParentDropValidator !== 'undefined') {
       const existingShapes = CanvasState.getShapes();
       const requiredTypes = Array.isArray(itemDef.parentType) ? itemDef.parentType : [itemDef.parentType];
-      const parentShape = existingShapes.find(s => {
+      const matchingParents = existingShapes.filter(s => {
         if (!requiredTypes.includes(s.Type)) return false;
         if (s.Type === newShape.Type) return false;
         const hw = s.Width / 2;
@@ -189,7 +189,9 @@ const DropHandler = (() => {
           worldPos.x >= s.WorldX - hw && worldPos.x <= s.WorldX + hw &&
           worldPos.y >= s.WorldY - hh && worldPos.y <= s.WorldY + hh
         );
-      });
+      }).sort((a, b) => (a.Width * a.Height) - (b.Width * b.Height));
+
+      const parentShape = matchingParents[0] || null;
       if (parentShape) {
         newShape.ParentContainerID = parentShape.ShapeID;
         console.log(`[DropHandler] Linked ${newShape.Label} (${newShape.ShapeID}) -> parent ${parentShape.Label} (${parentShape.ShapeID})`);

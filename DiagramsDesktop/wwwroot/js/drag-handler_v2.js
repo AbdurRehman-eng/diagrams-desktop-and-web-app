@@ -440,7 +440,7 @@ const DragHandler = (() => {
               // Valid! Update the parent reference
               const existingShapes = CanvasState.getShapes();
               const requiredTypes = Array.isArray(itemDef.parentType) ? itemDef.parentType : [itemDef.parentType];
-              const parentShape = existingShapes.find(s => {
+              const matchingParents = existingShapes.filter(s => {
                 if (s.ShapeID === finalShape.ShapeID) return false;
                 if (!requiredTypes.includes(s.Type)) return false;
                 if (s.Type === finalShape.Type) return false;
@@ -450,7 +450,9 @@ const DragHandler = (() => {
                   finalShape.WorldX >= s.WorldX - hw && finalShape.WorldX <= s.WorldX + hw &&
                   finalShape.WorldY >= s.WorldY - hh && finalShape.WorldY <= s.WorldY + hh
                 );
-              });
+              }).sort((a, b) => (a.Width * a.Height) - (b.Width * b.Height));
+
+              const parentShape = matchingParents[0] || null;
               if (parentShape) {
                 CanvasState.updateShape(finalShape.ShapeID, { ParentContainerID: parentShape.ShapeID });
                 console.log(`[DragHandler] Re-linked ${finalShape.Label} (${finalShape.ShapeID}) -> parent ${parentShape.Label} (${parentShape.ShapeID})`);
