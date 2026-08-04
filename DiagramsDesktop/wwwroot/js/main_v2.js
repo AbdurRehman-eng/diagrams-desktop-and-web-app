@@ -169,12 +169,6 @@ function _setupToolbarV2() {
   if (btnUndo) btnUndo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.undo(); };
   if (btnRedo) btnRedo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.redo(); };
 
-  // 5. Save to DB — prompt for name before saving
-  const btnSaveDb = document.getElementById('btn-save-db');
-  if (btnSaveDb && typeof DiagramApi !== 'undefined') {
-    btnSaveDb.onclick = () => DiagramApi.promptAndSaveToDb();
-  }
-
   // Theme Toggle Button
   const btnThemeToggle = document.getElementById('btn-theme-toggle');
   if (btnThemeToggle && typeof ThemeController !== 'undefined') {

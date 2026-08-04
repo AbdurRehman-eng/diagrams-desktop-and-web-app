@@ -235,16 +235,30 @@ const DragHandler = (() => {
               const bounds  = DeriveParentInnerBoundaries.fromShape(parentShape2);
               const EPSILON = 1;
 
-              const pLeft   = bounds.ParentInnerLeftX   + EPSILON;
-              const pRight  = bounds.ParentInnerRightX  - EPSILON;
-              const pTop    = bounds.ParentInnerTopY    - EPSILON;
-              const pBottom = bounds.ParentInnerBottomY + EPSILON;
+              let ratio = 0.10;
+              if (typeof CanvasState !== 'undefined') {
+                const gv = CanvasState.getGlobalVars();
+                ratio = gv.rectangle?.protectionPaddingRatio ?? 0.10;
+              }
 
-              // Clamp only the edges that are actively being dragged
-              if (_activeHandle.includes('w') && left   < pLeft)   left   = pLeft;
-              if (_activeHandle.includes('e') && right  > pRight)  right  = pRight;
-              if (_activeHandle.includes('s') && bottom < pBottom) bottom = pBottom;
-              if (_activeHandle.includes('n') && top    > pTop)    top    = pTop;
+              // Clamp only the edges that are actively being dragged, taking protection padding into account
+              const rFactor = ratio / 2;
+              if (_activeHandle.includes('w')) {
+                const pLeft = (bounds.ParentInnerLeftX + (right * rFactor) + EPSILON) / (1 + rFactor);
+                if (left < pLeft) left = pLeft;
+              }
+              if (_activeHandle.includes('e')) {
+                const pRight = (bounds.ParentInnerRightX + (left * rFactor) - EPSILON) / (1 + rFactor);
+                if (right > pRight) right = pRight;
+              }
+              if (_activeHandle.includes('s')) {
+                const pBottom = (bounds.ParentInnerBottomY + (top * rFactor) + EPSILON) / (1 + rFactor);
+                if (bottom < pBottom) bottom = pBottom;
+              }
+              if (_activeHandle.includes('n')) {
+                const pTop = (bounds.ParentInnerTopY + (bottom * rFactor) - EPSILON) / (1 + rFactor);
+                if (top > pTop) top = pTop;
+              }
 
               // Re-apply minimum size in case clamping crushed the shape
               if (right - left < 10) {
@@ -589,6 +603,19 @@ const DragHandler = (() => {
                       _reset();
                       return;
                     }
+                  }
+                }
+
+                // Check parent containment for resized child
+                const parentShape = allShapes.find(s => s.ShapeID === resizedShape.ParentContainerID);
+                if (parentShape) {
+                  const containRes = ContainmentEngine.validateChildInParent(resizedShape, parentShape);
+                  if (!containRes.valid) {
+                    console.warn('[DragHandler] Child resize exceeds parent boundary — snapping back');
+                    _snapBack();
+                    RenderCanvas.render();
+                    _reset();
+                    return;
                   }
                 }
               }

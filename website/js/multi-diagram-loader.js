@@ -31,8 +31,6 @@ const MultiDiagramLoader = (() => {
 
   // ── Init ───────────────────────────────────────────────────────
   function init() {
-    const btnSaveDb = document.getElementById('btn-save-db');
-    if (btnSaveDb) btnSaveDb.addEventListener('click', saveActiveToDb);
   }
 
   // ══════════════════════════════════════════════════════════════

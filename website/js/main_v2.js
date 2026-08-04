@@ -167,12 +167,6 @@ function _setupToolbarV2() {
   if (btnUndo) btnUndo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.undo(); };
   if (btnRedo) btnRedo.onclick = () => { if (typeof HistoryManager !== 'undefined') HistoryManager.redo(); };
 
-  // 5. Save to DB — prompt for name before saving (Fix 3)
-  const btnSaveDb = document.getElementById('btn-save-db');
-  if (btnSaveDb && typeof DiagramApi !== 'undefined') {
-    btnSaveDb.onclick = () => DiagramApi.promptAndSaveToDb();
-  }
-
   // 6. Properties Modal
   const btnGlobalVars = document.getElementById('btn-global-vars');
   if (btnGlobalVars && typeof PropertiesModal !== 'undefined') {
