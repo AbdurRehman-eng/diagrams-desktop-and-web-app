@@ -138,7 +138,7 @@ public partial class MainPage : ContentPage
 		}
 		else
 		{
-			var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DiagramsDesktop", "startup.log");
+			var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GML Diagrams", "startup.log");
 			MauiProgram.LogToFile($"[WebView] Error: Kestrel server did not respond at {url} after 20 seconds.");
 
 			// Show a professional error page instead of a blank screen

@@ -73,12 +73,12 @@ dotnet build DiagramsDesktop.Installer/DiagramsDesktop.Installer.wixproj -c Rele
 ```
 
 The build command automatically:
-1. Publishes the MAUI desktop application as a self-contained, unpackaged `win-x64` executable to `publish/DiagramsDesktop`.
+1. Publishes the MAUI desktop application as a self-contained, unpackaged `win-x64` executable to `publish/GMLDiagrams`.
 2. Cleans up extra satellite folders.
 3. Harvests files and links them into a single setup package.
 
 The generated installer will be created at:
-📂 `DiagramsDesktop.Installer\bin\Release\DiagramsDesktop-1.0.0-Setup.msi`
+📂 `DiagramsDesktop.Installer\bin\Release\GMLDiagrams-1.0.0-Setup.msi`
 
 ## 📄 License
 

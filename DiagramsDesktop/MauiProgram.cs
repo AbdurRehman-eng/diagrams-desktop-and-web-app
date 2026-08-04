@@ -31,7 +31,7 @@ public static class MauiProgram
     {
         try
         {
-            var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DiagramsDesktop");
+            var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GML Diagrams");
             Directory.CreateDirectory(appDataFolder);
             var logPath = Path.Combine(appDataFolder, "startup.log");
             File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}{Environment.NewLine}");
@@ -46,7 +46,7 @@ public static class MauiProgram
     {
 #if WINDOWS
         // Redirect WebView2 cache to a writable AppData path to prevent Program Files write-permission issues
-        var wWebView2CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DiagramsDesktop", "WebView2Cache");
+        var wWebView2CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GML Diagrams", "WebView2Cache");
         try
         {
             Directory.CreateDirectory(wWebView2CachePath);
@@ -68,7 +68,7 @@ public static class MauiProgram
         LogToFile($"webRootPath: {webRootPath} (Exists: {Directory.Exists(webRootPath)})");
 
         // 1. Determine local database path and initialize database schema
-        var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DiagramsDesktop");
+        var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GML Diagrams");
         var dbPath = Path.Combine(appDataFolder, "diagrams.db");
         var connectionString = $"Data Source={dbPath}";
 

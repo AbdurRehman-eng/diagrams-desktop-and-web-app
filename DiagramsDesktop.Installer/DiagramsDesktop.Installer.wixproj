@@ -1,10 +1,10 @@
 <Project Sdk="WixToolset.Sdk/4.0.5">
 
   <PropertyGroup>
-    <OutputName>DiagramsDesktop-1.0.0-Setup</OutputName>
+    <OutputName>GMLDiagrams-1.0.0-Setup</OutputName>
     <OutputType>Package</OutputType>
     <!-- Tell WiX linker where SourceDir maps to (the publish folder) -->
-    <BindInputPaths>$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop</BindInputPaths>
+    <BindInputPaths>$(MSBuildThisFileDirectory)..\publish\GMLDiagrams</BindInputPaths>
     <!-- Target x64 architecture -->
     <InstallerPlatform>x64</InstallerPlatform>
     <!-- ICE03/ICE80: Suppress resource language and 32/64 bit component mismatch warnings/errors -->
@@ -20,7 +20,7 @@
 
   <!-- Harvest the entire publish output folder automatically -->
   <ItemGroup>
-    <HarvestDirectory Include="..\publish\DiagramsDesktop">
+    <HarvestDirectory Include="..\publish\GMLDiagrams">
       <DirectoryRefId>INSTALLFOLDER</DirectoryRefId>
       <ComponentGroupName>PublishFilesGroup</ComponentGroupName>
       <SuppressRootDirectory>true</SuppressRootDirectory>
@@ -29,9 +29,9 @@
 
   <!-- Automatically publish the MAUI app as self-contained win-x64 before building the installer -->
   <Target Name="PublishApp" BeforeTargets="BeforeBuild">
-    <RemoveDir Directories="$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop" />
-    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\DiagramsDesktop\DiagramsDesktop.csproj&quot; -c $(Configuration) -f net10.0-windows10.0.19041.0 -o &quot;$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop&quot; -r win-x64 --self-contained true -p:PublishSingleFile=false" />
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)encrypt-data.ps1&quot; -TargetDir &quot;$(MSBuildThisFileDirectory)..\publish\DiagramsDesktop\wwwroot\data&quot; -Password &quot;GmlDiagramsSecretPassword2026!&quot;" />
+    <RemoveDir Directories="$(MSBuildThisFileDirectory)..\publish\GMLDiagrams" />
+    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\DiagramsDesktop\DiagramsDesktop.csproj&quot; -c $(Configuration) -f net10.0-windows10.0.19041.0 -o &quot;$(MSBuildThisFileDirectory)..\publish\GMLDiagrams&quot; -r win-x64 --self-contained true -p:PublishSingleFile=false" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)encrypt-data.ps1&quot; -TargetDir &quot;$(MSBuildThisFileDirectory)..\publish\GMLDiagrams\wwwroot\data&quot; -Password &quot;GmlDiagramsSecretPassword2026!&quot;" />
   </Target>
 
 </Project>
