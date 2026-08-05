@@ -215,7 +215,7 @@ public class LicenseManager : ILicenseManager
         catch (Exception ex)
         {
             MauiProgram.LogToFile($"[LicenseManager] Check update failed: {ex.Message}");
-            return new CheckUpdateV1Response { UpdateAvailable = false, ReleaseNotes = ex.Message };
+            throw;
         }
     }
 

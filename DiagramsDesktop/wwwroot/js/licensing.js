@@ -13,6 +13,7 @@ const Licensing = (() => {
   async function init() {
     console.log('[Licensing] Initializing check...');
     await checkStatus();
+    await checkUpdatesOnStartup();
   }
 
   async function checkStatus() {
@@ -141,6 +142,7 @@ const Licensing = (() => {
       }
     } catch (err) {
       console.error('[Licensing] Update check error:', err);
+      alert('GML Web site is not available.');
     }
   }
 
@@ -198,6 +200,56 @@ const Licensing = (() => {
     el.classList.add(type);
   }
 
-  return { init, checkStatus, activateProductKey, deactivateDevice, checkAppUpdate, hideAd };
+  async function checkUpdatesOnStartup() {
+    try {
+      const response = await fetch(`${BASE_URL}/update`);
+      if (!response.ok) throw new Error('Update check failed on backend.');
+
+      const res = await response.json();
+      if (res.update_available) {
+        const updateOverlay = document.getElementById('update-overlay');
+        const updateTitle   = document.getElementById('update-overlay-title');
+        const updateMsg     = document.getElementById('update-overlay-message');
+        const downloadLink  = document.getElementById('btn-update-download');
+        const dismissBtn    = document.getElementById('btn-update-dismiss');
+        const notesBox      = document.getElementById('update-notes-box');
+        const notesText     = document.getElementById('update-notes-text');
+
+        if (updateOverlay) {
+          if (downloadLink) downloadLink.href = res.download_url || '#';
+
+          if (res.release_notes) {
+            if (notesText) notesText.textContent = res.release_notes;
+            if (notesBox) notesBox.style.display = 'block';
+          } else {
+            if (notesBox) notesBox.style.display = 'none';
+          }
+
+          if (res.is_mandatory) {
+            if (updateTitle) updateTitle.textContent = 'Mandatory Update Required';
+            if (updateMsg) updateMsg.textContent = `A mandatory update (version ${res.latest_version}) is required. You cannot use the application until it is updated.`;
+            if (dismissBtn) dismissBtn.style.display = 'none';
+            blockInterface(true);
+            updateOverlay.classList.remove('hidden');
+          } else {
+            if (updateTitle) updateTitle.textContent = 'Update Available';
+            if (updateMsg) updateMsg.textContent = `A new version (${res.latest_version}) is available. You can update now or continue with the current version.`;
+            if (dismissBtn) dismissBtn.style.display = 'block';
+            updateOverlay.classList.remove('hidden');
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[Licensing] Startup update check failed:', err);
+      alert('GML Web site is not available.');
+    }
+  }
+
+  function dismissUpdate() {
+    const updateOverlay = document.getElementById('update-overlay');
+    if (updateOverlay) updateOverlay.classList.add('hidden');
+  }
+
+  return { init, checkStatus, activateProductKey, deactivateDevice, checkAppUpdate, hideAd, dismissUpdate };
 
 })();
