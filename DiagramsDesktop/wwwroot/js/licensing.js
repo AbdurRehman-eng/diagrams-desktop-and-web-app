@@ -136,7 +136,7 @@ const Licensing = (() => {
 
       const res = await response.json();
       if (res.update_available) {
-        alert(`A new version is available: ${res.latest_version}\n\nNotes:\n${res.release_notes || 'No release notes.'}\n\nDownload: ${res.download_url || 'N/A'}`);
+        alert(`A new version is available: ${res.latest_version}\n\nNotes:\n${res.release_notes || 'No release notes.'}\n\nTo download the update, please visit: https://grademylabs.com`);
       } else {
         alert('Your application is up to date.');
       }
@@ -216,7 +216,7 @@ const Licensing = (() => {
         const notesText     = document.getElementById('update-notes-text');
 
         if (updateOverlay) {
-          if (downloadLink) downloadLink.href = res.download_url || '#';
+          if (downloadLink) downloadLink.href = 'https://grademylabs.com';
 
           if (res.release_notes) {
             if (notesText) notesText.textContent = res.release_notes;
