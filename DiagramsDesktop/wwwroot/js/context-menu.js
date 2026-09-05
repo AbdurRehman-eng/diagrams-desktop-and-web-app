@@ -131,8 +131,16 @@ const ContextMenuController = (() => {
       e.stopPropagation();
       ctxMenu.classList.add('hidden');
       if (typeof PropertiesModal !== 'undefined') {
-        if (_lastTargetShapeId) PropertiesModal.openForShape(_lastTargetShapeId);
-        else                    PropertiesModal.openForCanvas();
+        const targetId = _lastTargetShapeId || _lastTargetCocId;
+        const isCoc = !_lastTargetShapeId && !!_lastTargetCocId;
+        if (targetId) {
+          if (typeof InputController !== 'undefined' && InputController.checkShapeReadOnly && InputController.checkShapeReadOnly(targetId, isCoc)) {
+            alert('This resource is read-only under your current plan/entitlements and its properties cannot be modified.');
+            return;
+          }
+          PropertiesModal.openForShape(targetId);
+        }
+        else          PropertiesModal.openForCanvas();
       }
     });
 
@@ -148,6 +156,10 @@ const ContextMenuController = (() => {
       e.stopPropagation();
       ctxMenu.classList.add('hidden');
       if (_lastTargetShapeId) {
+        if (typeof InputController !== 'undefined' && InputController.checkShapeReadOnly && InputController.checkShapeReadOnly(_lastTargetShapeId, false)) {
+          alert('This resource is read-only under your current plan/entitlements and cannot be deleted.');
+          return;
+        }
         // ── Unified deletion guard (children + COC devices) ──────────────────
         if (typeof DeleteGuard !== 'undefined') {
           const guard = DeleteGuard.check(_lastTargetShapeId);
@@ -160,6 +172,7 @@ const ContextMenuController = (() => {
         CanvasState.selectShape(null);
         if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
         if (typeof DirtyTracker   !== 'undefined') DirtyTracker.markDirty();
+        if (typeof TemporaryActionFile !== 'undefined') TemporaryActionFile.update();
         RenderCanvas.render();
       }
     });
@@ -169,6 +182,7 @@ const ContextMenuController = (() => {
       ctxMenu.classList.add('hidden');
       if (_lastTargetConnId) {
         CanvasState.removeConnection(_lastTargetConnId);
+        if (typeof TemporaryActionFile !== 'undefined') TemporaryActionFile.update();
         RenderCanvas.render();
       }
     });
@@ -176,8 +190,15 @@ const ContextMenuController = (() => {
     btnDeleteCoc.addEventListener('click', (e) => {
       e.stopPropagation();
       ctxMenu.classList.add('hidden');
+      if (_lastTargetCocId) {
+        if (typeof InputController !== 'undefined' && InputController.checkShapeReadOnly && InputController.checkShapeReadOnly(_lastTargetCocId, true)) {
+          alert('This resource is read-only under your current plan/entitlements and cannot be deleted.');
+          return;
+        }
+      }
       if (_lastTargetCocId && typeof CircleOnContainerState !== 'undefined') {
         CircleOnContainerState.remove(_lastTargetCocId);
+        if (typeof TemporaryActionFile !== 'undefined') TemporaryActionFile.update();
         RenderCanvas.render();
       }
     });

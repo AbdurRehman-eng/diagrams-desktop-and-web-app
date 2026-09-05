@@ -217,19 +217,27 @@ const DragHandler = (() => {
             // Clamp only the edges that are actively being dragged, taking protection padding into account
             const rFactor = ratio / 2;
             if (_activeHandle.includes('w')) {
-              const pLeft = (bounds.ParentInnerLeftX + (right * rFactor) + EPSILON) / (1 + rFactor);
+              const pLeft1 = (bounds.ParentInnerLeftX + (right * rFactor) + EPSILON) / (1 + rFactor);
+              const pLeft2 = (right * (1 + rFactor) - bounds.ParentInnerRightX + EPSILON) / rFactor;
+              const pLeft = Math.max(pLeft1, pLeft2);
               if (left < pLeft) left = pLeft;
             }
             if (_activeHandle.includes('e')) {
-              const pRight = (bounds.ParentInnerRightX + (left * rFactor) - EPSILON) / (1 + rFactor);
+              const pRight1 = (bounds.ParentInnerRightX + (left * rFactor) - EPSILON) / (1 + rFactor);
+              const pRight2 = (left * (1 + rFactor) - bounds.ParentInnerLeftX - EPSILON) / rFactor;
+              const pRight = Math.min(pRight1, pRight2);
               if (right > pRight) right = pRight;
             }
             if (_activeHandle.includes('s')) {
-              const pBottom = (bounds.ParentInnerBottomY + (top * rFactor) + EPSILON) / (1 + rFactor);
+              const pBottom1 = (bounds.ParentInnerBottomY + (top * rFactor) + EPSILON) / (1 + rFactor);
+              const pBottom2 = (top * (1 + rFactor) - bounds.ParentInnerTopY + EPSILON) / rFactor;
+              const pBottom = Math.max(pBottom1, pBottom2);
               if (bottom < pBottom) bottom = pBottom;
             }
             if (_activeHandle.includes('n')) {
-              const pTop = (bounds.ParentInnerTopY + (bottom * rFactor) - EPSILON) / (1 + rFactor);
+              const pTop1 = (bounds.ParentInnerTopY + (bottom * rFactor) - EPSILON) / (1 + rFactor);
+              const pTop2 = (bottom * (1 + rFactor) - bounds.ParentInnerBottomY - EPSILON) / rFactor;
+              const pTop = Math.min(pTop1, pTop2);
               if (top > pTop) top = pTop;
             }
 

@@ -103,9 +103,21 @@ const RenderShapeLibraryItems = (() => {
     div.dataset.itemId    = item.id;
     div.dataset.itemType  = item.type;
     div.dataset.categoryId = item.categoryId;
-    div.title         = item.label;
+    
+    let isDisabled = false;
+    let tooltip = item.label;
+    if (typeof Licensing !== 'undefined') {
+      const reqEnt = Licensing.getRequiredEntitlementForShapeType(item.type || item.label || '');
+      if (!Licensing.hasEntitlement(reqEnt)) {
+        isDisabled = true;
+        tooltip = `${item.label} (Upgrade required)`;
+        div.classList.add('shape-item--disabled');
+      }
+    }
+    
+    div.title         = tooltip;
     div.setAttribute('role', 'button');
-    div.setAttribute('tabindex', '0');
+    div.setAttribute('tabindex', isDisabled ? '-1' : '0');
     div.setAttribute('aria-label', `Drag ${item.label} shape`);
 
     const iconEl      = document.createElement('div');

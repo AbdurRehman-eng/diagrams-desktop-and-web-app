@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json;
 using Microsoft.Maui.Storage;
 using DiagramsDesktop.Core.Models;
 
@@ -16,6 +17,15 @@ public interface ILicenseManager
     string ProductKey { get; }
     string ProductCode { get; }
     LatestAdV1Response? LatestAd { get; }
+    string BasePlan { get; }
+    string EffectivePlan { get; }
+    bool TrialActive { get; }
+    DateTime? TrialEndDate { get; }
+    System.Collections.Generic.Dictionary<string, bool> Entitlements { get; }
+    bool HasEntitlement(string entitlementCode);
+    bool IsOffline { get; }
+    DateTime LastValidatedAt { get; }
+    int OfflineGracePeriodDays { get; }
 
     Task InitializeAsync();
     Task<RegisterDeviceV1Response> ActivateAsync(string productKey);
@@ -33,6 +43,11 @@ public class LicenseManager : ILicenseManager
     private const string PrefHeartbeatInterval = "GML_Licensing_HeartbeatInterval";
     private const string PrefOfflineGracePeriod = "GML_Licensing_OfflineGracePeriod";
     private const string PrefIsActivated = "GML_Licensing_IsActivated";
+    private const string PrefBasePlan = "GML_Licensing_BasePlan";
+    private const string PrefEffectivePlan = "GML_Licensing_EffectivePlan";
+    private const string PrefTrialActive = "GML_Licensing_TrialActive";
+    private const string PrefTrialEndDate = "GML_Licensing_TrialEndDate";
+    private const string PrefEntitlementsJson = "GML_Licensing_EntitlementsJson";
 
     private readonly ILicenseClient _client;
     private readonly IHardwareInfoProvider _hardwareProvider;
@@ -49,6 +64,80 @@ public class LicenseManager : ILicenseManager
     public string ViolationTitle { get; private set; } = string.Empty;
     public string ViolationMessage { get; private set; } = string.Empty;
     public LatestAdV1Response? LatestAd { get; private set; }
+
+    public bool IsOffline { get; private set; }
+
+    public DateTime LastValidatedAt
+    {
+        get
+        {
+            var ticks = Preferences.Default.Get(PrefLastValidated, 0L);
+            return ticks > 0 ? new DateTime(ticks, DateTimeKind.Utc) : DateTime.MinValue;
+        }
+    }
+
+    public int OfflineGracePeriodDays => Preferences.Default.Get(PrefOfflineGracePeriod, 7);
+
+    private System.Collections.Generic.Dictionary<string, bool>? _cachedEntitlements;
+
+    public string BasePlan => Preferences.Default.Get(PrefBasePlan, string.Empty);
+    public string EffectivePlan => Preferences.Default.Get(PrefEffectivePlan, string.Empty);
+    public bool TrialActive => Preferences.Default.Get(PrefTrialActive, false);
+
+    public DateTime? TrialEndDate
+    {
+        get
+        {
+            var ticks = Preferences.Default.Get(PrefTrialEndDate, 0L);
+            return ticks > 0 ? new DateTime(ticks, DateTimeKind.Utc) : null;
+        }
+    }
+
+    public System.Collections.Generic.Dictionary<string, bool> Entitlements
+    {
+        get
+        {
+            if (_cachedEntitlements == null)
+            {
+                var json = Preferences.Default.Get(PrefEntitlementsJson, string.Empty);
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    try
+                    {
+                        _cachedEntitlements = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, bool>>(json);
+                    }
+                    catch
+                    {
+                        _cachedEntitlements = new System.Collections.Generic.Dictionary<string, bool>();
+                    }
+                }
+                else
+                {
+                    _cachedEntitlements = new System.Collections.Generic.Dictionary<string, bool>();
+                }
+            }
+            return _cachedEntitlements!;
+        }
+    }
+
+    public bool HasEntitlement(string entitlementCode)
+    {
+        if (!IsActivated || IsViolating) return false;
+
+        if (entitlementCode == "basic_resources")
+        {
+            if (Entitlements.Count == 0 || !Entitlements.ContainsKey("basic_resources"))
+            {
+                return true;
+            }
+        }
+
+        if (Entitlements.TryGetValue(entitlementCode, out var enabled))
+        {
+            return enabled;
+        }
+        return false;
+    }
 
     public string ProductKey => Preferences.Default.Get(PrefProductKey, string.Empty);
     public string ProductCode => "GML_DIAGRAMS"; // This app's product identifier
@@ -89,6 +178,7 @@ public class LicenseManager : ILicenseManager
             }
             catch (Exception ex)
             {
+                IsOffline = true;
                 MauiProgram.LogToFile($"[LicenseManager] Startup validation failed: {ex.Message}. Applying offline checks.");
                 ApplyOfflineGraceChecks();
             }
@@ -159,6 +249,16 @@ public class LicenseManager : ILicenseManager
                 // Sync settings
                 await FetchSettingsAsync();
 
+                // Immediately run validation to sync entitlements
+                try
+                {
+                    await RunRuntimeValidationAsync();
+                }
+                catch (Exception ex)
+                {
+                    MauiProgram.LogToFile($"[LicenseManager] Post-activation validation failed: {ex.Message}");
+                }
+
                 StartBackgroundLoops();
             }
 
@@ -223,7 +323,19 @@ public class LicenseManager : ILicenseManager
     {
         try
         {
-            var ad = await _client.GetLatestAdAsync(_serverUrl, _token, ProductCode);
+            var hardware = _hardwareProvider.GetHardwareInfo();
+            var deviceId = hardware.HardwareFingerprint;
+            var response = await _client.GetNextAdAsync(_serverUrl, _token, ProductCode, deviceId);
+            
+            var ad = new LatestAdV1Response
+            {
+                HasAd = response.Success,
+                AdId = response.AdvertisementId,
+                Title = response.AdvertisementSlot,
+                ImageUrl = response.CdnUrl,
+                ClickUrl = "https://grademylabs.com/pricing", // Default pricing redirect
+                DisplayDurationSeconds = 10
+            };
             LatestAd = ad;
             return ad;
         }
@@ -240,6 +352,12 @@ public class LicenseManager : ILicenseManager
         Preferences.Default.Remove(PrefProductKey);
         Preferences.Default.Remove(PrefIsActivated);
         Preferences.Default.Remove(PrefLastValidated);
+        Preferences.Default.Remove(PrefBasePlan);
+        Preferences.Default.Remove(PrefEffectivePlan);
+        Preferences.Default.Remove(PrefTrialActive);
+        Preferences.Default.Remove(PrefTrialEndDate);
+        Preferences.Default.Remove(PrefEntitlementsJson);
+        _cachedEntitlements = null;
 
         IsActivated = false;
         IsViolating = false;
@@ -269,19 +387,22 @@ public class LicenseManager : ILicenseManager
     private async Task RunRuntimeValidationAsync()
     {
         var hardware = _hardwareProvider.GetHardwareInfo();
-        var req = new ValidateRuntimeV1Request
+        var request = new ValidateRuntimeV1Request
         {
             ProductKey = ProductKey,
             ProductCode = ProductCode,
-            HardwareInfo = hardware,
+            HardwareInfo = new HardwareInfoSummary
+            {
+                HardwareFingerprint = hardware.HardwareFingerprint
+            },
             AppVersion = AppVersion
         };
-
-        var response = await _client.ValidateRuntimeAsync(_serverUrl, _token, req);
+        var response = await _client.ValidateRuntimeAsync(_serverUrl, _token, request);
         Preferences.Default.Set(PrefLastValidated, DateTime.UtcNow.Ticks);
 
         if (response.Valid)
         {
+            IsOffline = false;
             IsViolating = false;
             IsActivated = true;
             ViolationType = string.Empty;
@@ -291,6 +412,16 @@ public class LicenseManager : ILicenseManager
             // Sync updated intervals from validation
             Preferences.Default.Set(PrefValidationInterval, response.ValidationIntervalMinutes);
             Preferences.Default.Set(PrefHeartbeatInterval, response.HeartbeatIntervalMinutes);
+
+            // Sync plans and entitlements
+            Preferences.Default.Set(PrefBasePlan, response.BasePlan ?? string.Empty);
+            Preferences.Default.Set(PrefEffectivePlan, response.EffectivePlan ?? string.Empty);
+            Preferences.Default.Set(PrefTrialActive, response.TrialActive);
+            Preferences.Default.Set(PrefTrialEndDate, response.TrialEndDate?.Ticks ?? 0L);
+            
+            var entsJson = JsonSerializer.Serialize(response.Entitlements ?? new());
+            Preferences.Default.Set(PrefEntitlementsJson, entsJson);
+            _cachedEntitlements = response.Entitlements;
         }
         else
         {
@@ -406,6 +537,7 @@ public class LicenseManager : ILicenseManager
                     };
                     MauiProgram.LogToFile("[LicenseManager] Sending periodic heartbeat...");
                     var res = await _client.SendHeartbeatAsync(_serverUrl, _token, req);
+                    IsOffline = false;
                     MauiProgram.LogToFile($"[LicenseManager] Heartbeat response: acknowledged={res.Acknowledged}, status={res.Status}");
                 }
             }
@@ -415,6 +547,7 @@ public class LicenseManager : ILicenseManager
             }
             catch (Exception ex)
             {
+                IsOffline = true;
                 MauiProgram.LogToFile($"[LicenseManager] Heartbeat loop error: {ex.Message}");
             }
         }
@@ -442,6 +575,7 @@ public class LicenseManager : ILicenseManager
             }
             catch (Exception ex)
             {
+                IsOffline = true;
                 MauiProgram.LogToFile($"[LicenseManager] Validation loop error: {ex.Message}. Falling back to offline grace checks.");
                 ApplyOfflineGraceChecks();
             }

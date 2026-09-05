@@ -19,6 +19,7 @@ const DragShapeLibraryItem = (() => {
 
   function beginLibraryItemDrag(event, itemEl) {
     if (!ShapesPanelState.get('DragFromLibraryEnabled')) return;
+    if (itemEl.classList.contains('shape-item--disabled')) return;
     
     const itemId     = itemEl.dataset.itemId;
     const allItems   = ShapesPanelState.get('VisibleShapeLibraryItems') || [];

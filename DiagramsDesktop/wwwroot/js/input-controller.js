@@ -126,6 +126,13 @@ const InputController = (() => {
       if (cocId) {
         CircleOnContainerState.selectCircleOnContainer(cocId);
 
+        // Block move/resize if COC is read-only
+        if (checkShapeReadOnly(cocId, true)) {
+          console.warn('[InputController] Selection allowed, but move/resize blocked on read-only COC:', cocId);
+          RenderCanvas.render();
+          return;
+        }
+
         if (typeof MoveCircleOnContainer !== 'undefined') {
           if (isCocResize && cocResizeHandleCode) {
             MoveCircleOnContainer.beginResize(cocId, cocResizeHandleCode, e);
@@ -155,6 +162,14 @@ const InputController = (() => {
 
       console.log('[InputController] SELECTING HANDLE:', handle, 'on shape:', shapeId);
       CanvasState.selectShape(shapeId);
+
+      // Block resize if shape is read-only
+      if (checkShapeReadOnly(shapeId, false)) {
+        console.warn('[InputController] Selection allowed, but resize blocked on read-only shape:', shapeId);
+        RenderCanvas.render();
+        return;
+      }
+
       DragHandler.onMouseDown(e, shapeId, handle);
       RenderCanvas.render();
       return;
@@ -168,6 +183,14 @@ const InputController = (() => {
       console.log('[InputController] Shape hit:', shapeId);
 
       CanvasState.selectShape(shapeId);
+
+      // Block drag-move if shape is read-only
+      if (checkShapeReadOnly(shapeId, false)) {
+        console.warn('[InputController] Selection allowed, but drag-move blocked on read-only shape:', shapeId);
+        RenderCanvas.render();
+        return;
+      }
+
       DragHandler.onMouseDown(e, shapeId, 'move');
       RenderCanvas.render();
       return;
@@ -219,6 +242,10 @@ const InputController = (() => {
         : null;
 
       if (selectedCocId) {
+        if (checkShapeReadOnly(selectedCocId, true)) {
+          alert('This resource is read-only under your current plan/entitlements and cannot be deleted.');
+          return;
+        }
         CanvasState.removeCircleOnContainer(selectedCocId);
         CircleOnContainerState.clearSelection();
         if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
@@ -240,6 +267,10 @@ const InputController = (() => {
       // ── Delete selected regular shape ─────────────────────────────────────
       const selected = CanvasState.getSelectedId();
       if (selected) {
+        if (checkShapeReadOnly(selected, false)) {
+          alert('This resource is read-only under your current plan/entitlements and cannot be deleted.');
+          return;
+        }
         // ── Unified deletion guard (children + COC devices) ──────────────────
         if (typeof DeleteGuard !== 'undefined') {
           const guard = DeleteGuard.check(selected);
@@ -272,6 +303,24 @@ const InputController = (() => {
   }
 
   document.addEventListener('keydown', onKeyDown);
+
+  function checkShapeReadOnly(shapeId, isCoc) {
+    if (typeof Licensing === 'undefined') return false;
+    if (isCoc) {
+      const cocs = CanvasState.getCircleOnContainers ? CanvasState.getCircleOnContainers() : [];
+      const coc = cocs.find(c => c.CircleOnContainerID === shapeId);
+      if (coc && Licensing.isShapeReadOnly({ Type: coc.DeviceOnContainerEdgeType || 'aws-igw' })) {
+        return true;
+      }
+    } else {
+      const shapes = CanvasState.getShapes ? CanvasState.getShapes() : [];
+      const shape = shapes.find(s => s.ShapeID === shapeId);
+      if (shape && Licensing.isShapeReadOnly(shape)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   return { init, setTool, getTool };
 

@@ -1,0 +1,6 @@
+Region,Region code,Availability Zones,Availability Zone IDs,Geography,Data note
+US East (Ohio),us-east-2,"us-east-2a,us-east-2b,us-east-2c","use2-az1,use2-az2,use2-az3","Ohio, United States of America",Example ZoneName-to-ZoneId mapping shown in AWS documentation.
+US West (Oregon),us-west-2,"us-west-2a,us-west-2b,us-west-2c,us-west-2d","usw2-az1,usw2-az2,usw2-az3,usw2-az4","Oregon, United States of America",Refresh ZoneName and ZoneId from DescribeAvailabilityZones for the connected AWS account.
+Europe (Ireland),eu-west-1,"eu-west-1a,eu-west-1b,eu-west-1c","euw1-az1,euw1-az2,euw1-az3","Ireland",Refresh ZoneName and ZoneId from DescribeAvailabilityZones for the connected AWS account.
+Middle East (UAE),me-central-1,"me-central-1a,me-central-1b,me-central-1c","mec1-az1,mec1-az2,mec1-az3","United Arab Emirates",Refresh ZoneName and ZoneId from DescribeAvailabilityZones for the connected AWS account.
+Asia Pacific (Singapore),ap-southeast-1,"ap-southeast-1a,ap-southeast-1b,ap-southeast-1c","apse1-az1,apse1-az2,apse1-az3","Singapore",Refresh ZoneName and ZoneId from DescribeAvailabilityZones for the connected AWS account.

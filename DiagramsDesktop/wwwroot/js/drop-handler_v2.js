@@ -41,8 +41,25 @@ const DropHandler = (() => {
     // ── M8: Edge-attachment shapes bypass the normal drop pipeline ─
     // Must run BEFORE ParentDropValidator to intercept IGW before hierarchy check.
     if (itemDef && itemDef.edgeAttachment) {
+      // Entitlements Check for edge-attachment shapes
+      if (typeof Licensing !== 'undefined') {
+        const requiredEnt = Licensing.getRequiredEntitlementForShapeType(itemDef.type);
+        if (!Licensing.hasEntitlement(requiredEnt)) {
+          _showDropError(`Your current plan does not support creating a ${itemDef.label || itemDef.type}. Please upgrade your subscription.`);
+          return;
+        }
+      }
       _handleEdgeAttachmentDrop(payload, itemDef, worldPos);
       return;
+    }
+
+    // ── GML License Entitlements Gating ──
+    if (itemDef && typeof Licensing !== 'undefined') {
+      const requiredEnt = Licensing.getRequiredEntitlementForShapeType(itemDef.type);
+      if (!Licensing.hasEntitlement(requiredEnt)) {
+        _showDropError(`Your current plan does not support creating a ${itemDef.label || itemDef.type}. Please upgrade your subscription.`);
+        return;
+      }
     }
 
     // ── M4: Parent-hierarchy validation ───────────────────────────
@@ -76,8 +93,27 @@ const DropHandler = (() => {
     }
 
     // ── Build shape object ────────────────────────────────────────
+    let shapeId = 'shape-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5);
+    if (typeLC === 'aws-vpc') {
+      shapeId = 'GML-VPC-' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    } else if (typeLC === 'aws-availability-zone') {
+      shapeId = 'GML-AZ-' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    } else if (typeLC === 'aws-subnet') {
+      shapeId = 'GML-SUBNET-' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    } else if (typeLC === 'aws-route-table') {
+      shapeId = 'GML-RT-' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    } else if (typeLC === 'aws-ec2') {
+      shapeId = 'GML-EC2-' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    } else if (typeLC === 'aws-lambda') {
+      shapeId = 'GML-LAMBDA-' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    } else if (typeLC === 'aws-nat') {
+      shapeId = 'GML-NAT-' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    } else if (typeLC === 'aws-region') {
+      shapeId = 'GML-REG-' + Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    }
+
     const newShape = {
-      ShapeID:     'shape-' + Date.now(),
+      ShapeID:     shapeId,
       DiagramID:   CanvasState.getActiveDiagram()?.DiagramID ?? 'unsaved',
       Type:        payload.itemType,
       Label:       payload.itemLabel,
@@ -207,6 +243,7 @@ const DropHandler = (() => {
     }
     if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
     if (typeof DirtyTracker   !== 'undefined') DirtyTracker.markDirty();
+    if (typeof TemporaryActionFile !== 'undefined') TemporaryActionFile.update();
     RenderCanvas.render();
   }
 
@@ -305,7 +342,9 @@ const DropHandler = (() => {
     );
 
     // Build the CircleOnContainer model (we need it to get CenterX/CenterY/Radius)
+    const igwHex = Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
     const model = CircleOnContainerModel.createCircleOnContainerModel({
+      CircleOnContainerID:       'GML-IGW-' + igwHex,
       ParentContainerID:         bestContainer.ShapeID,
       ParentContainerType:       bestContainer.Type,
       DeviceOnContainerEdgeType: itemDef.label,
@@ -368,6 +407,7 @@ const DropHandler = (() => {
 
     if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
     if (typeof DirtyTracker   !== 'undefined') DirtyTracker.markDirty();
+    if (typeof TemporaryActionFile !== 'undefined') TemporaryActionFile.update();
     RenderCanvas.render();
 
     console.log('[DropHandler] M8 Edge-attached:', model.Label, 'on', bestContainer.Label,

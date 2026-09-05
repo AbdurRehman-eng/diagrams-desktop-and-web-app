@@ -26,7 +26,7 @@ const CircleOnContainerModel = (() => {
   function createCircleOnContainerModel(opts) {
     const gv = _getGlobalVars();
 
-    const id = 'coc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+    const id = opts.CircleOnContainerID || ('coc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7));
     const diagramId = CanvasState.getActiveDiagram()?.DiagramID ?? 'unsaved';
 
     const t = Math.min(1, Math.max(0, opts.EdgeParameterT ?? 0.5));

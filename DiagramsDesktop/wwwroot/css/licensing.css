@@ -162,6 +162,20 @@
   transform: none !important;
 }
 
+.license-btn.secondary {
+  background: transparent;
+  color: var(--license-text);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+}
+
+.license-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: white;
+  box-shadow: none;
+}
+
 .license-secondary-link {
   display: inline-block;
   margin-top: 16px;
@@ -306,4 +320,33 @@
 
 .license-ad-link:hover {
   background: #475569;
+}
+
+/* Offline warning banner */
+.offline-banner {
+  background-color: #f59e0b; /* Warning Amber */
+  color: #0f172a; /* Dark Slate */
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.offline-banner.hidden {
+  display: none !important;
+}
+
+/* Disabled toolbox items */
+.DraggableShapeLibraryItem.shape-item--disabled {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+  filter: grayscale(1);
+  pointer-events: auto; /* Allow mouse hover to display tooltip */
 }

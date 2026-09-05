@@ -48,8 +48,19 @@ const DeleteGuard = (() => {
     if (typeof ShapeCategories !== 'undefined') {
       const hw = shape.Width  / 2;
       const hh = shape.Height / 2;
+
+      // Trace ancestors of the shape to exclude them from child validation
+      const ancestors = new Set();
+      let curr = shape;
+      while (curr && curr.ParentContainerID) {
+        ancestors.add(curr.ParentContainerID);
+        curr = allShapes.find(s => s.ShapeID === curr.ParentContainerID);
+      }
+
       const hasGeometricChild = allShapes.some(c => {
         if (c.ShapeID === shapeId) return false;
+        if (ancestors.has(c.ShapeID)) return false; // Skip ancestors
+
         const def = ShapeCategories.getItemByType(c.Type);
         // Only block if the candidate IS a child-type shape (has a required parent)
         if (!def || def.parentType === null || def.parentType === undefined) return false;
@@ -103,3 +114,9 @@ const DeleteGuard = (() => {
   return { check };
 
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = DeleteGuard;
+} else {
+  window.DeleteGuard = DeleteGuard;
+}

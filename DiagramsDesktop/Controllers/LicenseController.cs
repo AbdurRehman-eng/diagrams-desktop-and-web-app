@@ -28,7 +28,15 @@ public class LicenseController : ControllerBase
             violationMessage = _licenseManager.ViolationMessage,
             productKey = _licenseManager.ProductKey,
             productCode = _licenseManager.ProductCode,
-            latestAd = _licenseManager.LatestAd
+            latestAd = _licenseManager.LatestAd,
+            basePlan = _licenseManager.BasePlan,
+            effectivePlan = _licenseManager.EffectivePlan,
+            trialActive = _licenseManager.TrialActive,
+            trialEndDate = _licenseManager.TrialEndDate,
+            entitlements = _licenseManager.Entitlements,
+            isOffline = _licenseManager.IsOffline,
+            lastValidatedAt = _licenseManager.LastValidatedAt,
+            offlineGracePeriodDays = _licenseManager.OfflineGracePeriodDays
         });
     }
 

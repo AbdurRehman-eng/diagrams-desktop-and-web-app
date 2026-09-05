@@ -9,11 +9,15 @@
 const Licensing = (() => {
 
   const BASE_URL = '/api/license';
+  let _entitlements = {};
+  let _effectivePlan = '';
 
   async function init() {
     console.log('[Licensing] Initializing check...');
     await checkStatus();
     await checkUpdatesOnStartup();
+    // Poll status periodically to update UI when system goes online/offline
+    setInterval(checkStatus, 30000);
   }
 
   async function checkStatus() {
@@ -26,13 +30,24 @@ const Licensing = (() => {
       const status = await response.json();
       console.log('[Licensing] Status check response:', status);
 
+      _entitlements = status.entitlements || {};
+      _effectivePlan = status.effectivePlan || '';
+
       const activationOverlay = document.getElementById('activation-overlay');
       const violationOverlay = document.getElementById('violation-overlay');
+      const offlineBanner = document.getElementById('offline-warn-banner');
 
-      if (!status.isActivated) {
+      if (!status.isActivated || !hasEntitlement('basic_resources')) {
         // Show Activation overlay
-        if (activationOverlay) activationOverlay.classList.remove('hidden');
+        if (activationOverlay) {
+          activationOverlay.classList.remove('hidden');
+          const titleEl = activationOverlay.querySelector('h2');
+          if (titleEl) titleEl.textContent = 'Activation or Subscription Required';
+          const pEl = activationOverlay.querySelector('p');
+          if (pEl) pEl.textContent = 'An active subscription with "basic_resources" entitlement is required to use GML Diagrams. Please enter your product key to activate.';
+        }
         if (violationOverlay) violationOverlay.classList.add('hidden');
+        if (offlineBanner) offlineBanner.classList.add('hidden');
         blockInterface(true);
       } 
       else if (status.isViolating) {
@@ -44,6 +59,7 @@ const Licensing = (() => {
           document.getElementById('violation-title').textContent = status.violationTitle || 'License Violation';
           document.getElementById('violation-message').textContent = status.violationMessage || 'An active license violation was detected.';
         }
+        if (offlineBanner) offlineBanner.classList.add('hidden');
         blockInterface(true);
       } 
       else {
@@ -51,6 +67,26 @@ const Licensing = (() => {
         if (activationOverlay) activationOverlay.classList.add('hidden');
         if (violationOverlay) violationOverlay.classList.add('hidden');
         blockInterface(false);
+
+        // Handle offline grace warning banner
+        if (status.isOffline) {
+          if (offlineBanner) {
+            const lastVal = new Date(status.lastValidatedAt);
+            const elapsedMs = Date.now() - lastVal.getTime();
+            const elapsedDays = elapsedMs / (1000 * 60 * 60 * 24);
+            const daysRemaining = Math.max(0, status.offlineGracePeriodDays - elapsedDays);
+            
+            document.getElementById('offline-warn-message').textContent = `Working Offline. License validation required in ${daysRemaining.toFixed(1)} days`;
+            offlineBanner.classList.remove('hidden');
+          }
+        } else {
+          if (offlineBanner) offlineBanner.classList.add('hidden');
+        }
+
+        // Update commit plan button state based on entitlements
+        if (typeof CommitConsole !== 'undefined') {
+          CommitConsole.init();
+        }
 
         // Display ad if configured on the server
         if (status.latestAd && status.latestAd.has_ad) {
@@ -212,18 +248,9 @@ const Licensing = (() => {
         const updateMsg     = document.getElementById('update-overlay-message');
         const downloadLink  = document.getElementById('btn-update-download');
         const dismissBtn    = document.getElementById('btn-update-dismiss');
-        const notesBox      = document.getElementById('update-notes-box');
-        const notesText     = document.getElementById('update-notes-text');
 
         if (updateOverlay) {
           if (downloadLink) downloadLink.href = 'https://grademylabs.com';
-
-          if (res.release_notes) {
-            if (notesText) notesText.textContent = res.release_notes;
-            if (notesBox) notesBox.style.display = 'block';
-          } else {
-            if (notesBox) notesBox.style.display = 'none';
-          }
 
           if (res.is_mandatory) {
             if (updateTitle) updateTitle.textContent = 'Mandatory Update Required';
@@ -250,6 +277,66 @@ const Licensing = (() => {
     if (updateOverlay) updateOverlay.classList.add('hidden');
   }
 
-  return { init, checkStatus, activateProductKey, deactivateDevice, checkAppUpdate, hideAd, dismissUpdate };
+  function hasEntitlement(code) {
+    if (code === 'basic_resources') {
+      if (Object.keys(_entitlements).length === 0 || _entitlements[code] === undefined) {
+        return true;
+      }
+    }
+    return !!_entitlements[code];
+  }
+
+  function isPremiumCloudResource(itemOrType) {
+    const typeOrLabel = typeof itemOrType === 'string' ? itemOrType.toLowerCase() : 
+                        ((itemOrType.type || '') + ' ' + (itemOrType.label || '')).toLowerCase();
+    return typeOrLabel.includes('nat-gateway') || 
+           typeOrLabel.includes('nat gateway') || 
+           typeOrLabel.includes('aws-nat') || 
+           typeOrLabel.includes('load-balancer') || 
+           typeOrLabel.includes('load balancer') || 
+           typeOrLabel.includes('transit-gateway') || 
+           typeOrLabel.includes('transit gateway') || 
+           typeOrLabel.includes('expressroute') || 
+           typeOrLabel.includes('vpn-gateway') || 
+           typeOrLabel.includes('vpn gateway') || 
+           typeOrLabel.includes('vpn gateways');
+  }
+
+  function isMarketplaceResource(itemOrType) {
+    const typeOrLabel = typeof itemOrType === 'string' ? itemOrType.toLowerCase() : 
+                        ((itemOrType.type || '') + ' ' + (itemOrType.label || '')).toLowerCase();
+    return typeOrLabel.includes('fortinet') || 
+           typeOrLabel.includes('fortigate') || 
+           typeOrLabel.includes('palo alto') || 
+           typeOrLabel.includes('paloalto') || 
+           typeOrLabel.includes('cisco');
+  }
+
+  function getRequiredEntitlementForShapeType(type) {
+    if (!type) return 'basic_resources';
+    const typeLC = type.toLowerCase();
+    if (isPremiumCloudResource(typeLC)) {
+      return 'premium_cloud_resources';
+    }
+    if (isMarketplaceResource(typeLC)) {
+      return 'marketplace_resources';
+    }
+    if (typeLC.startsWith('aws-')) {
+      return 'basic_resources';
+    }
+    if (typeLC === 'line' || typeLC === 'circle' || typeLC === 'rectangle') {
+      return 'basic_resources';
+    }
+    return 'basic_resources';
+  }
+
+  function isShapeReadOnly(shape) {
+    if (!shape) return false;
+    const type = shape.Type;
+    const reqEnt = getRequiredEntitlementForShapeType(type);
+    return !hasEntitlement(reqEnt);
+  }
+
+  return { init, checkStatus, activateProductKey, deactivateDevice, checkAppUpdate, hideAd, dismissUpdate, hasEntitlement, isShapeReadOnly, getRequiredEntitlementForShapeType, isPremiumCloudResource, isMarketplaceResource };
 
 })();

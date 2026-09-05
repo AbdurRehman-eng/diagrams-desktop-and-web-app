@@ -69,6 +69,8 @@
           <!-- M7+: Connect button commented out for M1/M2 baseline -->
           <button class="toolbar-btn" id="btn-connect" title="Connector tool">Connect</button>
           <div class="toolbar-sep"></div>
+          <button class="toolbar-btn" id="btn-commit-plan" title="Commit AWS plan" style="background-color: #2563eb; color: white;">Commit Plan</button>
+          <div class="toolbar-sep"></div>
           <button class="toolbar-btn" id="btn-theme-toggle" title="Toggle theme">
             <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
             <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
@@ -108,6 +110,11 @@
 
 
     </header>
+
+    <!-- Offline Warning Banner -->
+    <div id="offline-warn-banner" class="offline-banner hidden">
+      <span id="offline-warn-message">Working Offline. License validation required in X days</span>
+    </div>
 
     <!-- ── Main Workspace ──────────────────────────────── -->
     <main id="app-workspace">
@@ -212,12 +219,32 @@
       </div>
       <div class="license-card-body">
         <p id="update-overlay-message">A mandatory update is required to continue using GML Diagrams.</p>
-        <div class="violation-detail-box" id="update-notes-box" style="display: none; max-height: 120px; overflow-y: auto; margin-bottom: 15px; text-align: left;">
-          <strong style="font-size: 12px; color: var(--color-text-secondary);">RELEASE NOTES:</strong>
-          <pre id="update-notes-text" style="margin: 5px 0 0 0; font-family: inherit; font-size: 13px; white-space: pre-wrap; color: var(--color-text-primary); text-align: left;"></pre>
-        </div>
+
         <a id="btn-update-download" href="#" target="_blank" class="license-btn" style="text-align: center; text-decoration: none; display: block; margin-bottom: 10px; line-height: 38px; height: 40px; padding: 0;">Download Latest Version</a>
-        <button id="btn-update-dismiss" class="license-btn secondary" style="display: none; width: 100%; border: 1px solid var(--color-border); background: transparent; color: var(--color-text-primary);" onclick="Licensing.dismissUpdate()">Continue with Current Version</button>
+        <button id="btn-update-dismiss" class="license-btn secondary" style="display: none;" onclick="Licensing.dismissUpdate()">Continue with Current Version</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Commit Console Overlay -->
+  <div id="commit-console-overlay" class="license-overlay hidden">
+    <div class="license-card" style="width: 550px; max-width: 90%; background-color: #0f172a; color: #f1f5f9; border: 1px solid #3b82f6;">
+      <div class="license-card-header" style="border-bottom: 1px solid #1e293b; padding-bottom: 12px; display: flex; align-items: center;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <h2 style="color: #f1f5f9; font-size: 18px; margin: 0; margin-left: 8px;">AWS Commit Progress Console</h2>
+      </div>
+      <div class="license-card-body" style="padding-top: 12px; display: flex; flex-direction: column; gap: 12px;">
+        <div id="commit-console-log" style="background-color: #020617; border: 1px solid #1e293b; border-radius: 6px; padding: 12px; height: 220px; overflow-y: auto; font-family: monospace; font-size: 11px; color: #10b981; line-height: 1.5; text-align: left; box-sizing: border-box;">
+          <!-- Log output lines go here -->
+        </div>
+        <div id="commit-console-status" style="font-size: 12px; font-weight: 600; text-align: center; color: #94a3b8;">
+          Ready to commit...
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px;">
+          <button id="btn-commit-close" class="license-btn secondary" style="display: none;" onclick="CommitConsole.close()">Close Console</button>
+        </div>
       </div>
     </div>
   </div>
@@ -371,6 +398,12 @@
 
   <script src="js/theme-controller.js?v=1.0"></script>
   <script src="js/licensing.js"></script>
+  
+  <!-- GML AWS Temporary Action File Support -->
+  <script src="js/aws-region-csv-loader.js"></script>
+  <script src="js/temporary-action-file.js"></script>
+  <script src="js/commit-console.js"></script>
+
   <script src="js/main_v2.js?v=9.1"></script>
 
 

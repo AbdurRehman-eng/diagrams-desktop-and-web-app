@@ -235,6 +235,32 @@ namespace DiagramsDesktop.Core.Repositories
                     UpdatedAt TEXT NOT NULL
                 );";
 
+            // Create CommitTransactions table
+            var createCommitTransactionsTable = @"
+                CREATE TABLE IF NOT EXISTS CommitTransactions (
+                    CorrelationID TEXT PRIMARY KEY,
+                    DiagramID TEXT,
+                    Status TEXT,
+                    ActionPlan TEXT,
+                    CreatedAt TEXT,
+                    CompletedAt TEXT
+                );";
+
+            // Create ActionAuditLogs table
+            var createActionAuditLogsTable = @"
+                CREATE TABLE IF NOT EXISTS ActionAuditLogs (
+                    AuditLogID TEXT PRIMARY KEY,
+                    CorrelationID TEXT,
+                    Username TEXT,
+                    Provider TEXT,
+                    Action TEXT,
+                    GmlID TEXT,
+                    ProviderResourceID TEXT,
+                    Result TEXT,
+                    FailureReason TEXT,
+                    Timestamp TEXT
+                );";
+
             using var cmd1 = new SqliteCommand(createDiagramsTable, connection);
             cmd1.ExecuteNonQuery();
 
@@ -267,6 +293,12 @@ namespace DiagramsDesktop.Core.Repositories
 
             using var cmd11 = new SqliteCommand(createCredentialsTable, connection);
             cmd11.ExecuteNonQuery();
+
+            using var cmd12 = new SqliteCommand(createCommitTransactionsTable, connection);
+            cmd12.ExecuteNonQuery();
+
+            using var cmd13 = new SqliteCommand(createActionAuditLogsTable, connection);
+            cmd13.ExecuteNonQuery();
 
             // Seed ConnectionStyleDefaults
             var seedStyleDefaults = @"

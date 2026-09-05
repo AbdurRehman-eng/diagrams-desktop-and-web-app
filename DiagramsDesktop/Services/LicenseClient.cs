@@ -20,6 +20,8 @@ public interface ILicenseClient
     Task<CheckUpdateV1Response> CheckUpdateAsync(string serverUrl, string token, string productCode, string currentVersion);
     Task<DeactivateDeviceV1Response> DeactivateDeviceAsync(string serverUrl, string token, DeactivateDeviceV1Request request);
     Task<CheckExpiryV1Response> CheckExpiryAsync(string serverUrl, string token, CheckExpiryV1Request request);
+    Task<ValidateRuntimeV1Response> ValidateLicenseWithEntitlementsAsync(string serverUrl, string token, string productKey, string productCode);
+    Task<DesktopAdResponse> GetNextAdAsync(string serverUrl, string token, string productCode, string deviceId);
 }
 
 public class LicenseClient : ILicenseClient
@@ -29,6 +31,19 @@ public class LicenseClient : ILicenseClient
     public LicenseClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
+    }
+
+    public async Task<ValidateRuntimeV1Response> ValidateLicenseWithEntitlementsAsync(string serverUrl, string token, string productKey, string productCode)
+    {
+        var url = $"{serverUrl.TrimEnd('/')}/api/licenses/validate";
+        var payload = new ValidateProductKeyV1Request { ProductKey = productKey, ProductCode = productCode };
+        return await SendPostAsync<ValidateProductKeyV1Request, ValidateRuntimeV1Response>(url, token, payload);
+    }
+
+    public async Task<DesktopAdResponse> GetNextAdAsync(string serverUrl, string token, string productCode, string deviceId)
+    {
+        var url = $"{serverUrl.TrimEnd('/')}/api/desktop/advertisements/next?product_code={Uri.EscapeDataString(productCode)}&device_id={Uri.EscapeDataString(deviceId)}";
+        return await SendGetAsync<DesktopAdResponse>(url, token);
     }
 
     public async Task<ValidateProductKeyV1Response> ValidateProductKeyAsync(string serverUrl, string token, string productKey, string productCode)

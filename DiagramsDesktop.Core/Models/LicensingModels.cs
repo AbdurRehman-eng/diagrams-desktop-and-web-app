@@ -90,6 +90,12 @@ public sealed class RegisterDeviceV1Response
     public string Message { get; set; } = string.Empty;
 }
 
+public sealed class HardwareInfoSummary
+{
+    [JsonPropertyName("hardware_fingerprint")]
+    public string HardwareFingerprint { get; set; } = string.Empty;
+}
+
 public sealed class ValidateRuntimeV1Request
 {
     [JsonPropertyName("product_key")]
@@ -99,7 +105,7 @@ public sealed class ValidateRuntimeV1Request
     public string ProductCode { get; set; } = string.Empty;
 
     [JsonPropertyName("hardware_info")]
-    public HardwareInfoV1? HardwareInfo { get; set; }
+    public HardwareInfoSummary? HardwareInfo { get; set; }
 
     [JsonPropertyName("app_version")]
     public string? AppVersion { get; set; }
@@ -124,6 +130,51 @@ public sealed class ValidateRuntimeV1Response
 
     [JsonPropertyName("heartbeat_interval_minutes")]
     public int HeartbeatIntervalMinutes { get; set; } = 15;
+
+    [JsonPropertyName("product")]
+    public string Product { get; set; } = string.Empty;
+
+    [JsonPropertyName("product_key")]
+    public string ProductKey { get; set; } = string.Empty;
+
+    [JsonPropertyName("license_status")]
+    public string LicenseStatus { get; set; } = string.Empty;
+
+    [JsonPropertyName("base_plan")]
+    public string BasePlan { get; set; } = string.Empty;
+
+    [JsonPropertyName("effective_plan")]
+    public string EffectivePlan { get; set; } = string.Empty;
+
+    [JsonPropertyName("trial_active")]
+    public bool TrialActive { get; set; }
+
+    [JsonPropertyName("trial_end_date")]
+    public DateTime? TrialEndDate { get; set; }
+
+    [JsonPropertyName("entitlements")]
+    public System.Collections.Generic.Dictionary<string, bool> Entitlements { get; set; } = new();
+}
+
+public sealed class DesktopAdResponse
+{
+    [JsonPropertyName("success")]
+    public bool Success { get; set; }
+
+    [JsonPropertyName("advertisementId")]
+    public int AdvertisementId { get; set; }
+
+    [JsonPropertyName("advertisementSlot")]
+    public string AdvertisementSlot { get; set; } = string.Empty;
+
+    [JsonPropertyName("cdnUrl")]
+    public string CdnUrl { get; set; } = string.Empty;
+
+    [JsonPropertyName("contentType")]
+    public string ContentType { get; set; } = string.Empty;
+
+    [JsonPropertyName("configurationVersion")]
+    public int ConfigurationVersion { get; set; }
 }
 
 public sealed class DesktopSettingsV1Response

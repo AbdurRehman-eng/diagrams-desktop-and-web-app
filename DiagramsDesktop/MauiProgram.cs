@@ -255,6 +255,9 @@ public static class MauiProgram
                 builder.Services.AddSingleton<IDiagramCanvasService, DiagramCanvasService>();
                 builder.Services.AddSingleton<IConnectionRepository>(new ConnectionRepository(connectionString));
                 builder.Services.AddSingleton<IConnectionService, ConnectionService>();
+                builder.Services.AddSingleton<IDiagramActionService>(provider => 
+                    new DiagramActionService(connectionString, entitlementCode => 
+                        provider.GetRequiredService<ILicenseManager>().HasEntitlement(entitlementCode)));
 
                 // Licensing Services
                 builder.Services.AddSingleton<HttpClient>();

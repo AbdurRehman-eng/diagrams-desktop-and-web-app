@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof ContextMenuController !== 'undefined') ContextMenuController.init();
   if (typeof ConnectionOptionsMenu !== 'undefined') ConnectionOptionsMenu.init();
   if (typeof DirtyTracker          !== 'undefined') DirtyTracker.init();
+  if (typeof CommitConsole         !== 'undefined') CommitConsole.init();
 
   // ── 9. Toolbar ──────────────────────────────────────────────────
   _setupToolbarV2();

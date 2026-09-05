@@ -49,6 +49,9 @@ const ConnectionBuilder = (() => {
     if (typeof DirtyTracker !== 'undefined') {
       DirtyTracker.markDirty();
     }
+    if (typeof TemporaryActionFile !== 'undefined') {
+      TemporaryActionFile.update();
+    }
   }
 
   function _addToState(connectionObj) {

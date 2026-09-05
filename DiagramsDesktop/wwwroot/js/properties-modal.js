@@ -235,6 +235,53 @@ const PropertiesModal = (() => {
                     <button type="button" class="prop-btn" id="btn-prop-save-svg-settings" style="padding: 4px 8px; font-size: 11px;">Save Settings</button>
                   </div>
                 </div>
+
+                <!-- AWS Specific Properties (Hidden by default, displayed for AWS shapes) -->
+                <div id="prop-aws-section" class="hidden" style="border-top: 1px solid var(--color-border); padding-top: 12px; margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+                  <div class="prop-label" style="font-weight: 600; margin-bottom: 4px;">AWS Cloud Configuration</div>
+                  
+                  <!-- Region Selection (Mandatory for Region) -->
+                  <div id="prop-aws-region-row" class="prop-row hidden">
+                    <div class="prop-label">Region Selection</div>
+                    <select id="prop-aws-region-select" class="prop-input" style="width: 100%; font-size:12px;"></select>
+                  </div>
+                  
+                  <!-- AZ Selection (Mandatory for AZ) -->
+                  <div id="prop-aws-az-row" class="prop-row hidden">
+                    <div class="prop-label">AZ Selection</div>
+                    <select id="prop-aws-az-select" class="prop-input" style="width: 100%; font-size:12px;"></select>
+                  </div>
+
+                  <!-- VPC/Subnet Name -->
+                  <div id="prop-aws-name-row" class="prop-row hidden">
+                    <div class="prop-label">Resource Name</div>
+                    <input type="text" id="prop-aws-name" class="prop-input" style="width: 100%; font-size:12px;" />
+                  </div>
+
+                  <!-- VPC/Subnet CIDR Block -->
+                  <div id="prop-aws-cidr-row" class="prop-row hidden">
+                    <div class="prop-label">IPv4 CIDR Block</div>
+                    <input type="text" id="prop-aws-cidr" class="prop-input" placeholder="e.g. 10.0.0.0/16" style="width: 100%; font-size:12px;" />
+                  </div>
+
+                  <!-- GML Description (Optional for all) -->
+                  <div class="prop-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                    <div class="prop-label">GML Description (diagram metadata)</div>
+                    <textarea id="prop-aws-gml-desc" class="prop-input" style="width: 100%; height: 50px; font-size:11px; font-family:sans-serif; resize:vertical; box-sizing: border-box;"></textarea>
+                  </div>
+
+                  <!-- Cloud Description (Optional for all) -->
+                  <div class="prop-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                    <div class="prop-label">Cloud Description (provider tag)</div>
+                    <textarea id="prop-aws-cloud-desc" class="prop-input" style="width: 100%; height: 50px; font-size:11px; font-family:sans-serif; resize:vertical; box-sizing: border-box;"></textarea>
+                  </div>
+
+                  <!-- Tags (Optional for VPC, Subnet, IGW) -->
+                  <div id="prop-aws-tags-row" class="prop-row hidden" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                    <div class="prop-label">Tags (comma-separated Key=Value)</div>
+                    <input type="text" id="prop-aws-tags" class="prop-input" placeholder="e.g. Environment=Prod,Owner=Ops" style="width: 100%; font-size:12px; box-sizing: border-box;" />
+                  </div>
+                </div>
               </div>
 
             </div><!-- end prop-body -->
@@ -365,6 +412,9 @@ const PropertiesModal = (() => {
       }
     };
 
+    if (typeof AwsRegionCsvLoader !== 'undefined') {
+      AwsRegionCsvLoader.load();
+    }
     console.log('[PropertiesModal] Initialized — M3 (Circle + Rectangle global tabs).');
   }
 
@@ -556,14 +606,33 @@ const PropertiesModal = (() => {
 
   // ── Individual shape form populate/apply ──────────────────────────────────
   function _populateShapeForm(shapeId) {
-    const shape = CanvasState.getShapes().find(s => s.ShapeID === shapeId);
+    let shape = CanvasState.getShapes().find(s => s.ShapeID === shapeId);
+    let isCoc = false;
+    if (!shape && typeof CanvasState.getCircleOnContainers === 'function') {
+      shape = CanvasState.getCircleOnContainers().find(c => c.CircleOnContainerID === shapeId);
+      isCoc = true;
+    }
     if (!shape) return;
+
+    // Standard properties (width/height only for non-edge shapes)
     _sel.stroke = shape.StrokeColor || shape.Color || PALETTE[0];
     _sel.fill   = shape.FillColor   || shape.Color || PALETTE[0];
     _updateActiveSwatches('swatch-grid-stroke', _sel.stroke);
     _updateActiveSwatches('swatch-grid-fill',   _sel.fill);
-    document.getElementById('prop-shape-width').value  = shape.Width;
-    document.getElementById('prop-shape-height').value = shape.Height;
+    
+    const widthInput = document.getElementById('prop-shape-width');
+    const heightInput = document.getElementById('prop-shape-height');
+    if (isCoc) {
+      widthInput.value = 60;
+      heightInput.value = 60;
+      widthInput.disabled = true;
+      heightInput.disabled = true;
+    } else {
+      widthInput.value  = shape.Width;
+      heightInput.value = shape.Height;
+      widthInput.disabled = false;
+      heightInput.disabled = false;
+    }
 
     // M12: Populate custom SVG list and dropdowns
     _selectedAttachmentId = null;
@@ -571,26 +640,209 @@ const PropertiesModal = (() => {
     if (detailsDiv) detailsDiv.classList.add('hidden');
     _refreshAssetDropdown();
     _refreshAttachmentsList();
+
+    // --- AWS Properties Integration ---
+    const awsSection = document.getElementById('prop-aws-section');
+    if (!awsSection) return;
+
+    // Check type
+    const typeStr = isCoc ? (shape.DeviceOnContainerEdgeType || '') : (shape.Type || '');
+    const isAws = typeStr.toLowerCase().startsWith('aws-') || typeStr.toLowerCase() === 'internet gateway' || typeStr.toLowerCase() === 'nat gateway';
+    
+    if (isAws) {
+      awsSection.classList.remove('hidden');
+      
+      // Hide all rows initially
+      document.getElementById('prop-aws-region-row').classList.add('hidden');
+      document.getElementById('prop-aws-az-row').classList.add('hidden');
+      document.getElementById('prop-aws-name-row').classList.add('hidden');
+      document.getElementById('prop-aws-cidr-row').classList.add('hidden');
+      document.getElementById('prop-aws-tags-row').classList.add('hidden');
+
+      const typeLC = typeStr.toLowerCase();
+      if (typeLC === 'aws-region') {
+        document.getElementById('prop-aws-region-row').classList.remove('hidden');
+        
+        // Populate region select
+        const regSelect = document.getElementById('prop-aws-region-select');
+        regSelect.innerHTML = '<option value="random">Select Region Randomly</option>';
+        if (typeof AwsRegionCsvLoader !== 'undefined' && AwsRegionCsvLoader.isLoaded()) {
+          AwsRegionCsvLoader.getRegions().forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.code;
+            opt.textContent = `${r.name} (${r.code})`;
+            regSelect.appendChild(opt);
+          });
+        }
+        regSelect.value = shape.AwsRegionSelection || 'random';
+      }
+      else if (typeLC === 'aws-vpc') {
+        document.getElementById('prop-aws-name-row').classList.remove('hidden');
+        document.getElementById('prop-aws-cidr-row').classList.remove('hidden');
+        document.getElementById('prop-aws-tags-row').classList.remove('hidden');
+        
+        document.getElementById('prop-aws-name').value = shape.AwsName || '';
+        document.getElementById('prop-aws-cidr').value = shape.AwsCidr || '10.0.0.0/16';
+        document.getElementById('prop-aws-tags').value = shape.AwsTags || '';
+      }
+      else if (typeLC === 'aws-availability-zone') {
+        document.getElementById('prop-aws-az-row').classList.remove('hidden');
+        
+        // Filter zones by ancestor region
+        const allShapes = CanvasState.getShapes();
+        const parentVpc = allShapes.find(s => s.ShapeID === shape.ParentContainerID);
+        const parentRegion = parentVpc ? allShapes.find(s => s.ShapeID === parentVpc.ParentContainerID) : null;
+        const regionCode = parentRegion ? parentRegion.AwsRegionSelection : null;
+        
+        const azSelect = document.getElementById('prop-aws-az-select');
+        azSelect.innerHTML = '';
+        
+        if (regionCode && regionCode !== 'random') {
+          if (typeof AwsRegionCsvLoader !== 'undefined' && AwsRegionCsvLoader.isLoaded()) {
+            const zones = AwsRegionCsvLoader.getZonesForRegion(regionCode);
+            zones.forEach(z => {
+              const opt = document.createElement('option');
+              opt.value = z.name;
+              opt.textContent = `${z.name} (${z.id})`;
+              azSelect.appendChild(opt);
+            });
+            azSelect.value = shape.AwsAzSelection || (zones[0] ? zones[0].name : '');
+          }
+        } else {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = '-- Select Region in ancestor first --';
+          azSelect.appendChild(opt);
+        }
+      }
+      else if (typeLC === 'aws-subnet') {
+        document.getElementById('prop-aws-name-row').classList.remove('hidden');
+        document.getElementById('prop-aws-cidr-row').classList.remove('hidden');
+        document.getElementById('prop-aws-tags-row').classList.remove('hidden');
+        
+        document.getElementById('prop-aws-name').value = shape.AwsName || '';
+        document.getElementById('prop-aws-cidr').value = shape.AwsCidr || '';
+        document.getElementById('prop-aws-tags').value = shape.AwsTags || '';
+      }
+      else if (typeLC === 'internet gateway' || typeLC === 'aws-igw') {
+        document.getElementById('prop-aws-name-row').classList.remove('hidden');
+        document.getElementById('prop-aws-tags-row').classList.remove('hidden');
+        
+        document.getElementById('prop-aws-name').value = shape.AwsName || '';
+        document.getElementById('prop-aws-tags').value = shape.AwsTags || '';
+      }
+      else {
+        // NAT, RT, EC2, Lambda
+        document.getElementById('prop-aws-name-row').classList.remove('hidden');
+        document.getElementById('prop-aws-name').value = shape.AwsName || '';
+      }
+
+      document.getElementById('prop-aws-gml-desc').value = shape.AwsGmlDescription || '';
+      document.getElementById('prop-aws-cloud-desc').value = shape.AwsCloudDescription || '';
+    } else {
+      awsSection.classList.add('hidden');
+    }
   }
 
   function _applyShapeForm() {
-    const w = parseInt(document.getElementById('prop-shape-width').value, 10);
-    const h = parseInt(document.getElementById('prop-shape-height').value, 10);
-    const shape = CanvasState.getShapes().find(s => s.ShapeID === _activeShapeId);
+    let shape = CanvasState.getShapes().find(s => s.ShapeID === _activeShapeId);
+    let isCoc = false;
+    if (!shape && typeof CanvasState.getCircleOnContainers === 'function') {
+      shape = CanvasState.getCircleOnContainers().find(c => c.CircleOnContainerID === _activeShapeId);
+      isCoc = true;
+    }
     if (!shape) return;
 
+    const w = parseInt(document.getElementById('prop-shape-width').value, 10);
+    const h = parseInt(document.getElementById('prop-shape-height').value, 10);
+
+    // Parse standard shape elements
     let newSvg = shape.SvgIcon;
     if (newSvg) {
       newSvg = newSvg.replace(/fill="([^"]*)"/g,   (m, p) => p === 'none' || p === 'currentColor' ? m : `fill="${_sel.fill}"`);
       newSvg = newSvg.replace(/stroke="([^"]*)"/g, (m, p) => p === 'none' || p === 'currentColor' ? m : `stroke="${_sel.stroke}"`);
     }
-    CanvasState.updateShape(_activeShapeId, {
-      Width: w, Height: h,
-      StrokeColor: _sel.stroke, FillColor: _sel.fill,
-      Color: _sel.fill, SvgIcon: newSvg,
-    });
+
+    // AWS property fields read
+    let AwsName = '';
+    let AwsCidr = '';
+    let AwsRegionSelection = '';
+    let AwsAzSelection = '';
+    let AwsGmlDescription = '';
+    let AwsCloudDescription = '';
+    let AwsTags = '';
+
+    const typeStr = isCoc ? (shape.DeviceOnContainerEdgeType || '') : (shape.Type || '');
+    const isAws = typeStr.toLowerCase().startsWith('aws-') || typeStr.toLowerCase() === 'internet gateway' || typeStr.toLowerCase() === 'nat gateway';
+
+    if (isAws) {
+      AwsName = document.getElementById('prop-aws-name').value.trim();
+      AwsCidr = document.getElementById('prop-aws-cidr').value.trim();
+      AwsRegionSelection = document.getElementById('prop-aws-region-select').value;
+      
+      const azSelect = document.getElementById('prop-aws-az-select');
+      AwsAzSelection = azSelect ? azSelect.value : '';
+      
+      AwsGmlDescription = document.getElementById('prop-aws-gml-desc').value.trim();
+      AwsCloudDescription = document.getElementById('prop-aws-cloud-desc').value.trim();
+      AwsTags = document.getElementById('prop-aws-tags').value.trim();
+
+      const typeLC = typeStr.toLowerCase();
+      if (typeLC === 'aws-region' && AwsRegionSelection === 'random') {
+        if (typeof AwsRegionCsvLoader !== 'undefined') {
+          const randRegion = AwsRegionCsvLoader.getRandomRegion();
+          if (randRegion) {
+            AwsRegionSelection = randRegion.code;
+            alert(`Select Region Randomly resolved to: ${randRegion.name} (${randRegion.code})`);
+          }
+        }
+      }
+    }
+
+    // Calculate new label
+    let newLabel = shape.Label;
+    if (isAws) {
+      const typeLC = typeStr.toLowerCase();
+      if (typeLC === 'aws-region') {
+        if (typeof AwsRegionCsvLoader !== 'undefined') {
+          newLabel = AwsRegionCsvLoader.getRegionNameByCode(AwsRegionSelection);
+        } else {
+          newLabel = AwsRegionSelection;
+        }
+      } else if (typeLC === 'aws-availability-zone') {
+        newLabel = AwsAzSelection || 'AZ';
+      } else {
+        newLabel = AwsName || shape.Label;
+      }
+    }
+
+    const updates = {
+      AwsName,
+      AwsCidr,
+      AwsRegionSelection,
+      AwsAzSelection,
+      AwsGmlDescription,
+      AwsCloudDescription,
+      AwsTags,
+      Label: newLabel,
+      StrokeColor: _sel.stroke,
+      FillColor: _sel.fill,
+      Color: _sel.fill,
+      SvgIcon: newSvg
+    };
+
+    if (!isCoc) {
+      updates.Width = w;
+      updates.Height = h;
+      CanvasState.updateShape(_activeShapeId, updates);
+    } else {
+      CanvasState.updateCircleOnContainer(_activeShapeId, updates);
+    }
+
     RenderCanvas.render();
-    if (typeof HistoryManager !== 'undefined') HistoryManager.recordState();
+    if (typeof HistoryManager      !== 'undefined') HistoryManager.recordState();
+    if (typeof DirtyTracker         !== 'undefined') DirtyTracker.markDirty();
+    if (typeof TemporaryActionFile  !== 'undefined') TemporaryActionFile.update();
   }
 
   // ── Swatch highlight helper ───────────────────────────────────────────────
